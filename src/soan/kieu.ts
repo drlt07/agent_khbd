@@ -75,6 +75,28 @@ export const HoatDongOut = z.object({
   anToan: z.string().describe('Biện pháp an toàn nếu có thí nghiệm, thực hành, vận động; không có thì để chuỗi rỗng'),
 });
 
+/**
+ * CV 5512: khuôn ép đúng 4 bước (Chuyển giao – Thực hiện – Báo cáo – Kết luận) để AI không thể đặt sai tên hay sai số bước.
+ * App đổi lại thành danh sách bước như các hoạt động khác.
+ */
+const NoiDungBuoc = z.object({
+  phut: z.number().describe('Số phút nguyên, ≥ 1'),
+  gv: z.string().describe('Việc cụ thể của giáo viên'),
+  hs: z.string().describe('Việc cụ thể của học sinh'),
+});
+export const HoatDong5512Out = HoatDongOut.extend({
+  buoc: z.object({
+    chuyenGiao: NoiDungBuoc.describe('Bước 1. Chuyển giao nhiệm vụ'),
+    thucHien: NoiDungBuoc.describe('Bước 2. Thực hiện nhiệm vụ'),
+    baoCao: NoiDungBuoc.describe('Bước 3. Báo cáo, thảo luận'),
+    ketLuan: NoiDungBuoc.describe('Bước 4. Kết luận, nhận định'),
+  }),
+});
+export const TEN_BUOC_5512 = { chuyenGiao: 'Chuyển giao nhiệm vụ', thucHien: 'Thực hiện nhiệm vụ', baoCao: 'Báo cáo, thảo luận', ketLuan: 'Kết luận, nhận định' } as const;
+export const tuHoatDong5512 = (r: z.infer<typeof HoatDong5512Out>): z.infer<typeof HoatDongOut> => ({
+  ...r, buoc: (Object.keys(TEN_BUOC_5512) as (keyof typeof TEN_BUOC_5512)[]).map((k) => ({ ten: TEN_BUOC_5512[k], ...r.buoc[k] })),
+});
+
 export const MaTichHopOut = z.object({
   ma: z.string().describe('Mã chỉ báo, chỉ lấy trong danh sách được giao'),
   hoatDong: z.enum(['HD1', 'HD2', 'HD3', 'HD4', 'GD1']),

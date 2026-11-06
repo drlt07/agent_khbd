@@ -138,3 +138,12 @@ Nguyên tắc: chỉ animate `transform` và `opacity`; đường cong `--ease-o
 - `Khbd.nguon`: toàn văn giáo án cũ (≤ 12.000 kí tự) đưa vào bối cảnh mọi lần AI soạn, kèm yêu cầu giữ kiến thức, thiết kế hoạt động mới, không chép cách tổ chức cũ; với CV 5512, mỗi hoạt động nhận thêm nguyên văn hoạt động tương ứng của giáo án cũ.
 - Phương án đã chọn ở "Đổi mới hoạt động" thành hướng dẫn soạn cho hoạt động tương ứng (`nguon.huongDan`), AI soạn theo đúng phương án đó.
 - Trình soạn ghi rõ "Soạn lại từ giáo án …". Ô tên bài luôn hiện kể cả khi chưa chọn bộ sách.
+
+## "Soạn lại" ở bước Kiểm tra sửa được lỗi thật – 06/11/2026
+
+Trước đây bấm "Soạn lại" mà lỗi vẫn y nguyên vì: (1) AI không được biết bản hiện tại lỗi gì; (2) CV 5512 chỉ dặn "4 bước" bằng lời, AI hay đặt sai tên/số bước; (3) AI mẫu trả nội dung cố định, đổi thời lượng thì không khớp.
+- `soanPhan(..., loiTruoc)`: soạn lại từ bước Kiểm tra gửi kèm lỗi cụ thể của phần đó ("bản mới PHẢI sửa hết: …"), rồi vẫn qua vòng luật ≤ 2 lượt.
+- `HoatDong5512Out`: khuôn ép đúng 4 ô Chuyển giao – Thực hiện – Báo cáo – Kết luận; app đổi lại thành danh sách bước (`tuHoatDong5512`). AI không thể sai số bước, tên bước.
+- AI mẫu (lớp học đảo ngược): đọc "Thời lượng: N phút" trong lời nhắc, chia lại số phút các bước cho khớp (`chiaLaiPhut`).
+- Sau khi soạn lại, app báo kết quả: hết lỗi, hoặc còn lỗi gì (với AI mẫu nói rõ là nội dung dựng sẵn).
+- Kiểm thử `tests/soan-lai-loi.test.ts`: lỗi thiếu câu luyện tập, sai số bước CV 5512, lệch tổng số phút đều được sửa sau một lần soạn lại.

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { The, HopBao, NhanAiLam, Nut } from '../../thanh-phan/chung';
 import { danhSachPhan, phanCuaLoi, soanPhan, type MaPhan } from '../../soan/quy-trinh';
 import { LoiAi, type GoiAi } from '../../soan/ai';
+import { aiMau } from '../../soan/mau';
 import { BieuTuong } from '../../thanh-phan/bieu-tuong';
 import { moTaMa } from '../../thu-vien';
 import { chamDiem, DIEM_DAT, kiemTraKhbd, tuSuaAnToan, type ChoDaSua } from '../../soan/luat';
@@ -13,6 +14,7 @@ const KQ = { dat: 'Đạt', soan_lai: 'Soạn lại', bo_ma: 'Bỏ mã', loi: 'C
 export default function Buoc4KiemTra({ k, sua, ai, datKhbd }: { k: Khbd; sua: (f: (k: Khbd) => Khbd) => void; ai: GoiAi | null; datKhbd: (k: Khbd) => void }) {
   const [dangSoan, setDangSoan] = useState<MaPhan | null>(null);
   const [loiSoan, setLoiSoan] = useState('');
+  const [ketQuaSoan, setKetQuaSoan] = useState<{ ok: boolean; text: string } | null>(null);
   const kRef = useRef(k); kRef.current = k;
   const [daSua, setDaSua] = useState<ChoDaSua[]>([]);
   const [xemSua, setXemSua] = useState(false);
@@ -29,15 +31,24 @@ export default function Buoc4KiemTra({ k, sua, ai, datKhbd }: { k: Khbd; sua: (f
   const tenPhan = Object.fromEntries(danhSachPhan(k).map((p) => [p.ma, p.ten])) as Record<MaPhan, string>;
   // Các phần có lỗi phải sửa mà AI soạn lại được (giữ thứ tự soạn)
   const phanLoi = danhSachPhan(k).map((p) => p.ma).filter((p) => nghiem.some((l) => phanCuaLoi(k, l.viTri) === p));
+  /** Lỗi phải sửa đang thuộc một phần (để AI biết cần sửa gì khi soạn lại). */
+  const loiCua = (x: Khbd, p: MaPhan) => kiemTraKhbd(x).filter((l) => l.muc === 'nghiem' && phanCuaLoi(x, l.viTri) === p);
   const soanLai = async (ds: MaPhan[]) => {
     if (!ai) return;
-    setLoiSoan('');
+    setLoiSoan(''); setKetQuaSoan(null);
     for (const p of ds) {
       setDangSoan(p);
-      try { const moi = await soanPhan(kRef.current, p, ai); kRef.current = moi; datKhbd(moi); }
-      catch (e) { setLoiSoan(e instanceof LoiAi ? `${e.loi.thongBao} ${e.loi.cachXuLy}` : 'Không soạn lại được phần này.'); break; }
+      try {
+        const moi = await soanPhan(kRef.current, p, ai, '', loiCua(kRef.current, p).map((l) => l.thongBao));
+        kRef.current = moi; datKhbd(moi);
+      } catch (e) { setLoiSoan(e instanceof LoiAi ? `${e.loi.thongBao} ${e.loi.cachXuLy}` : 'Không soạn lại được phần này.'); break; }
     }
     setDangSoan(null);
+    // Báo thật kết quả: còn lỗi thì nói rõ, không im lặng
+    const con = ds.flatMap((p) => loiCua(kRef.current, p));
+    setKetQuaSoan(con.length
+      ? { ok: false, text: `Đã soạn lại nhưng vẫn còn ${con.length} lỗi: ${con.map((l) => l.thongBao).join(' ')} ${ai === aiMau ? 'AI mẫu chỉ có nội dung dựng sẵn nên không sửa được lỗi này; thầy/cô sửa trực tiếp ở bản xem bên dưới hoặc dùng khóa AI thật.' : 'Bấm soạn lại lần nữa hoặc sửa trực tiếp ở bản xem bên dưới.'}` }
+      : { ok: true, text: `Đã soạn lại ${ds.length} phần, hết lỗi phải sửa.` });
   };
 
   return (
@@ -73,6 +84,7 @@ export default function Buoc4KiemTra({ k, sua, ai, datKhbd }: { k: Khbd; sua: (f
             </div>
           )}
           {loiSoan && <HopBao kieu="err" className="mt-3">{loiSoan}</HopBao>}
+          {ketQuaSoan && <HopBao kieu={ketQuaSoan.ok ? 'ok' : 'warn'} className="mt-3">{ketQuaSoan.text}</HopBao>}
           {nghiem.length > 0 && <p className="text-sm text-muted mt-3">Hoặc sửa trực tiếp ở bản xem bên dưới.</p>}
         </The>
 

@@ -5,6 +5,9 @@ import { phanBoMacDinh } from '../src/soan/phan-bo';
 import { TEN_HD, type Khbd } from '../src/soan/kieu';
 import type { GoiAi } from '../src/soan/ai';
 
+/** Khuôn CV 5512: 4 bước thành 4 ô cố định (AI thật trả đúng dạng này). */
+const o4 = <T,>(b: T[]) => ({ chuyenGiao: b[0], thucHien: b[1], baoCao: b[2], ketLuan: b[3] });
+
 const hd = (ten: string, nhom: HoatDongGoiY['nhom'], p: Partial<HoatDongGoiY> = {}): HoatDongGoiY => ({
   ten, nhom, yTuong: 'ý tưởng', congNghe: '', canKiemTra: false, thoiLuong: 10, mucChuanBi: 'thap', thoiDiem: 'hinh_thanh',
   mucTieu: 'm', chuanBi: ['Máy chiếu'], kichBan: [{ buoc: 'b1', phut: 4 }, { buoc: 'b2', phut: 6 }], vaiTro: 'GV/HS', cauHoiMau: 'Câu hỏi mẫu', sanPham: 'sp', danhGia: 'đg', chotKienThuc: 'chốt', duPhong: 'Dùng phiếu in', ...p,
@@ -51,7 +54,7 @@ describe('Nhờ AI gợi ý hoạt động – quy trình', () => {
   });
   it('phương án giáo viên chọn được đưa vào lời nhắc soạn hoạt động, ghi dấu vết', async () => {
     let nhac = '';
-    const ai: GoiAi = async (y) => { nhac = y.nhac; return y.schema.parse({ mucTieu: 'm', noiDung: 'n', sanPham: 's', anToan: '', cauHoi: [], buoc: ['Chuyển giao nhiệm vụ', 'Thực hiện nhiệm vụ', 'Báo cáo, thảo luận', 'Kết luận, nhận định'].map((ten) => ({ ten, phut: 5, gv: 'Giáo viên chiếu mô phỏng và đặt câu hỏi dự đoán', hs: 'Học sinh dự đoán, thao tác mô phỏng và ghi số liệu' })) }); };
+    const ai: GoiAi = async (y) => { nhac = y.nhac; return y.schema.parse({ mucTieu: 'm', noiDung: 'n', sanPham: 's', anToan: '', cauHoi: [], buoc: o4(['Chuyển giao nhiệm vụ', 'Thực hiện nhiệm vụ', 'Báo cáo, thảo luận', 'Kết luận, nhận định'].map((ten) => ({ ten, phut: 5, gv: 'Giáo viên chiếu mô phỏng và đặt câu hỏi dự đoán', hs: 'Học sinh dự đoán, thao tác mô phỏng và ghi số liệu' }))) }); };
     const chon = hd('Thí nghiệm ảo PhET', 'B', { congNghe: 'PhET', cauHoiMau: 'Khi tăng gấp đôi vận tốc, động năng thay đổi thế nào?' });
     const k2 = await soanPhan(k, 'HD2', ai, huongDanTuGoiY(chon));
     expect(nhac).toContain('PHƯƠNG ÁN GIÁO VIÊN ĐÃ CHỌN');

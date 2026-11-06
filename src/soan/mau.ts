@@ -222,8 +222,12 @@ const TRA_LOI_5512: Record<string, unknown> = {
 };
 
 /** CV 5512: GeoGebra ở Hình thành kiến thức (HĐ2), chatbot AI và CLIL ở Vận dụng (HĐ4); học liệu HS không có phần tự học. */
+const O_5512 = ['chuyenGiao', 'thucHien', 'baoCao', 'ketLuan'] as const;
 function choCv5512(ten: string, du: unknown): unknown {
-  if (TRA_LOI_5512[ten]) return TRA_LOI_5512[ten];
+  if (TRA_LOI_5512[ten]) {
+    const h = structuredClone(TRA_LOI_5512[ten]) as Record<string, any>;
+    return { ...h, buoc: Object.fromEntries(O_5512.map((o, i) => [o, { phut: h.buoc[i].phut, gv: h.buoc[i].gv, hs: h.buoc[i].hs }])) };
+  }
   const d = structuredClone(du) as Record<string, any>;
   if (ten === 'tichHop') {
     for (const m of d.ma) m.hoatDong = m.ma === 'NLc' ? 'HD4' : 'HD2';
@@ -233,11 +237,30 @@ function choCv5512(ten: string, du: unknown): unknown {
   return d;
 }
 
+/** Chia lại số phút các bước cho đúng thời lượng yêu cầu (giữ tỉ lệ, mỗi bước ≥ 1 phút). */
+export function chiaLaiPhut(phut: number[], tong: number): number[] {
+  const cu = phut.reduce((a, b) => a + b, 0) || 1;
+  const moi = phut.map((p) => Math.max(1, Math.floor((p * tong) / cu)));
+  let du = tong - moi.reduce((a, b) => a + b, 0);
+  for (let i = 0; du !== 0 && i < 1000; i++) {
+    const j = i % moi.length;
+    if (du > 0) { moi[j]++; du--; } else if (moi[j] > 1) { moi[j]--; du++; }
+  }
+  return moi;
+}
+
 /** AI giả: trả nội dung dựng sẵn theo tên phần, có độ trễ nhỏ để thấy tiến trình. */
 export const aiMau: GoiAi = async (y) => {
   await new Promise((r) => setTimeout(r, 350));
   const laCv5512 = y.he.includes('Dạy học thông thường theo mẫu Công văn 5512: Mở đầu');
   const du = laCv5512 && TRA_LOI[y.ten] ? choCv5512(y.ten, TRA_LOI[y.ten]) : TRA_LOI[y.ten];
   if (!du) throw new Error(`Chưa có nội dung mẫu cho phần ${y.ten}`);
-  return y.schema.parse(structuredClone(du));
+  const kq = structuredClone(du) as Record<string, any>;
+  // Lớp học đảo ngược: thời lượng hoạt động đổi (số tiết, phân bổ) thì chia lại số phút các bước cho khớp
+  const tong = Number(y.nhac.match(/Thời lượng: (\d+) phút/)?.[1]);
+  if (!laCv5512 && /^HD\d$/.test(y.ten) && Array.isArray(kq.buoc) && tong > 0) {
+    const moi = chiaLaiPhut(kq.buoc.map((b: { phut: number }) => b.phut), tong);
+    kq.buoc = kq.buoc.map((b: object, i: number) => ({ ...b, phut: moi[i] }));
+  }
+  return y.schema.parse(kq);
 };

@@ -9,6 +9,9 @@ import { dungTaiLieu } from '../src/soan/xuat-word';
 import { TEN_HD, type Khbd } from '../src/soan/kieu';
 import type { GoiAi } from '../src/soan/ai';
 
+/** Khuôn CV 5512: 4 bước thành 4 ô cố định (AI thật trả đúng dạng này). */
+const o4 = <T,>(b: T[]) => ({ chuyenGiao: b[0], thucHien: b[1], baoCao: b[2], ketLuan: b[3] });
+
 const buoc4 = (tong: number) => {
   const p = [1, 1, 1, tong - 3];
   return BUOC_5512.map((ten, i) => ({ ten, phut: p[i], gv: `Giáo viên thực hiện việc cụ thể của bước ${ten.toLowerCase()} trong bài`, hs: `Học sinh thực hiện việc cụ thể của bước ${ten.toLowerCase()} trong bài` }));
@@ -33,7 +36,7 @@ describe('Dạy học thông thường theo CV 5512', () => {
     };
     const phut = phutTheoHoatDong(pb);
     const ai: GoiAi = async (y) => {
-      if (/^HD\d$/.test(y.ten)) return y.schema.parse({ mucTieu: 'Đạt YC1.', noiDung: 'Học sinh vẽ đồ thị.', sanPham: 'Đồ thị trên phiếu.', anToan: '', buoc: buoc4(phut[y.ten as 'HD1']), cauHoi: y.ten === 'HD3' ? [1, 2, 3].map((i) => ({ muc: 'CB', dang: 'tra_loi_ngan', cauHoi: `Tìm đỉnh của parabol số ${i}.`, phuongAn: [], dapAn: `(${i}; 0)`, loiThuongGap: 'dấu' })) : [] });
+      if (/^HD\d$/.test(y.ten)) return y.schema.parse({ mucTieu: 'Đạt YC1.', noiDung: 'Học sinh vẽ đồ thị.', sanPham: 'Đồ thị trên phiếu.', anToan: '', buoc: o4(buoc4(phut[y.ten as 'HD1'])), cauHoi: y.ten === 'HD3' ? [1, 2, 3].map((i) => ({ muc: 'CB', dang: 'tra_loi_ngan', cauHoi: `Tìm đỉnh của parabol số ${i}.`, phuongAn: [], dapAn: `(${i}; 0)`, loiThuongGap: 'dấu' })) : [] });
       if (y.ten === 'tichHop') return y.schema.parse({ ma: [{ ma: '5.3.5.1', hoatDong: 'HD2', bieuHien: 'nhập hàm số vào GeoGebra, vẽ parabol và đối chiếu tọa độ đỉnh', congCu: 'GeoGebra', minhChung: 'Ảnh đồ thị trên phiếu', tieuChi: 'Đạt khi đỉnh trùng kết quả tính tay' }], clil: null });
       return aiMau(y);
     };

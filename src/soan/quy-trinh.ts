@@ -4,7 +4,7 @@
  */
 import { z } from 'zod/v4';
 import { moTaMa, maTichHopHopLe } from '../thu-vien';
-import { GiaiDoan1Out, GiaiDoan3Out, HoatDongOut, MucTieuOut, TEN_HD, TichHopOut, YccdOut, type DauVet, type Khbd, type MaHd, type MaTichHop } from './kieu';
+import { GiaiDoan1Out, GiaiDoan3Out, HoatDongOut, HoatDong5512Out, tuHoatDong5512, MucTieuOut, TEN_HD, TichHopOut, YccdOut, type DauVet, type Khbd, type MaHd, type MaTichHop } from './kieu';
 import type { GoiAi } from './ai';
 import { heThong, nhacGiaiDoan1, nhacGiaiDoan3, nhacHoatDong, nhacMucTieu, nhacTichHop, nhacYccd } from './prompt';
 import { chamDiem, DIEM_DAT, kiemTraBuoc, kiemTraCauHoi, kiemTraVanBan, vanBanHoatDong, boChuNguHs } from './luat';
@@ -42,7 +42,7 @@ export async function rutYccd(k: Khbd, ai: GoiAi): Promise<Khbd['yccd']> {
 
 /** Soạn một phần, có vòng soạn lại khi luật bắt lỗi khuôn/thời lượng. Trả KHBD mới. */
 /** huongDan: phương án giáo viên chọn từ "Nhờ AI gợi ý" (chỉ dùng cho hoạt động). */
-export async function soanPhan(k: Khbd, phan: MaPhan, ai: GoiAi, huongDan = ''): Promise<Khbd> {
+export async function soanPhan(k: Khbd, phan: MaPhan, ai: GoiAi, huongDan = '', loiTruoc: string[] = []): Promise<Khbd> {
   const he = heThong(k);
   const dauVet = [...k.dauVet];
 
@@ -68,16 +68,20 @@ export async function soanPhan(k: Khbd, phan: MaPhan, ai: GoiAi, huongDan = ''):
   huongDan = huongDan || k.nguon?.huongDan?.[hd] || '';
   const ten = TEN_HD[k.phuongPhap][hd];
   const phut = phutTheoHoatDong(k.phanBo)[hd];
-  let nhac = nhacHoatDong(k, hd, huongDan);
+  // Soạn lại từ bước Kiểm tra: AI được biết bản hiện tại đang lỗi gì
+  const nhacGoc = loiTruoc.length ? `${nhacHoatDong(k, hd, huongDan)}\n\nBản hiện tại của hoạt động này bị luật bắt lỗi, bản mới PHẢI sửa hết: ${loiTruoc.join(' ')}` : nhacHoatDong(k, hd, huongDan);
+  let nhac = nhacGoc;
   let ketQua: z.infer<typeof HoatDongOut> | null = null;
   for (let luot = 0; luot <= SO_LUOT_SOAN_LAI; luot++) {
-    const r = await ai({ ten: hd, he, nhac, schema: HoatDongOut });
+    const r = k.phuongPhap === 'cv5512'
+      ? tuHoatDong5512(await ai({ ten: hd, he, nhac, schema: HoatDong5512Out }))
+      : await ai({ ten: hd, he, nhac, schema: HoatDongOut });
     r.buoc = r.buoc.map((b) => ({ ...b, phut: Math.round(b.phut) }));
     const loi = [...kiemTraBuoc(r.buoc, phut, ten, k.phuongPhap), ...kiemTraCauHoi(r.cauHoi, hd, k.phuongPhap, ten, k.hoatDong.find((x) => x.ma === 'HD2')?.noiDung?.cauHoi), ...kiemTraVanBan(vanBanHoatDong(r), ten)].filter((l) => l.muc === 'nghiem');
     ketQua = r;
     if (!loi.length) { dauVet.push(vet(6, ten, 'dat', huongDan ? `Theo gợi ý GV chọn: ${huongDan.match(/"([^"]+)"/)?.[1] ?? ''}` : undefined, luot)); break; }
     dauVet.push(vet(6, ten, luot < SO_LUOT_SOAN_LAI ? 'soan_lai' : 'loi', loi.map((l) => l.thongBao).join(' '), luot));
-    nhac = `${nhacHoatDong(k, hd, huongDan)}\n\nLần soạn trước bị luật bắt lỗi, sửa lại: ${loi.map((l) => l.thongBao).join(' ')}`;
+    nhac = `${nhacGoc}\n\nLần soạn trước bị luật bắt lỗi, sửa lại: ${loi.map((l) => l.thongBao).join(' ')}`;
   }
   return { ...k, hoatDong: k.hoatDong.map((h) => (h.ma === hd ? { ...h, phut, noiDung: ketQua! } : h)), dauVet };
 }
