@@ -93,7 +93,8 @@ export default function KhoaAi() {
         )}
 
         <button onClick={kiemTra} disabled={tt.kieu === 'dang'}
-          className="bam self-start px-5 py-2.5 rounded-lg bg-accent text-accent-ink font-medium disabled:opacity-60">
+          className="bam self-start inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent text-accent-ink font-medium disabled:opacity-80">
+          {tt.kieu === 'dang' && <span className="vong-xoay" aria-hidden="true" />}
           {tt.kieu === 'dang' ? 'Đang kiểm tra…' : 'Kiểm tra và dùng khóa'}
         </button>
 

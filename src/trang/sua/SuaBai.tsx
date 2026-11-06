@@ -110,7 +110,7 @@ function BuocTai({ k, dang, docTep, dungMau, docGiaoAn, coAi }: { k: SuaKhbd | n
           <div className="w-12 h-12 mx-auto rounded-full bg-accent-soft text-accent grid place-items-center"><BieuTuong ten="upload" className="w-6 h-6" /></div>
           <div className="tieu-de mt-3">Kéo giáo án .docx vào đây</div>
           <div className="text-sm text-muted mt-1">Tối đa 20 MB. File .doc: mở bằng Word, Save As .docx.</div>
-          <Nut kieu="chinh" className="mt-4" disabled={dang === 'doc'} onClick={() => input.current?.click()}>{dang === 'doc' ? 'Đang đọc…' : 'Chọn file'}</Nut>
+          <Nut kieu="chinh" className="mt-4" dang={dang === 'doc'} disabled={dang === 'doc'} onClick={() => input.current?.click()}>{dang === 'doc' ? 'Đang đọc…' : 'Chọn file'}</Nut>
           <input ref={input} type="file" accept=".docx,.doc,.pdf" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) docTep(f); e.target.value = ''; }} />
         </div>
         <button onClick={dungMau} className="bam text-sm text-muted underline self-start">Chưa có file? Dùng giáo án mẫu (Vật lí 10)</button>
@@ -124,7 +124,7 @@ function BuocTai({ k, dang, docTep, dungMau, docGiaoAn, coAi }: { k: SuaKhbd | n
             {k.doan.length > 60 && <p className="text-muted mt-2">… còn {k.doan.length - 60} đoạn</p>}
           </div>
           <div className="mt-4 flex flex-wrap items-center gap-3">
-            <Nut kieu="chinh" disabled={!coAi || dang === 'phanTich'} onClick={docGiaoAn}>{dang === 'phanTich' ? 'AI đang đọc giáo án…' : 'AI đọc giáo án'}</Nut>
+            <Nut kieu="chinh" dang={dang === 'phanTich'} disabled={!coAi || dang === 'phanTich'} onClick={docGiaoAn}>{dang === 'phanTich' ? 'AI đang đọc giáo án…' : 'AI đọc giáo án'}</Nut>
             <span className="text-sm text-muted">Rút ra môn, lớp, bài, YCCĐ và các hoạt động.</span>
           </div>
         </The>
@@ -203,7 +203,7 @@ function BuocDeXuat({ k, sua, dang, coAi, chayDeXuat }: { k: SuaKhbd; sua: (f: (
     <div className="flex flex-col gap-5">
       <The className="p-5 flex flex-wrap items-center gap-3 justify-between">
         <div><h2 className="text-base">AI đề xuất chỗ chèn</h2><p className="text-sm text-muted">Mỗi đề xuất qua luật; chưa đạt thì AI soạn lại tối đa 2 lượt.</p></div>
-        <Nut kieu={k.chen.length ? 'phu' : 'chinh'} disabled={!coAi || dang || !chonGi} onClick={chayDeXuat}>{dang ? 'AI đang đề xuất…' : k.chen.length ? 'Đề xuất lại' : 'AI đề xuất chỗ chèn'}</Nut>
+        <Nut kieu={k.chen.length ? 'phu' : 'chinh'} dang={!!dang} disabled={!coAi || dang || !chonGi} onClick={chayDeXuat}>{dang ? 'AI đang đề xuất…' : k.chen.length ? 'Đề xuất lại' : 'AI đề xuất chỗ chèn'}</Nut>
       </The>
       {!chonGi && <HopBao kieu="warn">Chưa chọn năng lực nào ở bước trước.</HopBao>}
       {k.chen.map((c) => {
@@ -287,7 +287,7 @@ function BuocTaiVe({ k, chan }: { k: SuaKhbd; chan: boolean }) {
       <p className="text-sm text-muted mt-1 break-words">{tenTepSua(k)} · nội dung gốc giữ nguyên, phần bổ sung tô nền xanh nhạt, kèm ma trận và phụ lục Căn cứ.</p>
       <p className="text-sm text-muted mt-1">Định dạng chữ đậm, nghiêng, hình ảnh của file gốc chưa được giữ; chữ giữ nguyên văn.</p>
       {chan && <HopBao kieu="err" className="mt-4">Còn lỗi phải sửa ở bước Xem trước.</HopBao>}
-      <Nut kieu="chinh" className="mt-5 w-full py-2.5" disabled={chan || tt === 'dang'} onClick={tai}>{tt === 'dang' ? 'Đang tạo file…' : 'Tải về .docx'}</Nut>
+      <Nut kieu="chinh" className="mt-5 w-full py-2.5" dang={tt === 'dang'} disabled={chan || tt === 'dang'} onClick={tai}>{tt === 'dang' ? 'Đang tạo file…' : 'Tải về .docx'}</Nut>
       {tt === 'xong' && <p className="text-sm text-luat mt-3">Đã tạo file.</p>}
       {tt === 'loi' && <p className="text-sm text-err-fg mt-3">Không tạo được file. Thử lại.</p>}
     </The>

@@ -45,7 +45,7 @@ export default function Buoc2KeHoach({ k, sua, ai }: { k: Khbd; sua: (f: (k: Khb
           {!k.yccd.length && <p className="text-sm text-muted py-2">Chưa có yêu cầu nào.</p>}
         </div>
         <div className="flex flex-wrap gap-2 mt-3">
-          <Nut kieu={k.yccd.length ? 'phu' : 'chinh'} onClick={deXuat} disabled={dang || !ai || !k.bai.trim()}>{dang ? 'AI đang đề xuất…' : k.yccd.length ? 'AI đề xuất lại' : 'AI đề xuất YCCĐ'}</Nut>
+          <Nut kieu={k.yccd.length ? 'phu' : 'chinh'} onClick={deXuat} dang={dang} disabled={dang || !ai || !k.bai.trim()}>{dang ? 'AI đang đề xuất…' : k.yccd.length ? 'AI đề xuất lại' : 'AI đề xuất YCCĐ'}</Nut>
           <Nut onClick={() => sua((x) => ({ ...x, yccdDaXacNhan: false, yccd: danhLaiMa([...x.yccd, { ma: '', noiDung: '' }]) }))}><BieuTuong ten="plus" className="w-4 h-4" />Thêm</Nut>
         </div>
         {!ai && <p className="text-sm text-warn-fg mt-2">Cần khóa AI để AI đề xuất. Thầy/cô vẫn tự nhập được.</p>}

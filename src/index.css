@@ -93,8 +93,47 @@ a, button, [role="switch"], select, label { -webkit-tap-highlight-color: transpa
 .o-bang:hover { border-color: var(--line); }
 .o-bang:focus { border-color: var(--accent); background: var(--surface); outline: none; }
 
+/* Xuất hiện (bước mới, khung báo, nội dung AI vừa soạn): mờ dần + nhích lên 6px, 240ms */
+@keyframes hien { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes hien-mo { from { opacity: 0; } to { opacity: 1; } }
+.vao { animation: hien 240ms var(--ease-out) backwards; }
+/* Đổi trang qua menu (bấm nhiều lần trong ngày): chỉ mờ dần, không dịch chuyển */
+.vao-mo { animation: hien-mo 180ms ease-out backwards; }
+/* Danh sách vào lần lượt: mỗi mục trễ 50ms (đặt --i trên từng mục) */
+.vao-lan { animation: hien 280ms var(--ease-out) backwards; animation-delay: calc(var(--i, 0) * 50ms); }
+
+/* Dấu tích khi một phần soạn xong: nảy nhẹ từ 0.85 */
+@keyframes tich { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: none; } }
+.tich-vao { animation: tich 220ms var(--ease-out) backwards; }
+
+/* Thanh tiến độ soạn: đổi độ dài bằng scaleX, có vệt sáng chạy khi AI đang làm */
+.tien-do { transform-origin: left; transition: transform 400ms var(--ease-out); }
+@keyframes vet-sang { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+.vet-sang { animation: vet-sang 1.4s linear infinite; }
+
+/* Vòng xoay trong nút đang chờ */
+@keyframes xoay { to { transform: rotate(360deg); } }
+.vong-xoay { width: 14px; height: 14px; border-radius: 9999px; border: 2px solid currentColor; border-right-color: transparent; animation: xoay 700ms linear infinite; flex-shrink: 0; }
+
+/* Khung chờ nội dung AI đang soạn */
+@keyframes nhap-nhay { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+.cho-ai { animation: nhap-nhay 1.4s ease-in-out infinite; }
+
+/* Thẻ bấm được: nhích lên khi rê chuột (chỉ máy có chuột, tránh "rê" giả khi chạm) */
+.the-noi { transition: transform 200ms var(--ease-out), box-shadow 200ms ease, border-color 150ms ease; }
+@media (hover: hover) and (pointer: fine) {
+  .the-noi:hover { transform: translateY(-2px); box-shadow: 0 2px 4px rgb(29 36 51 / .05), 0 10px 24px rgb(29 36 51 / .08); }
+}
+
+/* Nhãn bước trong thanh tiến trình: đổi màu mượt */
+.buoc-nhan { transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease; }
+
 /* Giảm chuyển động: bỏ dịch chuyển, giữ đổi màu và mờ dần */
 @media (prefers-reduced-motion: reduce) {
+  .vao, .vao-lan, .tich-vao { animation: hien-mo 200ms ease backwards; animation-delay: 0ms; }
+  .vet-sang { animation: none; opacity: 0; }
+  .vong-xoay { animation-duration: 1.6s; }
+  .the-noi:hover { transform: none !important; }
   .bam:active:not(:disabled), .bam-nhe:active:not(:disabled) { transform: none; }
   .ngan-keo, .ngan-keo[data-mo="true"] { transition: none; }
   .cong-tac span { transition: background-color 150ms ease !important; }

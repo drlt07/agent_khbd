@@ -39,23 +39,40 @@ export default function Buoc3Soan({ k, datKhbd, ai }: { k: Khbd; datKhbd: (k: Kh
     setDangChay(null);
   };
   const conLai = phan.filter((p) => !daCo(k, p.ma)).map((p) => p.ma);
+  const soXong = phan.length - conLai.length;
 
   return (
     <div className="grid grid-cols-1 gap-6 xl:grid-cols-[340px_1fr] items-start">
       <The className="p-5 xl:sticky xl:top-4">
         <div className="flex items-center justify-between gap-2"><h2 className="text-base">Soạn từng phần</h2><NhanAiLam ai="ai" /></div>
         <p className="text-sm text-muted mt-1">Mỗi phần qua luật kiểm tra; sai thì AI soạn lại tối đa 2 lượt.</p>
-        <ol className="mt-4 flex flex-col gap-1">
+        {/* Tiến độ: bao nhiêu phần đã xong; vệt sáng chạy khi AI đang làm */}
+        <div className="mt-4 flex items-center gap-3">
+          <div className="relative flex-1 h-1.5 rounded-full bg-surface-2 border border-line overflow-hidden" role="progressbar" aria-valuemin={0} aria-valuemax={phan.length} aria-valuenow={soXong} aria-label="Tiến độ soạn">
+            <div className="tien-do absolute inset-0 rounded-full bg-accent" style={{ transform: `scaleX(${phan.length ? soXong / phan.length : 0})` }} />
+            {dangChay && <div className="vet-sang absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/60 to-transparent" />}
+          </div>
+          <span className="text-[13px] text-muted so shrink-0">{soXong}/{phan.length}</span>
+        </div>
+        <ol className="mt-3 flex flex-col">
           {phan.map((p) => {
             const t = tt(p.ma);
+            const laHd = /^HD\d$/.test(p.ma);
             return (
-              <li key={p.ma} className="flex items-center gap-2.5 py-1.5">
-                <span className={`w-6 h-6 rounded-full grid place-items-center shrink-0 ${t === 'xong' ? 'bg-ok-bg text-ok-fg' : t === 'loi' ? 'bg-err-bg text-err-fg' : t === 'dang' ? 'bg-accent-soft text-accent' : 'bg-surface-2 text-muted border border-line'}`}>
-                  {t === 'xong' ? <BieuTuong ten="check" className="w-3.5 h-3.5" /> : t === 'loi' ? <BieuTuong ten="x" className="w-3.5 h-3.5" /> : t === 'dang' ? <span className="w-2 h-2 rounded-full bg-accent animate-pulse" /> : null}
+              <li key={p.ma} className={`flex items-start gap-2.5 py-2 px-2 -mx-2 rounded-lg buoc-nhan ${t === 'dang' ? 'bg-accent-soft' : ''}`}>
+                <span className={`buoc-nhan mt-0.5 w-6 h-6 rounded-full grid place-items-center shrink-0 ${t === 'xong' ? 'bg-ok-bg text-ok-fg' : t === 'loi' ? 'bg-err-bg text-err-fg' : t === 'dang' ? 'bg-surface text-accent' : 'bg-surface-2 text-muted border border-line'}`}>
+                  {t === 'xong' ? <BieuTuong ten="check" className="w-3.5 h-3.5 tich-vao" /> : t === 'loi' ? <BieuTuong ten="x" className="w-3.5 h-3.5 tich-vao" /> : t === 'dang' ? <span className="w-2 h-2 rounded-full bg-accent animate-pulse" /> : null}
                 </span>
-                <span className={`flex-1 text-[15px] ${t === 'dang' ? 'font-semibold' : ''}`}>{p.ten}</span>
-                {/^HD\d$/.test(p.ma) && <button disabled={!!dangChay || !ai} onClick={() => setGoiYCho(p.ma as MaHd)} className="text-[13px] text-accent underline disabled:opacity-40">Gợi ý</button>}
-                {t !== 'dang' && (t === 'xong' || t === 'loi') && <button disabled={!!dangChay || !ai} onClick={() => chay([p.ma])} className="text-[13px] text-muted underline disabled:opacity-40">Soạn lại</button>}
+                <div className="flex-1 min-w-0">
+                  <div className={`text-[15px] leading-snug ${t === 'dang' ? 'font-semibold text-accent' : ''}`}>{p.ten}</div>
+                  {t === 'dang' ? <div className="text-[12.5px] text-muted cho-ai">AI đang soạn…</div>
+                    : (laHd || t === 'xong' || t === 'loi') && (
+                      <div className="flex gap-3 text-[12.5px] mt-0.5">
+                        {laHd && <button disabled={!!dangChay || !ai} onClick={() => setGoiYCho(p.ma as MaHd)} className="text-accent hover:underline disabled:opacity-40">Gợi ý hoạt động</button>}
+                        {(t === 'xong' || t === 'loi') && <button disabled={!!dangChay || !ai} onClick={() => chay([p.ma])} className="text-muted hover:text-fg hover:underline disabled:opacity-40">Soạn lại</button>}
+                      </div>
+                    )}
+                </div>
               </li>
             );
           })}
@@ -63,16 +80,17 @@ export default function Buoc3Soan({ k, datKhbd, ai }: { k: Khbd; datKhbd: (k: Kh
         {Object.entries(loi).filter(([, v]) => v).map(([p, v]) => <HopBao key={p} kieu="err" className="mt-3"><strong>{v!.thongBao}</strong><br />{v!.cachXuLy}</HopBao>)}
         <div className="mt-4 flex flex-wrap gap-2">
           {dangChay ? <Nut onClick={() => { huy.current = true; }}>Dừng sau phần này</Nut>
-            : <Nut kieu="chinh" disabled={!ai || !conLai.length} onClick={() => chay(conLai)}>{conLai.length === phan.length ? 'Bắt đầu soạn' : conLai.length ? `Soạn ${conLai.length} phần còn lại` : 'Đã soạn xong'}</Nut>}
+            : conLai.length ? <Nut kieu="chinh" disabled={!ai} onClick={() => chay(conLai)}>{conLai.length === phan.length ? 'Bắt đầu soạn' : `Soạn ${conLai.length} phần còn lại`}</Nut>
+              : <div className="vao w-full flex items-center gap-2 rounded-lg bg-ok-bg text-ok-fg border border-ok-line px-3 py-2 text-sm font-medium"><BieuTuong ten="check" className="w-4 h-4 tich-vao" />Đã soạn xong tất cả các phần. Sang bước kiểm tra ở cuối trang.</div>}
         </div>
         {!ai && <p className="text-sm text-warn-fg mt-3">Cần khóa AI để soạn. <a href="#khoa-ai" className="underline">Thêm khóa</a></p>}
       </The>
       <div className="flex flex-col gap-5 min-w-0">
-        {goiYCho && <GoiYHoatDong k={k} hd={goiYCho} ai={ai} dong={() => setGoiYCho(null)} dung={async (huongDan) => {
+        {goiYCho && <div className="vao"><GoiYHoatDong k={k} hd={goiYCho} ai={ai} dong={() => setGoiYCho(null)} dung={async (huongDan) => {
           const moi = await soanPhan(kRef.current, goiYCho, ai!, huongDan);
           kRef.current = moi; datKhbd(moi);
-        }} />}
-        <XemKhbd k={k} />
+        }} /></div>}
+        <XemKhbd k={k} dangSoan={dangChay} />
       </div>
     </div>
   );

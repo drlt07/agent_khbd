@@ -81,7 +81,7 @@ function Khung() {
           <span className="tieu-de">Soạn KHBD</span>
           <span className="ml-auto text-[11px] font-semibold px-2 py-0.5 rounded-full bg-accent-soft text-accent">{ch.tenNgan}</span>
         </header>
-        <main className="mx-auto max-w-[1120px] px-4 sm:px-10 py-8 sm:py-10">
+        <main key={trangHienTai} className="vao-mo mx-auto max-w-[1120px] px-4 sm:px-10 py-8 sm:py-10">
           {trangHienTai === 'soan' && <TrinhSoan />}
           {trangHienTai === 'sua' && <SuaBai />}
           {trangHienTai === 'nls' && <TraCuuNls />}

@@ -115,3 +115,13 @@ Trình soạn 5 bước: Chọn tích hợp → Lập kế hoạch → Soạn n�
 - File Word và bản xem: "1. Đối với giáo viên", "2. Đối với học sinh"; bên nào không cần chuẩn bị ghi "Không yêu cầu chuẩn bị riêng."
 - Luật: thiết bị của cả hai bên đối chiếu danh sách khai báo; nhắc khi thiếu phần giáo viên hoặc học sinh.
 - Bản nháp cũ: danh sách chung tự chuyển vào phần giáo viên.
+
+## Chuyển động và tinh chỉnh giao diện – 06/11/2026
+
+Nguyên tắc: chỉ animate `transform` và `opacity`; đường cong `--ease-out` sẵn có; 180–280ms; thao tác bấm nhiều lần trong ngày thì chỉ mờ dần hoặc không chuyển động; có biến thể `prefers-reduced-motion` (chỉ mờ dần) và hiệu ứng rê chuột chỉ bật trên máy có chuột.
+- Đổi trang qua menu: mờ dần 180ms. Đổi bước trong trình soạn: mờ dần + nhích lên 6px, 240ms. Dấu tích bước đã qua nảy nhẹ.
+- Màn hình bắt đầu: 3 thẻ vào lần lượt (cách 50ms), rê chuột thẻ nhích lên 2px.
+- Bước Soạn nội dung: thanh tiến độ (x/8 phần, có vệt sáng khi AI đang chạy); dòng đang soạn được tô và ghi "AI đang soạn…"; nút "Gợi ý hoạt động", "Soạn lại" chuyển xuống dưới tên phần cho gọn; khi xong hiện khung xanh thay cho nút mờ "Đã soạn xong".
+- Bản xem: phần AI đang soạn hiện khung chờ nhấp nháy; nội dung vừa soạn xong hiện mờ dần.
+- Nút đang chờ (AI đề xuất, tạo file, kiểm tra khóa…) có vòng xoay nhỏ. Khung báo hiện mờ dần. Các phương án gợi ý hoạt động vào lần lượt.
+- Xóa ảnh chụp màn hình cũ ở thư mục gốc (d4-*.png, m4-*.png).

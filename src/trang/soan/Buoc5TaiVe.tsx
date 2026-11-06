@@ -30,7 +30,7 @@ export default function Buoc5TaiVe({ k, baiMoi }: { k: Khbd; baiMoi: () => void 
           <input type="checkbox" checked={dauVet} onChange={(e) => setDauVet(e.target.checked)} className="accent-[var(--accent)]" />In kèm dấu vết 8 bước
         </label>
         {chan && <HopBao kieu="err" className="mt-4">Còn {loi.filter((l) => l.muc === 'nghiem').length} lỗi phải sửa ở bước Kiểm tra và duyệt.</HopBao>}
-        <Nut kieu="chinh" className="mt-5 w-full py-2.5" disabled={chan || tt === 'dang'} onClick={tai}>{tt === 'dang' ? 'Đang tạo file…' : 'Tải về .docx'}</Nut>
+        <Nut kieu="chinh" className="mt-5 w-full py-2.5" dang={tt === 'dang'} disabled={chan || tt === 'dang'} onClick={tai}>{tt === 'dang' ? 'Đang tạo file…' : 'Tải về .docx'}</Nut>
         {tt === 'xong' && <p className="text-sm text-luat mt-3">Đã tạo file. Nếu trình duyệt không tự tải, kiểm tra thanh tải xuống.</p>}
         {tt === 'loi' && <p className="text-sm text-err-fg mt-3">Không tạo được file. Thử lại.</p>}
       </The>

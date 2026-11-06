@@ -31,7 +31,7 @@ const KIEU: Record<KieuHop, string> = {
   info: 'bg-accent-soft text-fg border-accent-line',
 };
 export const HopBao = ({ kieu, children, className = '' }: { kieu: KieuHop; children: ReactNode; className?: string }) => (
-  <div role={kieu === 'err' ? 'alert' : 'status'} className={`border rounded-lg px-4 py-3 text-sm ${KIEU[kieu]} ${className}`}>{children}</div>
+  <div role={kieu === 'err' ? 'alert' : 'status'} className={`vao border rounded-lg px-4 py-3 text-sm ${KIEU[kieu]} ${className}`}>{children}</div>
 );
 
 /** Nhãn ai làm: tím = AI, xanh lục = luật của app, xám = giáo viên. */
@@ -41,13 +41,19 @@ export const NhanAiLam = ({ ai }: { ai: 'ai' | 'luat' | 'gv' }) => {
 };
 
 type KieuNut = 'chinh' | 'phu' | 'nhe';
-export const Nut = ({ kieu = 'phu', className = '', ...p }: ButtonHTMLAttributes<HTMLButtonElement> & { kieu?: KieuNut }) => {
+/** Nút. dang = true: hiện vòng xoay nhỏ (đang chờ AI, đang tạo file…). */
+export const Nut = ({ kieu = 'phu', className = '', dang = false, children, ...p }: ButtonHTMLAttributes<HTMLButtonElement> & { kieu?: KieuNut; dang?: boolean }) => {
   const k = {
     chinh: 'bg-accent text-accent-ink hover:brightness-110 border border-transparent',
     phu: 'bg-surface border border-line-strong hover:border-accent hover:text-accent',
     nhe: 'text-muted hover:text-fg hover:bg-surface-2 border border-transparent',
   }[kieu];
-  return <button {...p} className={`inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium bam disabled:opacity-50 disabled:cursor-not-allowed ${k} ${className}`} />;
+  return (
+    <button {...p} aria-busy={dang || undefined} className={`inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium bam disabled:opacity-50 disabled:cursor-not-allowed ${dang ? 'disabled:opacity-80 disabled:cursor-progress' : ''} ${k} ${className}`}>
+      {dang && <span className="vong-xoay" aria-hidden="true" />}
+      {children}
+    </button>
+  );
 };
 
 export const Tabs = <T extends string>({ ds, chon, doi }: { ds: { id: T; ten: ReactNode }[]; chon: T; doi: (t: T) => void }) => (

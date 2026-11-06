@@ -50,7 +50,7 @@ export default function GoiYHoatDong({ k, hd, ai, dong, dung }: {
       </div>
       <div className="mt-3 flex flex-col sm:flex-row gap-2">
         <input value={ghi} onChange={(e) => setGhi(e.target.value)} placeholder="Yêu cầu khác (không bắt buộc), vd: lớp 45 HS, phòng không có Wi-Fi" aria-label="Yêu cầu khác" className={o} />
-        <Nut kieu="chinh" onClick={xin} disabled={!ai || !!dang} className="shrink-0">{dang === 'goiY' ? 'AI đang gợi ý…' : kq ? 'Gợi ý lại' : 'AI gợi ý'}</Nut>
+        <Nut kieu="chinh" onClick={xin} dang={dang === 'goiY'} disabled={!ai || !!dang} className="shrink-0">{dang === 'goiY' ? 'AI đang gợi ý…' : kq ? 'Gợi ý lại' : 'AI gợi ý'}</Nut>
       </div>
       {!ai && <p className="text-sm text-warn-fg mt-2">Cần khóa AI để gợi ý.</p>}
       {loi && <HopBao kieu="err" className="mt-3">{loi}</HopBao>}
@@ -74,7 +74,7 @@ export default function GoiYHoatDong({ k, hd, ai, dong, dung }: {
               const u = uuTien(i);
               const loiHd = kq.luat.theoHoatDong[i] ?? [];
               return (
-                <div key={i} className="rounded-xl border border-line p-4">
+                <div key={`${h.ten}-${i}`} style={{ ['--i' as string]: i }} className="vao-lan rounded-xl border border-line p-4">
                   <div className="flex flex-wrap items-start gap-2">
                     <span className="so text-muted w-5">{i + 1}.</span>
                     <div className="flex-1 min-w-0">
@@ -99,7 +99,7 @@ export default function GoiYHoatDong({ k, hd, ai, dong, dung }: {
                     </dl>
                   )}
                   <div className="mt-3 flex flex-wrap gap-2">
-                    <Nut kieu="chinh" disabled={!!dang} onClick={() => chon(h)}>{dang === h.ten ? 'AI đang soạn lại…' : `Dùng cho ${TEN_HD[k.phuongPhap][hd].split(/[.:]/)[0]}`}</Nut>
+                    <Nut kieu="chinh" dang={dang === h.ten} disabled={!!dang} onClick={() => chon(h)}>{dang === h.ten ? 'AI đang soạn lại…' : `Dùng cho ${TEN_HD[k.phuongPhap][hd].split(/[.:]/)[0]}`}</Nut>
                     <Nut kieu="nhe" onClick={() => setMo(mo === i ? null : i)}>{mo === i ? 'Thu gọn' : 'Xem triển khai'}</Nut>
                   </div>
                 </div>
