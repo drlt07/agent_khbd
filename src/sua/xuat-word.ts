@@ -5,7 +5,8 @@
 import { AlignmentType, BorderStyle, Document, Packer, Paragraph, ShadingType, Table, TableCell, TableRow, TextRun, WidthType, type ParagraphChild } from 'docx';
 import { chuCongThuc } from '../soan/word-cong-thuc';
 import { laMaAi, moTaMa, vanBanGoc } from '../thu-vien';
-import type { Chen, SuaKhbd } from './quy-trinh';
+import type { Chen, HoatDongMoi, SuaKhbd } from './quy-trinh';
+import { NHOM_HINH_THUC } from '../soan/goi-y';
 import { tachDong } from '../soan/dinh-dang';
 
 const FONT = 'Times New Roman';
@@ -42,6 +43,27 @@ function khoiBoSung(c: Chen): Paragraph[] {
   return ds;
 }
 
+/** Hoạt động mới đề xuất (giáo viên đã chọn): đặt ngay sau hoạt động cũ, tô nền xanh nhạt. */
+export function khoiHoatDongMoi(m: HoatDongMoi): Paragraph[] {
+  const h = m.goiY;
+  const p = (nhan: string, giaTri: string) => doan([chu(`${nhan} `, { dam: true }), ...chuCT(giaTri)], { nen: NEN_BO_SUNG });
+  const ds = [
+    doan([chu(`Đề xuất hoạt động mới (thay thế hoặc làm mới “${m.hoatDong}”): ${h.ten}`, { dam: true })], { nen: NEN_BO_SUNG }),
+    p('Hình thức:', `${NHOM_HINH_THUC[h.nhom]} · ${h.thoiLuong} phút`),
+    p('Mục tiêu:', h.mucTieu),
+    p('Ý tưởng:', h.yTuong),
+    p('Chuẩn bị:', h.chuanBi.join('; ')),
+    doan([chu('Tổ chức:', { dam: true })], { nen: NEN_BO_SUNG }),
+    ...h.kichBan.map((b, i) => doan([...chuCT(`Bước ${i + 1}: ${b.buoc} (${b.phut} phút)`)], { nen: NEN_BO_SUNG })),
+    p('Câu hỏi/nhiệm vụ mẫu:', h.cauHoiMau),
+    p('Sản phẩm:', h.sanPham),
+    p('Đánh giá:', h.danhGia),
+    p('Chốt kiến thức:', h.chotKienThuc),
+  ];
+  if (h.congNghe) ds.push(p('Công nghệ:', `${h.congNghe}${h.canKiemTra ? ' (cần kiểm tra quyền truy cập)' : ''}. Dự phòng: ${h.duPhong}`));
+  return ds;
+}
+
 export function dungTaiLieuSua(k: SuaKhbd): Document {
   const dung = k.chen.filter((c) => c.dung);
   const theoViTri = new Map<string, Chen[]>();
@@ -56,6 +78,7 @@ export function dungTaiLieuSua(k: SuaKhbd): Document {
       dung.forEach((c) => con.push(doan([chu(c.loai === 'clil' ? 'Tiếng Anh (CLIL): ' : `${laMaAi(c.ma) ? 'Năng lực AI' : 'Năng lực số'} ${c.ma}: `, { dam: true }), chu(c.loai === 'clil' ? `dùng key words ${c.keyWords.map((w) => w.en).join(', ')} trong ${c.hoatDong}.` : `HS ${c.bieuHien}.`)], { nen: NEN_BO_SUNG })));
     }
     for (const c of theoViTri.get(d.ma) ?? []) con.push(...khoiBoSung(c));
+    for (const m of (k.hoatDongMoi ?? []).filter((x) => x.chenSau === d.ma)) con.push(...khoiHoatDongMoi(m));
   }
 
   if (dung.length) {

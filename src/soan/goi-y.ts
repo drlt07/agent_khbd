@@ -65,14 +65,22 @@ export type HoatDongGoiY = GoiY['hoatDong'][number];
 
 export const nguyenTacHoatDong = () => LUAT_HOAT_DONG.replace(/<!--.*?-->\s*/s, '');
 
-export function nhacGoiY(k: Khbd, hd?: MaHd, yeuCau = ''): string {
+/** Hoạt động trong giáo án cũ mà giáo viên muốn đổi mới (lối "Sửa KHBD cũ"). */
+export interface HoatDongCu { ten: string; phut: number; noiDung: string }
+
+export function nhacGoiY(k: Khbd, hd?: MaHd, yeuCau = '', cu?: HoatDongCu): string {
   const phut = hd ? phutTheoHoatDong(k.phanBo)[hd] : 0;
   return [
     `Môn ${TEN_MON[k.mon]}, lớp ${k.lop}, bài "${k.bai}"${k.boSach.trim() ? ` (bộ sách ${k.boSach.trim()})` : ''}.`,
     k.yccd.length ? `Yêu cầu cần đạt:\n${k.yccd.map((y) => `${y.ma}: ${y.noiDung}`).join('\n')}` : '',
     `Thiết bị lớp đang có: ${k.dieuKien.thietBi.join('; ') || 'chỉ bảng và phấn'}. Mức học sinh: ${{ yeu: 'yếu', tb: 'trung bình', kha: 'khá' }[k.dieuKien.mucHs]}.`,
     [...k.tichHop.nls, ...k.tichHop.ai].length ? `Năng lực số/AI giáo viên muốn tích hợp: ${[...k.tichHop.nls, ...k.tichHop.ai].map((m) => `${m} (${moTaMa(m).slice(0, 120)})`).join('; ')}.` : '',
-    hd ? `Giáo viên đang tìm phương án cho "${TEN_HD[k.phuongPhap][hd]}" (khoảng ${phut} phút). Ưu tiên các hoạt động hợp thời điểm này, nhưng vẫn đa dạng nhóm hình thức.` : '',
+    cu ? [
+      `Giáo viên muốn đổi mới "${cu.ten}" (khoảng ${cu.phut} phút) trong giáo án cũ của mình. Nội dung hiện có của hoạt động (chỉ đọc để hiểu mục tiêu, kiến thức, cách đang tổ chức; KHÔNG chép lại):`,
+      `<<<\n${cu.noiDung}\n>>>`,
+      `Đề xuất hoạt động mới thay thế hoặc làm mới hoạt động này: giữ đúng mục tiêu và kiến thức, đổi cách tổ chức cho hấp dẫn, tích cực hơn; thời lượng không vượt ${cu.phut} phút. Phần A nêu ngắn điểm mạnh và điểm cần đổi mới của cách tổ chức hiện tại.`,
+    ].join('\n')
+      : hd ? `Giáo viên đang tìm phương án cho "${TEN_HD[k.phuongPhap][hd]}" (khoảng ${phut} phút). Ưu tiên các hoạt động hợp thời điểm này, nhưng vẫn đa dạng nhóm hình thức.` : '',
     yeuCau.trim() ? `Yêu cầu thêm của giáo viên: ${yeuCau.trim()}` : '',
     'Trả về: Phần A – phân tích bài học; Phần B và C – 5 đến 8 hoạt động (mỗi hoạt động đủ các mục triển khai); Phần D – 3 đề xuất ưu tiên (dễ triển khai nhất, sáng tạo nhất, khai thác AI hoặc mô phỏng tốt nhất) kèm lí do ngắn.',
   ].filter(Boolean).join('\n\n');
@@ -124,17 +132,17 @@ export function chuanHoaGoiY(g: GoiY, k: Pick<Khbd, 'dieuKien'>): GoiY {
   };
 }
 
-export async function goiYHoatDong(k: Khbd, ai: GoiAi, hd?: MaHd, yeuCau = ''): Promise<{ goiY: GoiY; luat: KetQuaLuatGoiY; luot: number }> {
+export async function goiYHoatDong(k: Khbd, ai: GoiAi, hd?: MaHd, yeuCau = '', cu?: HoatDongCu): Promise<{ goiY: GoiY; luat: KetQuaLuatGoiY; luot: number }> {
   const he = `Bạn là chuyên gia thiết kế hoạt động dạy học THPT theo Chương trình GDPT 2018. Viết tiếng Việt, cụ thể, dùng được ngay. Công thức, kí hiệu toán, lí, hóa viết LaTeX trong cặp $…$ (vd $y = x^2$, $\\mathrm{H_2O}$).\n\n${nguyenTacHoatDong()}`;
-  const phutToiDa = hd ? phutTheoHoatDong(k.phanBo)[hd] : undefined;
-  let nhac = nhacGoiY(k, hd, yeuCau);
+  const phutToiDa = cu ? cu.phut : hd ? phutTheoHoatDong(k.phanBo)[hd] : undefined;
+  let nhac = nhacGoiY(k, hd, yeuCau, cu);
   let cuoi: { goiY: GoiY; luat: KetQuaLuatGoiY; luot: number } | null = null;
   for (let luot = 0; luot <= 2; luot++) {
     const goiY = chuanHoaGoiY(await ai({ ten: 'goiY', he, nhac, schema: GoiYOut }), k);
     const luat = kiemTraGoiY(goiY, k, phutToiDa);
     cuoi = { goiY, luat, luot };
     if (!luat.nghiem.length) break;
-    nhac = `${nhacGoiY(k, hd, yeuCau)}\n\nLần trước chưa đạt, sửa lại: ${luat.nghiem.join(' ')}`;
+    nhac = `${nhacGoiY(k, hd, yeuCau, cu)}\n\nLần trước chưa đạt, sửa lại: ${luat.nghiem.join(' ')}`;
   }
   return cuoi!;
 }

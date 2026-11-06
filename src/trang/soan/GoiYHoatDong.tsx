@@ -3,16 +3,19 @@ import { ChuCT } from '../../thanh-phan/cong-thuc';
 import { The, HopBao, Nut, NhanAiLam } from '../../thanh-phan/chung';
 import { BieuTuong } from '../../thanh-phan/bieu-tuong';
 import { LoiAi, type GoiAi } from '../../soan/ai';
-import { goiYHoatDong, huongDanTuGoiY, MUC_CHUAN_BI, NHOM_HINH_THUC, THOI_DIEM, type GoiY, type HoatDongGoiY, type KetQuaLuatGoiY } from '../../soan/goi-y';
+import { goiYHoatDong, huongDanTuGoiY, MUC_CHUAN_BI, NHOM_HINH_THUC, THOI_DIEM, type GoiY, type HoatDongCu, type HoatDongGoiY, type KetQuaLuatGoiY } from '../../soan/goi-y';
 import { TEN_HD, type Khbd, type MaHd } from '../../soan/kieu';
 
 const YEU_CAU_NHANH = ['Cách tổ chức khác', 'Lớp yếu', 'Chỉ có 1 máy tính và máy chiếu', 'Không cần Internet', 'Thêm năng lực số', 'Rút ngắn thời gian'];
 const o = 'w-full px-3 py-2.5 rounded-xl border border-line-strong bg-surface focus:border-accent outline-none';
 
 /** Bảng "Nhờ AI gợi ý" cho một hoạt động: Phần A–D; giáo viên chọn Dùng thì soạn lại hoạt động theo phương án. */
-export default function GoiYHoatDong({ k, hd, ai, dong, dung }: {
-  k: Khbd; hd: MaHd; ai: GoiAi | null; dong: () => void; dung: (huongDan: string, ten: string) => Promise<void>;
+export default function GoiYHoatDong({ k, hd, cu, ai, dong, dung }: {
+  k: Khbd; hd?: MaHd; cu?: HoatDongCu; ai: GoiAi | null; dong: () => void; dung: (huongDan: string, ten: string, h: HoatDongGoiY) => Promise<void>;
 }) {
+  /** Lối Sửa KHBD cũ: hoạt động lấy từ giáo án; lối soạn mới: hoạt động của KHBD đang soạn. */
+  const tenHd = cu ? cu.ten : hd ? TEN_HD[k.phuongPhap][hd] : '';
+  const nhanDung = cu ? 'Chèn vào giáo án' : `Dùng cho ${tenHd.split(/[.:]/)[0]}`;
   const [yeuCau, setYeuCau] = useState<string[]>([]);
   const [ghi, setGhi] = useState('');
   const [dang, setDang] = useState('');
@@ -23,13 +26,13 @@ export default function GoiYHoatDong({ k, hd, ai, dong, dung }: {
   const xin = async () => {
     if (!ai) return;
     setDang('goiY'); setLoi(''); setKq(null); setMo(null);
-    try { const r = await goiYHoatDong(k, ai, hd, [...yeuCau, ghi].filter(Boolean).join('; ')); setKq(r); }
+    try { const r = await goiYHoatDong(k, ai, hd, [...yeuCau, ghi].filter(Boolean).join('; '), cu); setKq(r); }
     catch (e) { setLoi(e instanceof LoiAi ? `${e.loi.thongBao} ${e.loi.cachXuLy}` : 'Không lấy được gợi ý.'); }
     finally { setDang(''); }
   };
   const chon = async (h: HoatDongGoiY) => {
     setDang(h.ten); setLoi('');
-    try { await dung(huongDanTuGoiY(h), h.ten); dong(); }
+    try { await dung(huongDanTuGoiY(h), h.ten, h); dong(); }
     catch (e) { setLoi(e instanceof LoiAi ? `${e.loi.thongBao} ${e.loi.cachXuLy}` : 'Không soạn lại được hoạt động.'); }
     finally { setDang(''); }
   };
@@ -41,7 +44,7 @@ export default function GoiYHoatDong({ k, hd, ai, dong, dung }: {
   return (
     <The className="p-5 border-accent-line">
       <div className="flex flex-wrap items-start justify-between gap-2">
-        <div><div className="flex items-center gap-2"><h2 className="text-base">Nhờ AI gợi ý</h2><NhanAiLam ai="ai" /></div><p className="text-sm text-muted mt-0.5">Cho {TEN_HD[k.phuongPhap][hd]}. Không bấm “Dùng” thì KHBD không thay đổi.</p></div>
+        <div><div className="flex items-center gap-2"><h2 className="text-base">Nhờ AI gợi ý</h2><NhanAiLam ai="ai" /></div><p className="text-sm text-muted mt-0.5">{cu ? <>AI đọc “{tenHd}” trong giáo án cũ và đề xuất cách tổ chức mới. Không bấm “Chèn” thì giáo án không thay đổi.</> : <>Cho {tenHd}. Không bấm “Dùng” thì KHBD không thay đổi.</>}</p></div>
         <button onClick={dong} aria-label="Đóng gợi ý" className="bam p-1.5 rounded-lg text-muted hover:text-fg hover:bg-surface-2"><BieuTuong ten="x" className="w-4 h-4" /></button>
       </div>
 
@@ -60,10 +63,10 @@ export default function GoiYHoatDong({ k, hd, ai, dong, dung }: {
           {/* PHẦN A */}
           <div className="rounded-xl bg-surface-2 border border-line p-4 text-[14.5px]">
             <div className="tieu-de text-[15px] mb-1">Phân tích bài học</div>
-            <p><b>Trọng tâm:</b> {kq.goiY.phanTich.trongTam}</p>
-            <p><b>Khó khăn thường gặp:</b> {kq.goiY.phanTich.khoKhan.join('; ')}</p>
-            <p><b>Kiểu hoạt động phù hợp:</b> {kq.goiY.phanTich.kieuHoatDong}</p>
-            <p><b>Cơ hội AI, công nghệ:</b> {kq.goiY.phanTich.coHoiAi}</p>
+            <p><b>Trọng tâm:</b> <ChuCT t={kq.goiY.phanTich.trongTam} /></p>
+            <p><b>Khó khăn thường gặp:</b> <ChuCT t={kq.goiY.phanTich.khoKhan.join("; ")} /></p>
+            <p><b>Kiểu hoạt động phù hợp:</b> <ChuCT t={kq.goiY.phanTich.kieuHoatDong} /></p>
+            <p><b>Cơ hội AI, công nghệ:</b> <ChuCT t={kq.goiY.phanTich.coHoiAi} /></p>
           </div>
           {kq.luat.nghiem.map((l) => <HopBao key={l} kieu="warn">{l}</HopBao>)}
           {kq.luat.nhac.map((l) => <p key={l} className="text-sm text-warn-fg">! {l}</p>)}
@@ -94,12 +97,12 @@ export default function GoiYHoatDong({ k, hd, ai, dong, dung }: {
                   {mo === i && (
                     <dl className="mt-3 grid gap-2 text-[14px] sm:grid-cols-[150px_1fr]">
                       {([['Mục tiêu', h.mucTieu], ['Chuẩn bị', h.chuanBi.join('; ')], ['Kịch bản', h.kichBan.map((b) => `${b.buoc} (${b.phut}')`).join('\n')], ['Vai trò GV – HS', h.vaiTro], ['Câu hỏi/nhiệm vụ mẫu', h.cauHoiMau], ['Sản phẩm', h.sanPham], ['Cách đánh giá', h.danhGia], ['Chốt kiến thức', h.chotKienThuc], ['Dự phòng (không Internet)', h.duPhong]] as const).map(([dt, dd]) => (
-                        <div key={dt} className="contents"><dt className="font-semibold">{dt}</dt><dd className="whitespace-pre-line">{dd}</dd></div>
+                        <div key={dt} className="contents"><dt className="font-semibold">{dt}</dt><dd className="whitespace-pre-line">{String(dd).split("\n").map((x, j) => <span key={j} className="block"><ChuCT t={x} /></span>)}</dd></div>
                       ))}
                     </dl>
                   )}
                   <div className="mt-3 flex flex-wrap gap-2">
-                    <Nut kieu="chinh" dang={dang === h.ten} disabled={!!dang} onClick={() => chon(h)}>{dang === h.ten ? 'AI đang soạn lại…' : `Dùng cho ${TEN_HD[k.phuongPhap][hd].split(/[.:]/)[0]}`}</Nut>
+                    <Nut kieu="chinh" dang={dang === h.ten} disabled={!!dang} onClick={() => chon(h)}>{dang === h.ten ? (cu ? 'Đang chèn…' : 'AI đang soạn lại…') : nhanDung}</Nut>
                     <Nut kieu="nhe" onClick={() => setMo(mo === i ? null : i)}>{mo === i ? 'Thu gọn' : 'Xem triển khai'}</Nut>
                   </div>
                 </div>

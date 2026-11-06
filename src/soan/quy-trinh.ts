@@ -23,6 +23,15 @@ export function danhSachPhan(k: Khbd): PhanSoan[] {
   return ds;
 }
 
+/** Phần soạn tương ứng với vị trí một lỗi luật (để bấm "Soạn lại" ngay ở bước Kiểm tra). Không ứng với phần nào thì null. */
+export function phanCuaLoi(k: Khbd, viTri: string): MaPhan | null {
+  if (viTri === 'Mục tiêu' || viTri.startsWith('Năng lực đặc thù') || viTri === 'Thiết bị' || viTri === 'Thiết bị dạy học') return 'mucTieu';
+  if (viTri === 'Giai đoạn 1' && k.phuongPhap === 'lhdn') return 'giaiDoan1';
+  if (viTri === 'Giai đoạn 3' && k.phuongPhap === 'lhdn') return 'giaiDoan3';
+  const hd = k.hoatDong.find((h) => viTri === h.ten || viTri.startsWith(`${h.ten},`));
+  return hd ? hd.ma : null;
+}
+
 const vet = (buoc: number, phan: string, ketQua: DauVet['ketQua'], lyDo?: string, luot?: number): DauVet => ({ buoc, phan, ketQua, lyDo, luot, thoiDiem: new Date().toISOString() });
 
 /** Bước 1: AI rút YCCĐ (giáo viên xác nhận ở giao diện). */

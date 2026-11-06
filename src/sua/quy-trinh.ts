@@ -9,6 +9,7 @@ import { chamDiem, DIEM_DAT, kiemTraVanBan, boChuNguHs } from '../soan/luat';
 import type { GoiAi } from '../soan/ai';
 import type { DauVet, Khbd } from '../soan/kieu';
 import type { Doan } from './doc-docx';
+import type { HoatDongCu, HoatDongGoiY } from '../soan/goi-y';
 
 /* ---------------- Khuôn đầu ra AI ---------------- */
 
@@ -58,10 +59,29 @@ export interface SuaKhbd {
   tichHop: Khbd['tichHop'];
   dieuKien: Khbd['dieuKien'];
   chen: Chen[];
+  /** Hoạt động mới giáo viên chọn từ gợi ý của AI; xuất thành khối bổ sung ngay sau hoạt động cũ. */
+  hoatDongMoi?: HoatDongMoi[];
   maBo: { ma: string; lyDo: string }[];
   dauVet: DauVet[];
   daPhanTich: boolean;
 }
+
+export interface HoatDongMoi { id: string; hoatDong: string; chenSau: string; goiY: HoatDongGoiY }
+
+/** Văn bản của một hoạt động trong giáo án cũ (các đoạn từ "tu" đến "den"), để AI đọc khi gợi ý hoạt động mới. */
+export function hoatDongCu(k: SuaKhbd, h: SuaKhbd['hoatDong'][number]): HoatDongCu {
+  const a = k.doan.findIndex((d) => d.ma === h.tu), b = k.doan.findIndex((d) => d.ma === h.den);
+  const ds = a >= 0 && b >= a ? k.doan.slice(a, b + 1) : [];
+  const noiDung = ds.map((d) => (d.loai === 'bang' && d.hang ? d.hang.map((r) => r.join(' | ')).join('\n') : d.text)).join('\n').slice(0, 4000);
+  return { ten: h.ten, phut: h.phut, noiDung };
+}
+
+/** Bối cảnh bài (dạng KHBD) để dùng chung bộ gợi ý hoạt động với lối soạn mới. */
+export const boiCanhGoiY = (k: SuaKhbd): Khbd => ({
+  id: k.id, mon: k.mon, lop: k.lop, boSach: '', bai: k.bai, soTiet: 1, phuongPhap: 'cv5512',
+  tichHop: k.tichHop, dieuKien: k.dieuKien, yccd: k.yccd, yccdDaXacNhan: k.yccdDaXacNhan,
+  phanBo: [], hoatDong: [], maTichHop: [], maBo: [], dauVet: [], capNhat: '',
+});
 
 const vet = (buoc: number, phan: string, ketQua: DauVet['ketQua'], lyDo?: string, luot?: number): DauVet => ({ buoc, phan, ketQua, lyDo, luot, thoiDiem: new Date().toISOString() });
 

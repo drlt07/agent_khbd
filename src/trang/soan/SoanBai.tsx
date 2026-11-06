@@ -84,7 +84,7 @@ export default function SoanBai() {
         {buoc === 0 && <Buoc1ThongTin k={k} sua={doiNen} ai={ai} />}
         {buoc === 1 && <Buoc2KeHoach k={k} sua={sua} ai={ai} />}
         {buoc === 2 && <Buoc3Soan k={k} datKhbd={(x) => datKhbd(x)} ai={ai} />}
-        {buoc === 3 && <Buoc4KiemTra k={k} sua={sua} />}
+        {buoc === 3 && <Buoc4KiemTra k={k} sua={sua} ai={ai} datKhbd={(x) => datKhbd(x)} />}
         {buoc === 4 && <Buoc5TaiVe k={k} baiMoi={baiMoi} />}
       </div>
 

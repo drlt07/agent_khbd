@@ -12,9 +12,12 @@ import { deXuat, kiemTraChen, kiemTraCuoi, phanTich, type Chen, type SuaKhbd } f
 import { taiWordSua, tenTepSua } from '../../sua/xuat-word';
 import { aiMauSua, doanMau, TEN_TEP_MAU, THIET_LAP_MAU } from '../../sua/mau';
 import { ChonMa } from '../soan/Buoc1ThongTin';
+import DoiMoiHoatDong from './DoiMoiHoatDong';
+import { NHOM_HINH_THUC } from '../../soan/goi-y';
+import { ChuCT } from '../../thanh-phan/cong-thuc';
 
 const KHOA = 'khbd.sua-nhap';
-const BUOC = ['Tải giáo án', 'Xác nhận, chọn tích hợp', 'AI đề xuất', 'Xem trước', 'Tải về'];
+const BUOC = ['Tải giáo án', 'Xác nhận, chọn tích hợp', 'AI đề xuất, đổi mới', 'Xem trước', 'Tải về'];
 const o = 'w-full px-3 py-2.5 rounded-xl border border-line-strong bg-surface focus:border-accent outline-none';
 type Loi = { thongBao: string; cachXuLy: string } | null;
 const loiTu = (e: unknown): NonNullable<Loi> => (e instanceof LoiAi ? e.loi : { thongBao: 'Không xử lí được.', cachXuLy: String((e as Error)?.message ?? e) });
@@ -58,7 +61,7 @@ export default function SuaBai() {
   const baiMoi = () => { setK(null); setBuoc(0); setLaMau(false); setLoi(null); };
 
   const kiemTra = k ? kiemTraCuoi(k) : { nghiem: [], nhac: [] };
-  const choPhep = [true, !!k?.daPhanTich, !!k?.yccdDaXacNhan, !!k && (k.chen.length > 0 || k.maBo.length > 0), !!k && kiemTra.nghiem.length === 0];
+  const choPhep = [true, !!k?.daPhanTich, !!k?.yccdDaXacNhan, !!k && (k.chen.length > 0 || k.maBo.length > 0 || (k.hoatDongMoi?.length ?? 0) > 0), !!k && kiemTra.nghiem.length === 0];
   const denDuoc = (i: number) => choPhep.slice(0, i + 1).every(Boolean);
 
   return (
@@ -84,7 +87,7 @@ export default function SuaBai() {
       {buoc === 0 && <BuocTai k={k} dang={dang} docTep={docTep} dungMau={() => { setK(moi(doanMau(), TEN_TEP_MAU, [], true)); setLaMau(true); setLoi(null); }}
         docGiaoAn={() => chay('phanTich', async () => { const r = await phanTich(k!, ai!); setK(r); setBuoc(1); })} coAi={!!ai} />}
       {buoc === 1 && k && <BuocXacNhan k={k} sua={sua} />}
-      {buoc === 2 && k && <BuocDeXuat k={k} sua={sua} dang={dang === 'deXuat'} coAi={!!ai} chayDeXuat={() => chay('deXuat', async () => setK(await deXuat(k, ai!)))} />}
+      {buoc === 2 && k && <BuocDeXuat k={k} sua={sua} ai={ai} dang={dang === 'deXuat'} coAi={!!ai} chayDeXuat={() => chay('deXuat', async () => setK(await deXuat(k, ai!)))} />}
       {buoc === 3 && k && <BuocXem k={k} kiemTra={kiemTra} />}
       {buoc === 4 && k && <BuocTaiVe k={k} chan={kiemTra.nghiem.length > 0} />}
 
@@ -191,7 +194,7 @@ function BuocXacNhan({ k, sua }: { k: SuaKhbd; sua: (f: (x: SuaKhbd) => SuaKhbd)
   );
 }
 
-function BuocDeXuat({ k, sua, dang, coAi, chayDeXuat }: { k: SuaKhbd; sua: (f: (x: SuaKhbd) => SuaKhbd) => void; dang: boolean; coAi: boolean; chayDeXuat: () => void }) {
+function BuocDeXuat({ k, sua, ai, dang, coAi, chayDeXuat }: { k: SuaKhbd; sua: (f: (x: SuaKhbd) => SuaKhbd) => void; ai: GoiAi | null; dang: boolean; coAi: boolean; chayDeXuat: () => void }) {
   const chonGi = k.tichHop.nls.length + k.tichHop.ai.length > 0 || k.tichHop.tiengAnh === 'clil';
   const suaChen = (id: string, p: Partial<Chen>) => sua((x) => {
     const phan = `Đề xuất ${x.chen.find((c) => c.id === id)?.ma}`;
@@ -205,7 +208,7 @@ function BuocDeXuat({ k, sua, dang, coAi, chayDeXuat }: { k: SuaKhbd; sua: (f: (
         <div><h2 className="text-base">AI đề xuất chỗ chèn</h2><p className="text-sm text-muted">Mỗi đề xuất qua luật; chưa đạt thì AI soạn lại tối đa 2 lượt.</p></div>
         <Nut kieu={k.chen.length ? 'phu' : 'chinh'} dang={!!dang} disabled={!coAi || dang || !chonGi} onClick={chayDeXuat}>{dang ? 'AI đang đề xuất…' : k.chen.length ? 'Đề xuất lại' : 'AI đề xuất chỗ chèn'}</Nut>
       </The>
-      {!chonGi && <HopBao kieu="warn">Chưa chọn năng lực nào ở bước trước.</HopBao>}
+      {!chonGi && <HopBao kieu="warn">Chưa chọn năng lực nào ở bước trước. Thầy/cô vẫn có thể đổi mới hoạt động ở phần dưới.</HopBao>}
       {k.chen.map((c) => {
         const r = kiemTraChen(c, k);
         return (
@@ -234,6 +237,7 @@ function BuocDeXuat({ k, sua, dang, coAi, chayDeXuat }: { k: SuaKhbd; sua: (f: (
           </The>
         );
       })}
+      <DoiMoiHoatDong k={k} sua={sua} ai={ai} />
       {k.maBo.map((b) => <HopBao key={b.ma} kieu="warn"><strong>{b.ma}</strong>: {b.lyDo}{k.chen.some((c) => c.ma === b.ma) ? ' Bản cuối vẫn ở trên (đang Bỏ); thầy/cô có thể bấm Dùng.' : ''}</HopBao>)}
     </div>
   );
@@ -258,6 +262,16 @@ function BuocXem({ k, kiemTra }: { k: SuaKhbd; kiemTra: { nghiem: string[]; nhac
               <div className="overflow-x-auto my-2"><table className="w-full text-[14px] border border-line">{d.hang.map((h, i) => <tr key={i} className="border-t border-line">{h.map((c, j) => <td key={j} className="p-2 align-top whitespace-pre-line">{c}</td>)}</tr>)}</table></div>
             ) : <p className={`whitespace-pre-line ${d.loai === 'tieuDe' ? 'tieu-de mt-4' : 'mt-1'}`}>{d.loai === 'muc' ? '– ' : ''}{d.text}</p>}
             {d.ma === k.mucTieuDen && dung.map((c) => <p key={`mt${c.id}`} className="mt-1 rounded-md bg-[var(--bo-sung)] px-2 py-1">{c.loai === 'clil' ? <><b>Tiếng Anh (CLIL):</b> dùng key words {c.keyWords.map((w) => w.en).join(', ')}.</> : <><b>{/^NL[a-d]$/.test(c.ma) ? 'Năng lực AI' : 'Năng lực số'} {c.ma}:</b> HS {c.bieuHien}.</>}</p>)}
+            {(k.hoatDongMoi ?? []).filter((m) => m.chenSau === d.ma).map((m) => (
+              <div key={m.id} className="my-2 rounded-lg bg-[var(--bo-sung)] px-3 py-2 border-l-4 border-accent">
+                <div className="font-semibold">Đề xuất hoạt động mới (thay thế hoặc làm mới “{m.hoatDong}”): {m.goiY.ten}</div>
+                <p className="text-[14px] text-muted">{NHOM_HINH_THUC[m.goiY.nhom]} · {m.goiY.thoiLuong} phút</p>
+                <p><b>Ý tưởng:</b> <ChuCT t={m.goiY.yTuong} /></p>
+                {m.goiY.kichBan.map((b, i) => <p key={i}>Bước {i + 1}: <ChuCT t={b.buoc} /> ({b.phut} phút)</p>)}
+                <p><b>Câu hỏi/nhiệm vụ mẫu:</b> <ChuCT t={m.goiY.cauHoiMau} /></p>
+                <p className="text-[14px]"><b>Sản phẩm:</b> <ChuCT t={m.goiY.sanPham} /> <b>Đánh giá:</b> <ChuCT t={m.goiY.danhGia} /></p>
+              </div>
+            ))}
             {dung.filter((c) => c.chenSau === d.ma).map((c) => (
               <div key={c.id} className="my-2 rounded-lg bg-[var(--bo-sung)] px-3 py-2 border-l-4 border-accent">
                 <div className="font-semibold">{c.loai === 'clil' ? 'Bổ sung – Tiếng Anh (CLIL)' : `Bổ sung – ${/^NL[a-d]$/.test(c.ma) ? 'Năng lực AI' : 'Năng lực số'} ${c.ma}`}</div>

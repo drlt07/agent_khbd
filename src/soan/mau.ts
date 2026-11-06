@@ -155,10 +155,89 @@ const TRA_LOI: Record<string, unknown> = {
   ] },
 };
 
+/**
+ * Bài mẫu khi giáo viên chọn dạy học thông thường (CV 5512): 4 hoạt động Mở đầu – Hình thành kiến thức – Luyện tập – Vận dụng,
+ * mỗi hoạt động đủ 4 bước tổ chức thực hiện. Câu hỏi luyện tập, vận dụng dùng lại bộ câu của bài mẫu.
+ */
+const HD_LHDN = TRA_LOI as Record<string, { cauHoi: unknown[] }>;
+const TRA_LOI_5512: Record<string, unknown> = {
+  HD1: {
+    mucTieu: 'Tạo nhu cầu tìm hiểu hàm số bậc hai qua tình huống quả bóng được ném lên (YC3).',
+    noiDung: 'Học sinh quan sát bảng độ cao quả bóng tại 3 thời điểm, dự đoán độ cao lớn nhất.',
+    sanPham: 'Dự đoán của các cặp đôi ghi trên bảng phụ.',
+    buoc: [
+      { ten: 'Chuyển giao nhiệm vụ', phut: 2, gv: 'Chiếu ảnh quả bóng và bảng độ cao tại $t = 0, 1, 2$ giây lần lượt là 1 m, 6 m, 9 m; hỏi: "Bóng lên cao nhất bao nhiêu mét?"', hs: 'Đọc tình huống, ghi câu hỏi vào vở.' },
+      { ten: 'Thực hiện nhiệm vụ', phut: 2, gv: 'Theo dõi, gợi ý: độ cao tăng thêm 5 m rồi chỉ còn 3 m.', hs: 'Cặp đôi thảo luận, ghi dự đoán và lí do.' },
+      { ten: 'Báo cáo, thảo luận', phut: 1, gv: 'Mời 2–3 cặp nêu dự đoán.', hs: 'Nêu dự đoán; cặp khác nhận xét.' },
+      { ten: 'Kết luận, nhận định', phut: 1, gv: 'Ghi nhận các dự đoán, dẫn vào bài: cần một hàm số mô tả độ cao theo thời gian.', hs: 'Ghi tên bài.' },
+    ],
+    cauHoi: [
+      { muc: 'LT', dang: 'tu_luan', cauHoi: 'Quả bóng có độ cao 1 m, 6 m, 9 m tại $t = 0, 1, 2$ giây. Theo em, bóng lên cao nhất khoảng bao nhiêu mét? Vì sao?', phuongAn: [], dapAn: 'Câu trả lời mở; mong đợi học sinh nhận ra độ cao tăng chậm dần nên đỉnh khoảng 10 m.', loiThuongGap: 'Cho rằng độ cao tăng đều mãi' },
+    ],
+    anToan: '',
+  },
+  HD2: {
+    mucTieu: 'Nhận biết hàm số bậc hai; xác định đỉnh, trục đối xứng, chiều mở của parabol (YC1, YC2).',
+    noiDung: 'Học sinh dùng GeoGebra thay đổi $a, b, c$, quan sát parabol, rút ra công thức đỉnh $I\\left(-\\frac{b}{2a}; -\\frac{\\Delta}{4a}\\right)$.',
+    sanPham: 'Phiếu học tập số 1: bảng quan sát và kết luận về đỉnh, trục đối xứng, chiều mở.',
+    buoc: [
+      { ten: 'Chuyển giao nhiệm vụ', phut: 3, gv: 'Giao Phiếu học tập số 1; yêu cầu nhóm vẽ $y = ax^2 + bx + c$ trên GeoGebra với thanh trượt $a, b, c$.', hs: 'Nhận phiếu, phân công trong nhóm.' },
+      { ten: 'Thực hiện nhiệm vụ', phut: 10, gv: 'Theo dõi, hỗ trợ nhóm gặp khó khi tạo thanh trượt.', hs: 'Cho $a$ dương, âm và ghi chiều mở; đọc tọa độ đỉnh, so với $-\\frac{b}{2a}$.' },
+      { ten: 'Báo cáo, thảo luận', phut: 4, gv: 'Mời 2 nhóm trình bày bảng quan sát.', hs: 'Trình bày; nhóm khác bổ sung, chất vấn.' },
+      { ten: 'Kết luận, nhận định', phut: 3, gv: 'Chốt định nghĩa hàm số bậc hai, công thức đỉnh, trục đối xứng $x = -\\frac{b}{2a}$, chiều mở theo dấu của $a$.', hs: 'Ghi kết luận vào vở.' },
+    ],
+    cauHoi: [
+      { muc: 'LT', dang: 'tra_loi_ngan', cauHoi: 'Khi $a > 0$, parabol $y = ax^2 + bx + c$ có bề lõm hướng về phía nào?', phuongAn: [], dapAn: 'Hướng lên trên.', loiThuongGap: 'Nhầm vai trò dấu của $a$' },
+      { muc: 'CB', dang: 'tra_loi_ngan', cauHoi: 'Với $y = x^2 - 4x + 3$, tính $-\\frac{b}{2a}$ và so với hoành độ đỉnh quan sát trên GeoGebra.', phuongAn: [], dapAn: '$-\\frac{b}{2a} = 2$, trùng hoành độ đỉnh.', loiThuongGap: 'Quên dấu trừ' },
+      { muc: 'NC', dang: 'tu_luan', cauHoi: 'Vì sao parabol nhận đường thẳng $x = -\\frac{b}{2a}$ làm trục đối xứng?', phuongAn: [], dapAn: 'Vì giá trị hàm số tại $-\\frac{b}{2a} + h$ và $-\\frac{b}{2a} - h$ bằng nhau với mọi $h$.', loiThuongGap: 'Nhầm trục đối xứng với tung độ đỉnh' },
+    ],
+    anToan: '',
+  },
+  HD3: {
+    mucTieu: 'Vận dụng công thức đỉnh, trục đối xứng và đọc đồ thị để giải bài tập (YC2).',
+    noiDung: 'Học sinh làm Phiếu học tập số 2 gồm 6 câu tăng dần mức độ.',
+    sanPham: 'Phiếu học tập số 2 đã chữa.',
+    buoc: [
+      { ten: 'Chuyển giao nhiệm vụ', phut: 2, gv: 'Giao Phiếu học tập số 2 gồm 6 câu từ Lý thuyết đến Nâng cao.', hs: 'Nhận phiếu, đọc đề.' },
+      { ten: 'Thực hiện nhiệm vụ', phut: 8, gv: 'Theo dõi, gợi ý cho học sinh chưa làm được câu Cơ bản.', hs: 'Làm cá nhân, sau đó đối chiếu với bạn cùng bàn.' },
+      { ten: 'Báo cáo, thảo luận', phut: 3, gv: 'Gọi học sinh chữa câu 3 và câu 5; dùng đồ thị để kiểm tra.', hs: 'Trình bày lời giải, giải thích lựa chọn đáp án.' },
+      { ten: 'Kết luận, nhận định', phut: 2, gv: 'Chốt lỗi hay gặp: sai dấu khi tính $-\\frac{b}{2a}$, nhầm giá trị lớn nhất và nhỏ nhất.', hs: 'Sửa bài trên phiếu.' },
+    ],
+    cauHoi: HD_LHDN.HD2.cauHoi,
+    anToan: '',
+  },
+  HD4: {
+    mucTieu: 'Lập hàm số bậc hai mô tả tình huống thực tế và tìm giá trị lớn nhất (YC3).',
+    noiDung: 'Giải bài toán quả bóng ở phần mở đầu, có kiểm chứng một bước bằng chatbot AI.',
+    sanPham: 'Lời giải của nhóm và Phiếu kiểm chứng phản hồi AI.',
+    buoc: [
+      { ten: 'Chuyển giao nhiệm vụ', phut: 2, gv: 'Giao lại tình huống quả bóng: lập $h(t) = at^2 + bt + c$ và tìm độ cao lớn nhất; được hỏi chatbot AI để kiểm tra một bước giải hệ.', hs: 'Nhận nhiệm vụ, phân công trong nhóm.' },
+      { ten: 'Thực hiện nhiệm vụ', phut: 7, gv: 'Nhắc học sinh tự giải trước, ghi rõ phần có dùng AI hỗ trợ.', hs: 'Lập và giải hệ được $h(t) = -t^2 + 6t + 1$; tìm đỉnh $(3; 10)$; ghi giữ/sửa/loại phản hồi AI.' },
+      { ten: 'Báo cáo, thảo luận', phut: 3, gv: 'Mời một nhóm trình bày.', hs: 'Trình bày, đối chiếu với dự đoán ở phần mở đầu.' },
+      { ten: 'Kết luận, nhận định', phut: 2, gv: 'Chốt cách giải bài toán giá trị lớn nhất bằng đỉnh parabol; giao bài tập về nhà.', hs: 'Ghi nhận, chép bài tập về nhà.' },
+    ],
+    cauHoi: HD_LHDN.HD3.cauHoi,
+    anToan: '',
+  },
+};
+
+/** CV 5512: GeoGebra ở Hình thành kiến thức (HĐ2), chatbot AI và CLIL ở Vận dụng (HĐ4); học liệu HS không có phần tự học. */
+function choCv5512(ten: string, du: unknown): unknown {
+  if (TRA_LOI_5512[ten]) return TRA_LOI_5512[ten];
+  const d = structuredClone(du) as Record<string, any>;
+  if (ten === 'tichHop') {
+    for (const m of d.ma) m.hoatDong = m.ma === 'NLc' ? 'HD4' : 'HD2';
+    if (d.clil) { d.clil.hoatDong = 'HD4'; d.clil.nhiemVu = 'Học sinh gắn nhãn tiếng Anh cho đỉnh, trục đối xứng và giá trị lớn nhất trên đồ thị của bài toán quả bóng.'; }
+  }
+  if (ten === 'mucTieu') d.hocSinh.hocLieu = ['SGK Toán 10, vở ghi, máy tính cầm tay', 'Đọc trước mục 1 bài Hàm số bậc hai trong SGK'];
+  return d;
+}
+
 /** AI giả: trả nội dung dựng sẵn theo tên phần, có độ trễ nhỏ để thấy tiến trình. */
 export const aiMau: GoiAi = async (y) => {
   await new Promise((r) => setTimeout(r, 350));
-  const du = TRA_LOI[y.ten];
+  const laCv5512 = y.he.includes('Dạy học thông thường theo mẫu Công văn 5512: Mở đầu');
+  const du = laCv5512 && TRA_LOI[y.ten] ? choCv5512(y.ten, TRA_LOI[y.ten]) : TRA_LOI[y.ten];
   if (!du) throw new Error(`Chưa có nội dung mẫu cho phần ${y.ten}`);
   return y.schema.parse(structuredClone(du));
 };

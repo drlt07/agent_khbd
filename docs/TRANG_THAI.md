@@ -125,3 +125,9 @@ Nguyên tắc: chỉ animate `transform` và `opacity`; đường cong `--ease-o
 - Bản xem: phần AI đang soạn hiện khung chờ nhấp nháy; nội dung vừa soạn xong hiện mờ dần.
 - Nút đang chờ (AI đề xuất, tạo file, kiểm tra khóa…) có vòng xoay nhỏ. Khung báo hiện mờ dần. Các phương án gợi ý hoạt động vào lần lượt.
 - Xóa ảnh chụp màn hình cũ ở thư mục gốc (d4-*.png, m4-*.png).
+
+## Soạn lại phần lỗi ngay ở bước Kiểm tra; bài mẫu theo CV 5512; Sửa KHBD cũ đề xuất hoạt động mới – 06/11/2026
+
+- Bước Kiểm tra, duyệt: nút "AI soạn lại N phần lỗi" và nút "Soạn lại" cạnh từng lỗi phải sửa (`phanCuaLoi` ánh xạ vị trí lỗi → phần soạn). Không còn phải quay về bước 3.
+- Bài mẫu: khi giáo viên chọn dạy học thông thường (CV 5512), AI mẫu trả nội dung đúng CV 5512 (Mở đầu – Hình thành kiến thức – Luyện tập – Vận dụng, mỗi hoạt động đủ 4 bước; luyện tập 6 câu); trước đây trả nội dung lớp học đảo ngược nên bị luật 5512 báo lỗi. Có kiểm thử cho cả hai phương pháp.
+- Sửa KHBD cũ, bước "AI đề xuất, đổi mới": mục "Đổi mới hoạt động". Với từng hoạt động trong giáo án, AI đọc nguyên văn hoạt động đó (`hoatDongCu`) và gợi ý 5–8 cách tổ chức mới theo `rules/hoat-dong.md`, không vượt thời lượng cũ. Phương án được chọn chèn thành khối bổ sung tô xanh nhạt ngay sau hoạt động cũ (Word và bản xem); nội dung gốc giữ nguyên văn. Giáo án mẫu Vật lí 10 có sẵn gợi ý để chạy thử không cần khóa AI.

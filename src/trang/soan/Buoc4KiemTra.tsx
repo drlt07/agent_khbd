@@ -1,5 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
-import { The, HopBao, NhanAiLam } from '../../thanh-phan/chung';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { The, HopBao, NhanAiLam, Nut } from '../../thanh-phan/chung';
+import { danhSachPhan, phanCuaLoi, soanPhan, type MaPhan } from '../../soan/quy-trinh';
+import { LoiAi, type GoiAi } from '../../soan/ai';
 import { BieuTuong } from '../../thanh-phan/bieu-tuong';
 import { moTaMa } from '../../thu-vien';
 import { chamDiem, DIEM_DAT, kiemTraKhbd, tuSuaAnToan, type ChoDaSua } from '../../soan/luat';
@@ -8,7 +10,10 @@ import XemKhbd from './XemKhbd';
 
 const KQ = { dat: 'Đạt', soan_lai: 'Soạn lại', bo_ma: 'Bỏ mã', loi: 'Còn lỗi', gv_sua: 'GV sửa' } as const;
 
-export default function Buoc4KiemTra({ k, sua }: { k: Khbd; sua: (f: (k: Khbd) => Khbd) => void }) {
+export default function Buoc4KiemTra({ k, sua, ai, datKhbd }: { k: Khbd; sua: (f: (k: Khbd) => Khbd) => void; ai: GoiAi | null; datKhbd: (k: Khbd) => void }) {
+  const [dangSoan, setDangSoan] = useState<MaPhan | null>(null);
+  const [loiSoan, setLoiSoan] = useState('');
+  const kRef = useRef(k); kRef.current = k;
   const [daSua, setDaSua] = useState<ChoDaSua[]>([]);
   const [xemSua, setXemSua] = useState(false);
   // Tự sửa lỗi trình bày an toàn một lần khi vào bước này, liệt kê từng chỗ đã sửa
@@ -21,6 +26,19 @@ export default function Buoc4KiemTra({ k, sua }: { k: Khbd; sua: (f: (k: Khbd) =
   const nghiem = loi.filter((l) => l.muc === 'nghiem');
   const nhac = loi.filter((l) => l.muc === 'nhac');
   const tenHd = TEN_HD[k.phuongPhap];
+  const tenPhan = Object.fromEntries(danhSachPhan(k).map((p) => [p.ma, p.ten])) as Record<MaPhan, string>;
+  // Các phần có lỗi phải sửa mà AI soạn lại được (giữ thứ tự soạn)
+  const phanLoi = danhSachPhan(k).map((p) => p.ma).filter((p) => nghiem.some((l) => phanCuaLoi(k, l.viTri) === p));
+  const soanLai = async (ds: MaPhan[]) => {
+    if (!ai) return;
+    setLoiSoan('');
+    for (const p of ds) {
+      setDangSoan(p);
+      try { const moi = await soanPhan(kRef.current, p, ai); kRef.current = moi; datKhbd(moi); }
+      catch (e) { setLoiSoan(e instanceof LoiAi ? `${e.loi.thongBao} ${e.loi.cachXuLy}` : 'Không soạn lại được phần này.'); break; }
+    }
+    setDangSoan(null);
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -34,15 +52,28 @@ export default function Buoc4KiemTra({ k, sua }: { k: Khbd; sua: (f: (k: Khbd) =
           </div>
           {xemSua && <ul className="mt-3 flex flex-col gap-2 text-sm">{daSua.map((d, i) => <li key={i} className="rounded-lg bg-surface-2 p-2.5"><div className="text-muted">{d.viTri} · {d.lyDo}</div><div className="line-through text-muted">{d.truoc}</div><div>{d.sau}</div></li>)}</ul>}
           <ul className="mt-3 flex flex-col gap-1.5">
-            {[...nghiem, ...nhac].map((l, i) => (
-              <li key={i} className="flex gap-2 text-[14.5px]">
-                <BieuTuong ten="x" className={`w-4 h-4 mt-1 ${l.muc === 'nghiem' ? 'text-err-fg' : 'text-warn-fg'}`} />
-                <span><span className="text-muted">{l.viTri} · luật {l.luat}:</span> {l.thongBao}</span>
-              </li>
-            ))}
+            {[...nghiem, ...nhac].map((l, i) => {
+              const p = l.muc === 'nghiem' ? phanCuaLoi(k, l.viTri) : null;
+              return (
+                <li key={i} className="flex gap-2 text-[14.5px]">
+                  <BieuTuong ten="x" className={`w-4 h-4 mt-1 shrink-0 ${l.muc === 'nghiem' ? 'text-err-fg' : 'text-warn-fg'}`} />
+                  <span className="flex-1"><span className="text-muted">{l.viTri} · luật {l.luat}:</span> {l.thongBao}</span>
+                  {p && ai && <button disabled={!!dangSoan} onClick={() => soanLai([p])} className="text-[13px] text-accent hover:underline shrink-0 self-start mt-0.5 disabled:opacity-40">{dangSoan === p ? 'Đang soạn…' : 'Soạn lại'}</button>}
+                </li>
+              );
+            })}
             {!loi.length && <li className="flex gap-2 text-luat"><BieuTuong ten="check" className="w-4 h-4 mt-0.5" />Bài đạt toàn bộ luật.</li>}
           </ul>
-          {nghiem.length > 0 && <p className="text-sm text-muted mt-3">Sửa trực tiếp ở bản xem bên dưới, hoặc quay lại bước 3 bấm “Soạn lại” phần bị lỗi.</p>}
+          {phanLoi.length > 0 && (
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <Nut kieu="chinh" dang={!!dangSoan} disabled={!ai || !!dangSoan} onClick={() => soanLai(phanLoi)}>
+                {dangSoan ? `AI đang soạn lại: ${tenPhan[dangSoan] ?? ''}…` : `AI soạn lại ${phanLoi.length} phần lỗi`}
+              </Nut>
+              {!ai && <span className="text-sm text-warn-fg">Cần khóa AI để soạn lại. <a href="#khoa-ai" className="underline">Thêm khóa</a></span>}
+            </div>
+          )}
+          {loiSoan && <HopBao kieu="err" className="mt-3">{loiSoan}</HopBao>}
+          {nghiem.length > 0 && <p className="text-sm text-muted mt-3">Hoặc sửa trực tiếp ở bản xem bên dưới.</p>}
         </The>
 
         <The className="p-5">
