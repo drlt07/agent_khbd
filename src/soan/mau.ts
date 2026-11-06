@@ -155,6 +155,17 @@ const TRA_LOI: Record<string, unknown> = {
   ] },
 };
 
+/** Gợi ý mã năng lực dựng sẵn cho bài mẫu Hàm số bậc hai (giáo viên vẫn tự tích chọn). */
+(TRA_LOI as Record<string, unknown>).goiYMa = {
+  nls: [
+    { ma: '5.3.5.1', lyDo: 'Học sinh dùng GeoGebra vẽ parabol, kéo thanh trượt a, b, c để tự rút ra đỉnh, trục đối xứng (hoạt động hình thành, vận dụng).' },
+    { ma: '1.3.5.1', lyDo: 'Học sinh nhập bảng số liệu độ cao quả bóng, sắp xếp và đối chiếu với đồ thị để lập hàm số.' },
+  ],
+  ai: [
+    { ma: 'NLc', lyDo: 'Học sinh hỏi chatbot AI kiểm tra một bước giải hệ phương trình, đối chiếu với lời giải của nhóm và ghi giữ/sửa/loại kèm lí do.' },
+  ],
+};
+
 /**
  * Bài mẫu khi giáo viên chọn dạy học thông thường (CV 5512): 4 hoạt động Mở đầu – Hình thành kiến thức – Luyện tập – Vận dụng,
  * mỗi hoạt động đủ 4 bước tổ chức thực hiện. Câu hỏi luyện tập, vận dụng dùng lại bộ câu của bài mẫu.

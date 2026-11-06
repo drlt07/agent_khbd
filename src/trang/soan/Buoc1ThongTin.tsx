@@ -5,6 +5,9 @@ import { CHI_BAO_MAC_DINH, MIEN_GOI_Y_THEO_MON, NANG_LUC_AI, NANG_LUC_DAC_THU, N
 import { THIET_BI_GOI_Y, type Khbd } from '../../soan/kieu';
 import type { GoiAi } from '../../soan/ai';
 import ChonBai, { soTietDeXuat } from './ChonBai';
+import { goiYMa, type KetQuaGoiYMa, type MaDuocGoiY } from '../../soan/goi-y-ma';
+import { LoiAi } from '../../soan/ai';
+import { Nut, NhanAiLam } from '../../thanh-phan/chung';
 
 const BO_SACH = ['Kết nối tri thức với cuộc sống', 'Chân trời sáng tạo', 'Cánh diều'];
 const o = 'w-full px-3 py-2.5 rounded-xl border border-line-strong bg-surface focus:border-accent outline-none';
@@ -20,6 +23,30 @@ export default function Buoc1ThongTin({ k, sua, ai }: { k: Khbd; sua: (f: (k: Kh
     const ds = x.tichHop[loai];
     return { ...x, tichHop: { ...x.tichHop, [loai]: ds.includes(ma) ? ds.filter((m) => m !== ma) : [...ds, ma] } };
   });
+  // AI gợi ý mã theo bài; giáo viên tự tích chọn (app không tích hộ)
+  const [gy, setGy] = useState<KetQuaGoiYMa | null>(null);
+  const [dangGy, setDangGy] = useState(false);
+  const [loiGy, setLoiGy] = useState('');
+  const xinGoiYMa = async () => {
+    if (!ai) return;
+    setDangGy(true); setLoiGy('');
+    try { setGy(await goiYMa(k, ai)); }
+    catch (e) { setLoiGy(e instanceof LoiAi ? `${e.loi.thongBao} ${e.loi.cachXuLy}` : 'Không lấy được gợi ý.'); }
+    finally { setDangGy(false); }
+  };
+  const chonHet = () => gy && sua((x) => ({ ...x, tichHop: { ...x.tichHop,
+    nls: [...new Set([...x.tichHop.nls, ...gy.nls.map((m) => m.ma)])], ai: [...new Set([...x.tichHop.ai, ...gy.ai.map((m) => m.ma)])] } }));
+  const khoiGoiY = (ds: MaDuocGoiY[], loai: 'nls' | 'ai') => ds.length ? (
+    <div className="vao mt-3 rounded-xl border border-accent-line bg-accent-soft/40 p-3 flex flex-col gap-2">
+      <div className="flex items-center justify-between gap-2"><span className="text-[13px] font-semibold">AI gợi ý cho bài này</span><NhanAiLam ai="ai" /></div>
+      {ds.map((m) => (
+        <div key={m.ma} className="flex flex-col gap-1">
+          <ChonMa ma={m.ma} chon={k.tichHop[loai].includes(m.ma)} doi={() => doiMa(loai, m.ma)} />
+          <p className="text-[13px] text-muted pl-2"><b className="text-fg">Lí do:</b> {m.lyDo}</p>
+        </div>
+      ))}
+    </div>
+  ) : null;
   const doiTb = (t: string) => sua((x) => ({ ...x, dieuKien: { ...x.dieuKien, thietBi: x.dieuKien.thietBi.includes(t) ? x.dieuKien.thietBi.filter((y) => y !== t) : [...x.dieuKien.thietBi, t] } }));
 
   return (
@@ -101,16 +128,27 @@ export default function Buoc1ThongTin({ k, sua, ai }: { k: Khbd; sua: (f: (k: Kh
       <div className="flex flex-col gap-6 min-w-0">
         <The className="p-5">
           <div className="flex items-baseline justify-between gap-2"><h2 className="text-base">Năng lực số</h2><span className="text-sm text-muted">{k.tichHop.nls.length} mã · nên 1–3</span></div>
-          <p className="text-sm text-muted mt-1">Gợi ý cho môn này:</p>
-          <div className="flex flex-col gap-1.5 mt-2">{goiY.map((ma) => <ChonMa key={ma} ma={ma} chon={k.tichHop.nls.includes(ma)} doi={() => doiMa('nls', ma)} />)}</div>
-          {k.tichHop.nls.filter((m) => !goiY.includes(m)).map((ma) => <div key={ma} className="mt-1.5"><ChonMa ma={ma} chon doi={() => doiMa('nls', ma)} /></div>)}
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <Nut kieu={gy ? 'phu' : 'chinh'} dang={dangGy} disabled={!ai || dangGy || !k.bai.trim()} onClick={xinGoiYMa}>{dangGy ? 'AI đang đọc bài…' : gy ? 'Gợi ý lại' : 'AI gợi ý mã theo bài'}</Nut>
+            {gy && (gy.nls.length + gy.ai.length > 0) && <Nut kieu="nhe" onClick={chonHet}>Chọn tất cả gợi ý</Nut>}
+          </div>
+          {!k.bai.trim() && <p className="text-[13px] text-muted mt-1.5">Chọn bài trước để AI gợi ý mã năng lực số và năng lực AI.</p>}
+          {!ai && <p className="text-[13px] text-warn-fg mt-1.5">Cần khóa AI để gợi ý. <a href="#khoa-ai" className="underline">Thêm khóa</a></p>}
+          {loiGy && <p className="text-[13px] text-err-fg mt-1.5">{loiGy}</p>}
+          {gy && !gy.nls.length && !gy.ai.length && <p className="text-[13px] text-muted mt-1.5">AI chưa tìm được mã phù hợp; thầy/cô chọn trong danh sách dưới.</p>}
+          {gy && khoiGoiY(gy.nls, 'nls')}
+          {gy && gy.ai.length > 0 && <p className="text-[12.5px] text-muted mt-1.5">Có {gy.ai.length} mã năng lực AI được gợi ý ở thẻ “Năng lực AI”.</p>}
+          <p className="text-sm text-muted mt-3">{gy ? 'Mã khác thường dùng cho môn này:' : 'Gợi ý cho môn này:'}</p>
+          <div className="flex flex-col gap-1.5 mt-2">{goiY.filter((ma) => !gy?.nls.some((m) => m.ma === ma)).map((ma) => <ChonMa key={ma} ma={ma} chon={k.tichHop.nls.includes(ma)} doi={() => doiMa('nls', ma)} />)}</div>
+          {k.tichHop.nls.filter((m) => !goiY.includes(m) && !gy?.nls.some((x) => x.ma === m)).map((ma) => <div key={ma} className="mt-1.5"><ChonMa ma={ma} chon doi={() => doiMa('nls', ma)} /></div>)}
           <input value={timMa} onChange={(e) => setTimMa(e.target.value)} placeholder="Tìm mã khác: 1.2.5.1, đánh giá, an toàn…" aria-label="Tìm mã năng lực số" className={`${o} mt-3`} />
           {kqTim.length > 0 && <div className="flex flex-col gap-1.5 mt-2">{kqTim.map((r) => <ChonMa key={r.chiBao.ma} ma={r.chiBao.ma} chon={k.tichHop.nls.includes(r.chiBao.ma)} doi={() => doiMa('nls', r.chiBao.ma)} />)}</div>}
         </The>
 
         <The className="p-5">
           <div className="flex items-baseline justify-between gap-2"><h2 className="text-base">Năng lực AI</h2><span className="text-sm text-muted">{NGUON_AI_2422}</span></div>
-          <div className="flex flex-col gap-1.5 mt-3">{NANG_LUC_AI.map((c) => <ChonMa key={c.ma} ma={c.ma} chon={k.tichHop.ai.includes(c.ma)} doi={() => doiMa('ai', c.ma)} />)}</div>
+          {gy && khoiGoiY(gy.ai, 'ai')}
+          <div className="flex flex-col gap-1.5 mt-3">{NANG_LUC_AI.filter((c) => !gy?.ai.some((m) => m.ma === c.ma)).map((c) => <ChonMa key={c.ma} ma={c.ma} chon={k.tichHop.ai.includes(c.ma)} doi={() => doiMa('ai', c.ma)} />)}</div>
         </The>
 
         <The className="p-5">

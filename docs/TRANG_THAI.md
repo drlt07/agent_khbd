@@ -147,3 +147,9 @@ Trước đây bấm "Soạn lại" mà lỗi vẫn y nguyên vì: (1) AI không
 - AI mẫu (lớp học đảo ngược): đọc "Thời lượng: N phút" trong lời nhắc, chia lại số phút các bước cho khớp (`chiaLaiPhut`).
 - Sau khi soạn lại, app báo kết quả: hết lỗi, hoặc còn lỗi gì (với AI mẫu nói rõ là nội dung dựng sẵn).
 - Kiểm thử `tests/soan-lai-loi.test.ts`: lỗi thiếu câu luyện tập, sai số bước CV 5512, lệch tổng số phút đều được sửa sau một lần soạn lại.
+
+## AI gợi ý mã năng lực số, năng lực AI theo bài – 06/11/2026
+
+- Bước 1 (Chọn tích hợp): nút "AI gợi ý mã theo bài" (`src/soan/goi-y-ma.ts`). AI đọc tên bài, YCCĐ, thiết bị lớp và toàn bộ thư viện (55 chỉ báo NLS bậc THPT, 4 mã NLa–NLd), gợi ý 1–3 mã NLS và 0–2 mã AI, mỗi mã một lí do (học sinh làm gì, công cụ gì, hoạt động nào).
+- Luật code `locGoiYMa`: chỉ giữ mã có trong thư viện và đúng loại, bỏ trùng, tối đa 3 NLS / 2 AI, ghi lại mã bị loại. App không tự tích; giáo viên tích từng mã hoặc bấm "Chọn tất cả gợi ý".
+- Mã gợi ý hiện kèm lí do ở đầu thẻ Năng lực số và thẻ Năng lực AI; danh sách mặc định theo môn bỏ các mã đã có trong gợi ý. Bài mẫu có gợi ý dựng sẵn (5.3.5.1, 1.3.5.1, NLc).
