@@ -1,0 +1,54 @@
+{
+  "nguon": "Quyết định 2422/QĐ-BGDĐT (18/8/2026) – Khung nội dung giáo dục trí tuệ nhân tạo cho học sinh phổ thông, mục Yêu cầu cần đạt về năng lực đặc thù; hướng dẫn triển khai: Công văn 5588/BGDĐT-GDPT (19/8/2026)",
+  "ghi_chu": "Tên thành phần và yêu cầu cần đạt cấp Trung học phổ thông chép nguyên văn từ văn bản do tác giả cung cấp ngày 06/11/2026. yccd_thpt là các ý tách theo dấu \"; \" của ô THPT; nối lại bằng \"; \" được đúng nguyên văn. Không có mã con trong văn bản nên app chỉ dùng mã thành phần.",
+  "thanh_phan": [
+    {
+      "ma": "NLa",
+      "mach": "A",
+      "ten": "Tư duy lấy con người làm trung tâm",
+      "yccd_thpt": [
+        "Phân tích được vai trò, quyền kiểm soát của con người trong vòng đời hệ thống AI",
+        "phân tích được tác động, rủi ro của AI đối với con người, xã hội",
+        "nêu được quy định pháp luật liên quan",
+        "biết bảo đảm yếu tố nhân văn, công bằng, bền vững khi thiết kế, sử dụng AI."
+      ],
+      "da_xac_minh": true
+    },
+    {
+      "ma": "NLb",
+      "mach": "B",
+      "ten": "Đạo đức AI",
+      "yccd_thpt": [
+        "Đánh giá được các vấn đề đạo đức, mức độ rủi ro và hành vi vi phạm pháp luật khi dùng AI",
+        "trình bày được quyền, trách nhiệm của người phát triển và người sử dụng",
+        "đề xuất được quy tắc ứng xử về AI cho trường học, cộng đồng."
+      ],
+      "da_xac_minh": true
+    },
+    {
+      "ma": "NLc",
+      "mach": "C",
+      "ten": "Các kĩ thuật và ứng dụng AI",
+      "yccd_thpt": [
+        "Trình bày được quy trình phát triển AI",
+        "phân biệt được AI tạo sinh với AI phân loại, dự đoán và biết sử dụng hiệu quả qua prompt",
+        "mô tả được một số công nghệ, kĩ thuật AI cơ bản",
+        "phân tích được vai trò của chất lượng dữ liệu",
+        "nêu được cách đánh giá hiệu quả của hệ thống AI."
+      ],
+      "da_xac_minh": true
+    },
+    {
+      "ma": "NLd",
+      "mach": "D",
+      "ten": "Thiết kế hệ thống AI",
+      "yccd_thpt": [
+        "Mô tả được cấu trúc, các thành phần chính của hệ thống AI và mối liên hệ giữa chúng",
+        "nhận biết được phương án thiết kế, vận hành phù hợp với mục tiêu",
+        "trình bày được vấn đề phát sinh và cách khắc phục",
+        "hiểu được sự hợp tác nhiều vai trò trong phát triển sản phẩm AI."
+      ],
+      "da_xac_minh": true
+    }
+  ]
+}

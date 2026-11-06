@@ -1,0 +1,149 @@
+<title>Hướng dẫn khóa AI</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: một cột đọc 760px theo nhận diện của app Soạn KHBD THPT; so sánh 2 cột, các bước đánh số, bảng lỗi cuộn ngang trên điện thoại */
+:root{
+  --bg:#f5f7fb; --surface:#ffffff; --fg:#101a2c; --muted:#5b6880; --line:#e3e8f0;
+  --accent:#1f4fb6; --accent-soft:#edf2fd; --warn-bg:#fdf6e7; --warn-fg:#7a4b06; --warn-line:#f0dcae;
+  --font:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e1420; --surface:#161f30; --fg:#e6ebf4; --muted:#9aa7bf; --line:#253149;
+  --accent:#8eaeff; --accent-soft:#1c2a4a; --warn-bg:#2a2112; --warn-fg:#f1cf8e; --warn-line:#4a3a1c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1420; --surface:#161f30; --fg:#e6ebf4; --muted:#9aa7bf; --line:#253149;
+  --accent:#8eaeff; --accent-soft:#1c2a4a; --warn-bg:#2a2112; --warn-fg:#f1cf8e; --warn-line:#4a3a1c; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font:15px/1.7 var(--font);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:32px 48px}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:40px}
+h1,h2,h3{text-wrap:balance;line-height:1.3;margin:0}
+h1{font-size:28px;font-weight:600;letter-spacing:-.01em}
+h2{font-size:20px;font-weight:600}
+h3{font-size:16px;font-weight:600}
+p{margin:0}
+a{color:var(--accent);text-underline-offset:3px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.eyebrow{font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.lead{color:var(--muted);max-width:62ch;margin-top:10px}
+.sec{display:flex;flex-direction:column;gap:16px}
+.compare{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.card .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.pill{font-size:12px;font-weight:500;padding:2px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:14px}
+dt{color:var(--muted)}dd{margin:0}
+code,.k{font-family:var(--mono);font-size:13px;background:var(--accent-soft);color:var(--fg);padding:1px 6px;border-radius:5px}
+ol.steps{list-style:none;counter-reset:s;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+ol.steps>li{counter-increment:s;display:grid;grid-template-columns:30px 1fr;gap:12px;align-items:start}
+ol.steps>li::before{content:counter(s);width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:600;background:var(--accent);color:var(--surface)}
+ol.steps>li>div{min-width:0;padding-top:3px}
+.sub{font-size:14px;color:var(--muted);margin-top:2px}
+.note{background:var(--warn-bg);color:var(--warn-fg);border:1px solid var(--warn-line);border-radius:10px;padding:12px 16px;font-size:14px}
+ul.safe{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px}
+th,td{text-align:left;vertical-align:top;padding:11px 14px;border-bottom:1px solid var(--line)}
+th{font-size:12px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+tr:last-child td{border-bottom:0}
+td:first-child{width:44%}
+.foot{font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:16px}
+nav.jump{display:flex;gap:8px;flex-wrap:wrap}
+nav.jump a{font-size:14px;text-decoration:none;padding:6px 14px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--fg)}
+nav.jump a:hover{border-color:var(--accent);color:var(--accent)}
+@media (prefers-reduced-motion:no-preference){nav.jump a{transition:border-color .15s,color .15s}}
+</style>
+
+<main class="wrap">
+  <header>
+    <p class="eyebrow">Khóa AI của tôi</p>
+    <h1>Kết nối app soạn KHBD với AI của thầy/cô</h1>
+    <p class="lead">App dùng khóa API (API key) của chính thầy/cô để gọi AI soạn bài. Mỗi thầy/cô tự tạo một khóa, dán vào mục “Khóa AI của tôi”, rồi bấm “Kiểm tra và dùng khóa”. Chi phí, nếu có, tính vào tài khoản AI của thầy/cô.</p>
+  </header>
+
+  <nav class="jump" aria-label="Đi tới phần">
+    <a href="#chon">Chọn nhà cung cấp</a>
+    <a href="#gemini">Lấy khóa Gemini</a>
+    <a href="#claude">Lấy khóa Claude</a>
+    <a href="#an-toan">Giữ khóa an toàn</a>
+    <a href="#loi">Lỗi thường gặp</a>
+  </nav>
+
+  <section class="sec" id="chon">
+    <h2>Chọn nhà cung cấp</h2>
+    <div class="compare">
+      <article class="card">
+        <div class="top"><h3>Google Gemini</h3><span class="pill">Dễ bắt đầu</span></div>
+        <dl>
+          <dt>Chi phí</dt><dd>Có gói miễn phí, không cần thẻ</dd>
+          <dt>Giới hạn</dt><dd>Số lượt mỗi phút và mỗi ngày</dd>
+          <dt>Khóa có dạng</dt><dd><span class="k">AIza…</span></dd>
+        </dl>
+        <p class="sub">Hợp để dùng thử và soạn bài ngắn. Hết lượt trong ngày thì chờ hạn mức đặt lại.</p>
+      </article>
+      <article class="card">
+        <div class="top"><h3>Anthropic Claude</h3><span class="pill">Soạn tốt nhất</span></div>
+        <dl>
+          <dt>Chi phí</dt><dd>Nạp tiền trước, trả theo lượng dùng</dd>
+          <dt>Gói nạp</dt><dd>Từ 5 USD, cần thẻ thanh toán quốc tế</dd>
+          <dt>Khóa có dạng</dt><dd><span class="k">sk-ant-…</span></dd>
+        </dl>
+        <p class="sub">Hợp cho bài nhiều tiết, cần soạn dài và chính xác.</p>
+      </article>
+    </div>
+    <p class="note"><strong>Lưu ý với gói miễn phí của Gemini:</strong> Google có thể dùng nội dung gửi qua gói miễn phí để cải thiện sản phẩm, kể cả cho người xem xét. App đã tự bỏ tên học sinh trước khi gửi, nhưng thầy/cô không dán thêm thông tin cá nhân của học sinh vào bài soạn.</p>
+  </section>
+
+  <section class="sec" id="gemini">
+    <h2>Lấy khóa Gemini</h2>
+    <ol class="steps">
+      <li><div>Mở <a href="https://aistudio.google.com/apikey">aistudio.google.com/apikey</a> và đăng nhập bằng tài khoản Google.<p class="sub">Nên dùng tài khoản Google cá nhân. Một số tài khoản do trường quản lý có thể bị chặn Google AI Studio.</p></div></li>
+      <li><div>Bấm <strong>Create API key</strong> (Tạo khóa API).<p class="sub">Nếu được hỏi chọn dự án (project), chọn dự án có sẵn hoặc để Google tạo mới.</p></div></li>
+      <li><div>Sao chép khóa vừa tạo. Khóa bắt đầu bằng <span class="k">AIza</span>.</div></li>
+      <li><div>Trong app, mở <strong>Khóa AI của tôi</strong>, chọn nhà cung cấp <strong>Gemini</strong>, dán khóa rồi bấm <strong>Kiểm tra và dùng khóa</strong>.<p class="sub">Ô “Mô hình” để trống là dùng mô hình mặc định của app.</p></div></li>
+    </ol>
+  </section>
+
+  <section class="sec" id="claude">
+    <h2>Lấy khóa Claude</h2>
+    <ol class="steps">
+      <li><div>Mở <a href="https://platform.claude.com">platform.claude.com</a>, đăng ký hoặc đăng nhập.</div></li>
+      <li><div>Vào <strong>Settings → Billing</strong>, bấm <strong>Purchase credits</strong>, chọn mức nạp (5, 20, 100 USD hoặc tự nhập) và nhập thẻ.<p class="sub">Nếu nút mua bị mờ, kiểm tra lại các ô địa chỉ thanh toán đã điền đủ chưa.</p></div></li>
+      <li><div>Vào <strong>API Keys</strong>, bấm <strong>Create key</strong>, đặt tên dễ nhớ, ví dụ <code>Soan KHBD</code>.</div></li>
+      <li><div>Sao chép khóa <strong>ngay lúc đó</strong>. Khóa bắt đầu bằng <span class="k">sk-ant-</span>.<p class="sub">Đóng cửa sổ là không xem lại được khóa nữa. Lỡ đóng thì tạo khóa mới.</p></div></li>
+      <li><div>Trong app, mở <strong>Khóa AI của tôi</strong>, chọn <strong>Claude</strong>, dán khóa và bấm <strong>Kiểm tra và dùng khóa</strong>.</div></li>
+    </ol>
+  </section>
+
+  <section class="sec" id="an-toan">
+    <h2>Giữ khóa an toàn</h2>
+    <ul class="safe">
+      <li><strong>Không gửi khóa cho người khác</strong>, kể cả đồng nghiệp hay nhóm Zalo. Ai có khóa là dùng được tài khoản và tiền nạp của thầy/cô.</li>
+      <li><strong>Trên máy dùng chung</strong> (máy phòng giáo viên, phòng máy), không tích “Nhớ khóa trên máy này”. Khi đó đóng trang là khóa tự xóa khỏi máy.</li>
+      <li><strong>Khi nghi lộ khóa</strong>, vào trang quản lý khóa của nhà cung cấp, xóa khóa cũ rồi tạo khóa mới.</li>
+      <li><strong>Với Claude</strong>, chỉ nạp mức vừa đủ dùng và không bật nạp tiền tự động nếu muốn kiểm soát chi tiêu.</li>
+    </ul>
+  </section>
+
+  <section class="sec" id="loi">
+    <h2>Lỗi thường gặp</h2>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>App báo</th><th>Cách xử lí</th></tr></thead>
+        <tbody>
+          <tr><td>Khóa chưa đúng dạng</td><td>Sao chép lại đủ khóa, không thừa dấu cách ở đầu hoặc cuối.</td></tr>
+          <tr><td>Khóa này là khóa …, không phải …</td><td>Chọn lại đúng nhà cung cấp: khóa <span class="k">AIza…</span> là Gemini, khóa <span class="k">sk-ant-…</span> là Claude.</td></tr>
+          <tr><td>Khóa API không hợp lệ hoặc đã bị thu hồi</td><td>Khóa đã bị xóa hoặc sai. Tạo khóa mới và dán lại.</td></tr>
+          <tr><td>Đã hết lượt miễn phí của Gemini</td><td>Chờ một lát nếu là giới hạn theo phút. Hạn mức theo ngày đặt lại lúc nửa đêm giờ Mỹ (Thái Bình Dương), tức khoảng 14–15 giờ chiều giờ Việt Nam.</td></tr>
+          <tr><td>Tài khoản Claude đã hết tiền</td><td>Nạp thêm tại Settings → Billing trên platform.claude.com.</td></tr>
+          <tr><td>Đang quá nhiều yêu cầu tới Claude</td><td>Chờ khoảng một phút rồi bấm soạn lại phần đó.</td></tr>
+          <tr><td>Không tìm thấy mô hình đã chọn</td><td>Xóa nội dung ô “Mô hình” để app dùng mô hình mặc định.</td></tr>
+          <tr><td>Không kết nối được tới Claude hoặc Gemini</td><td>Kiểm tra mạng. Mạng trường đôi khi chặn dịch vụ AI; thử mạng khác.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <p class="foot">Thông tin cập nhật ngày 05/11/2026. Giao diện trang của Google và Anthropic có thể thay đổi tên nút; các bước chính vẫn giữ như trên.</p>
+</main>
