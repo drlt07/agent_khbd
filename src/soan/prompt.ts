@@ -73,14 +73,14 @@ const HUONG_DAN_HD: Record<'lhdn' | 'cv5512', Record<MaHd, string>> = {
 const YEU_CAU_CAU_HOI: Record<'lhdn' | 'cv5512', Record<MaHd, string>> = {
   lhdn: {
     HD1: 'cauHoi: 2–3 nhận định dễ nhầm (dang "nhan_dinh") ứng với lỗi hay gặp ở phần tự học; dapAn ghi Đúng/Sai kèm kết luận đúng.',
-    HD2: 'cauHoi: bộ câu luyện tập phân hóa 6–9 câu, đủ 3 mức: LT (nhóm Cần hỗ trợ), CB (nhóm Cần củng cố), NC (nhóm Nắm tốt), 2–3 câu mỗi mức. Dạng câu theo môn (QĐ 764): nhiều lựa chọn đúng 4 phương án, đúng sai đúng 4 ý, trả lời ngắn. Các bước tổ chức phải nói nhóm nào làm câu nào.',
+    HD2: 'cauHoi: bộ câu luyện tập phân hóa 6–9 câu, đủ 3 mức: LT (nhóm Cần hỗ trợ), CB (nhóm Cần củng cố), NC (nhóm Nắm tốt), 2–3 câu mỗi mức. Dạng câu theo môn (QĐ 764): một lựa chọn (4 phương án, chỉ 1 đáp án đúng), đúng sai đúng 4 ý, trả lời ngắn. Các bước tổ chức phải nói nhóm nào làm câu nào.',
     HD3: 'cauHoi: nhiệm vụ vận dụng (dang "tu_luan") giải trọn tình huống mở đầu, dapAn ghi lời giải tóm tắt hoặc tiêu chí sản phẩm.',
     HD4: 'cauHoi: 3 câu exit ticket (2–4 câu), KHÔNG trùng câu luyện tập HĐ II, có đáp án.',
   },
   cv5512: {
     HD1: 'cauHoi: 1–2 câu hỏi hoặc tình huống mở đầu, dapAn ghi câu trả lời mong đợi.',
     HD2: 'cauHoi: hệ thống 2–4 câu hỏi gợi mở dẫn dắt học sinh hình thành kiến thức, dapAn ghi câu trả lời mong đợi.',
-    HD3: 'cauHoi: 4–6 câu hỏi, bài tập tăng dần mức độ (LT → CB → NC), dạng theo môn (nhiều lựa chọn đúng 4 phương án, đúng sai 4 ý, trả lời ngắn, tự luận), có đáp án.',
+    HD3: 'cauHoi: 4–6 câu hỏi, bài tập tăng dần mức độ (LT → CB → NC), dạng theo môn (một lựa chọn (4 phương án, chỉ 1 đáp án đúng), đúng sai 4 ý, trả lời ngắn, tự luận), có đáp án.',
     HD4: 'cauHoi: 1–2 nhiệm vụ vận dụng thực tiễn (dang "tu_luan"), dapAn ghi gợi ý sản phẩm hoặc tiêu chí đánh giá.',
   },
 };

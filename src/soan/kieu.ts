@@ -54,13 +54,13 @@ export const DoThiOut = z.object({
   yMin: z.number().nullable().describe('null để app tự chọn'),
   yMax: z.number().nullable().describe('null để app tự chọn'),
 });
-export const DANG_CAU = { nhieu_lua_chon: 'Nhiều lựa chọn', dung_sai: 'Đúng sai', tra_loi_ngan: 'Trả lời ngắn', tu_luan: 'Tự luận', nhan_dinh: 'Nhận định' } as const;
+export const DANG_CAU = { nhieu_lua_chon: 'Một lựa chọn', dung_sai: 'Đúng sai', tra_loi_ngan: 'Trả lời ngắn', tu_luan: 'Tự luận', nhan_dinh: 'Nhận định' } as const;
 export const CauHoiOut = z.object({
   muc: z.enum(['LT', 'CB', 'NC']).describe('LT = Lý thuyết (nhóm Cần hỗ trợ), CB = Cơ bản (nhóm Cần củng cố), NC = Nâng cao (nhóm Nắm tốt)'),
   dang: z.enum(['nhieu_lua_chon', 'dung_sai', 'tra_loi_ngan', 'tu_luan', 'nhan_dinh']),
   cauHoi: z.string().describe('Đề bài đầy đủ, không ghi phương án ở đây'),
-  phuongAn: z.array(z.string()).describe('Nhiều lựa chọn: đúng 4 phương án (không ghi chữ A., B. ở đầu); đúng sai: đúng 4 ý a–d; dạng khác: mảng rỗng'),
-  dapAn: z.string().describe('Nhiều lựa chọn: một chữ A/B/C/D; đúng sai: dạng "a-Đ, b-S, c-Đ, d-S"; nhận định: Đúng/Sai kèm kết luận đúng; còn lại: đáp án, lời giải ngắn'),
+  phuongAn: z.array(z.string()).describe('Một lựa chọn (trắc nghiệm 4 phương án, chỉ 1 đúng): đúng 4 phương án (không ghi chữ A., B. ở đầu); đúng sai: đúng 4 ý a–d; dạng khác: mảng rỗng'),
+  dapAn: z.string().describe('Một lựa chọn: một chữ A/B/C/D; đúng sai: dạng "a-Đ, b-S, c-Đ, d-S"; nhận định: Đúng/Sai kèm kết luận đúng; còn lại: đáp án, lời giải ngắn'),
   loiThuongGap: z.string().describe('Lỗi hiểu thường gặp mà câu này nhắm tới (mỗi phương án sai ứng một lỗi)'),
   doThi: DoThiOut.nullable().optional().describe('Chỉ khi câu hỏi cần hình đồ thị hàm số; app tự vẽ chính xác. Không cần thì null'),
 });
