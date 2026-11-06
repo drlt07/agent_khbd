@@ -65,6 +65,7 @@ export async function soanPhan(k: Khbd, phan: MaPhan, ai: GoiAi, huongDan = ''):
 
   // Hoạt động: luật 4.2 – 4.3 (nghiêm) → soạn lại tối đa 2 lượt
   const hd = phan;
+  huongDan = huongDan || k.nguon?.huongDan?.[hd] || '';
   const ten = TEN_HD[k.phuongPhap][hd];
   const phut = phutTheoHoatDong(k.phanBo)[hd];
   let nhac = nhacHoatDong(k, hd, huongDan);

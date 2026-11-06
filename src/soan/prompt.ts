@@ -21,6 +21,10 @@ function boiCanh(k: Khbd): string {
     `Thiết bị, công cụ giáo viên khai báo (chỉ được dùng các thứ này): ${k.dieuKien.thietBi.join('; ') || 'không có'}.`,
   ];
   if (k.yccd.length) dong.push(`Yêu cầu cần đạt đã được giáo viên xác nhận:\n${k.yccd.map((y) => `${y.ma}: ${y.noiDung}`).join('\n')}`);
+  if (k.nguon) dong.push([
+    `KHBD này được soạn lại từ giáo án cũ của giáo viên (${k.nguon.tenTep}). Giữ đúng nội dung kiến thức, yêu cầu cần đạt, ví dụ và bài tập cốt lõi của giáo án cũ; THIẾT KẾ HOẠT ĐỘNG MỚI: cách tổ chức khác, học sinh tích cực hơn, không chép lại câu chữ và cách tổ chức cũ.`,
+    `Giáo án cũ (chỉ để tham khảo kiến thức):\n<<<\n${k.nguon.toanVan}\n>>>`,
+  ].join('\n'));
   return dong.join('\n');
 }
 
@@ -87,6 +91,13 @@ const YEU_CAU_CAU_HOI: Record<'lhdn' | 'cv5512', Record<MaHd, string>> = {
 
 const cauHd2 = (k: Khbd) => k.hoatDong.find((h) => h.ma === 'HD2')?.noiDung?.cauHoi ?? [];
 
+/** Hoạt động tương ứng trong giáo án cũ (theo thứ tự, khi soạn lại theo CV 5512): kiến thức cần giữ, cách tổ chức cần đổi mới. */
+function hoatDongCuTuongUng(k: Khbd, hd: MaHd): string {
+  if (!k.nguon || k.phuongPhap !== 'cv5512') return '';
+  const cu = k.nguon.hoatDong[Number(hd.slice(2)) - 1];
+  return cu ? `Hoạt động tương ứng trong giáo án cũ: "${cu.ten}" (${cu.phut} phút). Giữ kiến thức, đổi mới cách tổ chức:\n<<<\n${cu.noiDung}\n>>>` : '';
+}
+
 export function nhacHoatDong(k: Khbd, hd: MaHd, huongDan = ''): string {
   const phut = phutTheoHoatDong(k.phanBo)[hd];
   const tiet = tietCuaHoatDong(k.phanBo, hd);
@@ -100,6 +111,7 @@ export function nhacHoatDong(k: Khbd, hd: MaHd, huongDan = ''): string {
       : `Chia ${phut < 10 ? '2–3' : '2–5'} bước, mỗi bước có số phút nguyên ≥ 1; tổng số phút các bước đúng bằng ${phut}. Nếu hoạt động trải qua nhiều tiết, có bước nhắc lại đầu tiết sau và chốt, giao nhiệm vụ cuối tiết trước.`,
     ma.length ? `Năng lực số/AI giáo viên đã chọn (chỉ thiết kế hành vi số trong hoạt động này nếu thật sự phù hợp, có thao tác cụ thể trên công cụ đã khai báo):\n${ma.join('\n')}` : '',
     truoc.length ? `Các hoạt động đã soạn (giữ mạch liên kết):\n${truoc.join('\n')}` : '',
+    hoatDongCuTuongUng(k, hd),
       `Câu hỏi, bài tập (viết ĐẦY ĐỦ, không chỉ ghi "câu 1–4"): ${YEU_CAU_CAU_HOI[k.phuongPhap][hd]}`,
     k.phuongPhap === 'lhdn' && hd === 'HD4' && cauHd2(k).length ? `Câu HĐ II đã có (exit ticket không được trùng):\n${cauHd2(k).map((c) => `- ${c.cauHoi}`).join('\n')}` : '',
     huongDan ? `PHƯƠNG ÁN GIÁO VIÊN ĐÃ CHỌN (bám sát):\n${huongDan}` : '',

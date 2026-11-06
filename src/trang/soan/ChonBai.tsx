@@ -64,7 +64,12 @@ export default function ChonBai({ k, sua, ai }: { k: Khbd; sua: (f: (k: Khbd) =>
     luu({ nguon: 'ppct', bai, capNhat: new Date().toISOString() }); setMoDan(false); setDan(''); setLoi('');
   };
 
-  if (!k.boSach.trim()) return <p className="text-sm text-muted">Chọn bộ sách để xem danh sách bài.</p>;
+  if (!k.boSach.trim()) return (
+    <div className="flex flex-col gap-2">
+      <p className="text-sm text-muted">Chọn bộ sách để xem danh sách bài, hoặc nhập tên bài.</p>
+      <input id="bai" value={k.bai} onChange={(e) => sua((x) => ({ ...x, bai: e.target.value }))} placeholder="Ví dụ: Bài 1. Hệ điều hành" aria-label="Tên bài" className={o} />
+    </div>
+  );
 
   const nhom = new Map<string, BaiHoc[]>();
   for (const b of loc) nhom.set(b.chuDe ?? '', [...(nhom.get(b.chuDe ?? '') ?? []), b]);

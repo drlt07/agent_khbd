@@ -8,7 +8,7 @@ import { DIEM_DAT } from '../../soan/luat';
 import { THIET_BI_GOI_Y } from '../../soan/kieu';
 import { docDocx, kiemTraTep } from '../../sua/doc-docx';
 import { luuTep } from '../../thanh-phan/luu-tep';
-import { deXuat, kiemTraChen, kiemTraCuoi, phanTich, type Chen, type SuaKhbd } from '../../sua/quy-trinh';
+import { deXuat, kiemTraChen, kiemTraCuoi, phanTich, taoKhbdTuGiaoAnCu, type Chen, type SuaKhbd } from '../../sua/quy-trinh';
 import { taiWordSua, tenTepSua } from '../../sua/xuat-word';
 import { aiMauSua, doanMau, TEN_TEP_MAU, THIET_LAP_MAU } from '../../sua/mau';
 import { ChonMa } from '../soan/Buoc1ThongTin';
@@ -209,6 +209,7 @@ function BuocDeXuat({ k, sua, ai, dang, coAi, chayDeXuat }: { k: SuaKhbd; sua: (
         <Nut kieu={k.chen.length ? 'phu' : 'chinh'} dang={!!dang} disabled={!coAi || dang || !chonGi} onClick={chayDeXuat}>{dang ? 'AI đang đề xuất…' : k.chen.length ? 'Đề xuất lại' : 'AI đề xuất chỗ chèn'}</Nut>
       </The>
       {!chonGi && <HopBao kieu="warn">Chưa chọn năng lực nào ở bước trước. Thầy/cô vẫn có thể đổi mới hoạt động ở phần dưới.</HopBao>}
+      <SoanLaiCaBai k={k} />
       {k.chen.map((c) => {
         const r = kiemTraChen(c, k);
         return (
@@ -240,6 +241,28 @@ function BuocDeXuat({ k, sua, ai, dang, coAi, chayDeXuat }: { k: SuaKhbd; sua: (
       <DoiMoiHoatDong k={k} sua={sua} ai={ai} />
       {k.maBo.map((b) => <HopBao key={b.ma} kieu="warn"><strong>{b.ma}</strong>: {b.lyDo}{k.chen.some((c) => c.ma === b.ma) ? ' Bản cuối vẫn ở trên (đang Bỏ); thầy/cô có thể bấm Dùng.' : ''}</HopBao>)}
     </div>
+  );
+}
+
+/** Soạn lại cả KHBD: mở trình soạn với thông tin và kiến thức của giáo án cũ, AI thiết kế hoạt động mới. */
+function SoanLaiCaBai({ k }: { k: SuaKhbd }) {
+  const soMoi = k.hoatDongMoi?.length ?? 0;
+  const moSoan = () => {
+    try {
+      const cu = localStorage.getItem('khbd.ban-nhap');
+      if (cu && !confirm('Trình soạn đang có một bản nháp khác. Thay bằng KHBD soạn lại từ giáo án này?')) return;
+      localStorage.setItem('khbd.ban-nhap', JSON.stringify({ khbd: taoKhbdTuGiaoAnCu(k), buoc: 0, laMau: false }));
+    } catch { /* bộ nhớ trình duyệt bị chặn */ }
+    location.hash = '#soan';
+  };
+  return (
+    <The className="p-5 flex flex-wrap items-center gap-4 justify-between bg-[linear-gradient(120deg,var(--accent-soft),var(--surface))]">
+      <div className="min-w-0 max-w-[62ch]">
+        <h2 className="text-base">Soạn lại cả KHBD với hoạt động mới</h2>
+        <p className="text-sm text-muted mt-1">AI giữ kiến thức, yêu cầu cần đạt của giáo án này và soạn một KHBD mới hoàn chỉnh theo CV 5512 (đổi được sang lớp học đảo ngược), các hoạt động được thiết kế lại.{soMoi ? ` ${soMoi} phương án thầy/cô đã chọn ở “Đổi mới hoạt động” sẽ được dùng.` : ''}</p>
+      </div>
+      <Nut kieu="chinh" disabled={!k.yccdDaXacNhan} onClick={moSoan}>Soạn KHBD mới từ giáo án này</Nut>
+    </The>
   );
 }
 

@@ -131,3 +131,10 @@ Nguyên tắc: chỉ animate `transform` và `opacity`; đường cong `--ease-o
 - Bước Kiểm tra, duyệt: nút "AI soạn lại N phần lỗi" và nút "Soạn lại" cạnh từng lỗi phải sửa (`phanCuaLoi` ánh xạ vị trí lỗi → phần soạn). Không còn phải quay về bước 3.
 - Bài mẫu: khi giáo viên chọn dạy học thông thường (CV 5512), AI mẫu trả nội dung đúng CV 5512 (Mở đầu – Hình thành kiến thức – Luyện tập – Vận dụng, mỗi hoạt động đủ 4 bước; luyện tập 6 câu); trước đây trả nội dung lớp học đảo ngược nên bị luật 5512 báo lỗi. Có kiểm thử cho cả hai phương pháp.
 - Sửa KHBD cũ, bước "AI đề xuất, đổi mới": mục "Đổi mới hoạt động". Với từng hoạt động trong giáo án, AI đọc nguyên văn hoạt động đó (`hoatDongCu`) và gợi ý 5–8 cách tổ chức mới theo `rules/hoat-dong.md`, không vượt thời lượng cũ. Phương án được chọn chèn thành khối bổ sung tô xanh nhạt ngay sau hoạt động cũ (Word và bản xem); nội dung gốc giữ nguyên văn. Giáo án mẫu Vật lí 10 có sẵn gợi ý để chạy thử không cần khóa AI.
+
+## Soạn lại cả KHBD từ giáo án cũ với hoạt động mới – 06/11/2026
+
+- Sửa KHBD cũ, bước 3: thẻ "Soạn lại cả KHBD với hoạt động mới" → nút "Soạn KHBD mới từ giáo án này" (`taoKhbdTuGiaoAnCu`). Mở trình soạn với môn, lớp, bài, YCCĐ đã xác nhận, năng lực tích hợp, thiết bị lấy từ giáo án cũ; mặc định CV 5512, số tiết theo tổng thời lượng cũ (đổi được).
+- `Khbd.nguon`: toàn văn giáo án cũ (≤ 12.000 kí tự) đưa vào bối cảnh mọi lần AI soạn, kèm yêu cầu giữ kiến thức, thiết kế hoạt động mới, không chép cách tổ chức cũ; với CV 5512, mỗi hoạt động nhận thêm nguyên văn hoạt động tương ứng của giáo án cũ.
+- Phương án đã chọn ở "Đổi mới hoạt động" thành hướng dẫn soạn cho hoạt động tương ứng (`nguon.huongDan`), AI soạn theo đúng phương án đó.
+- Trình soạn ghi rõ "Soạn lại từ giáo án …". Ô tên bài luôn hiện kể cả khi chưa chọn bộ sách.

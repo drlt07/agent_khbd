@@ -59,7 +59,7 @@ export default function SoanBai() {
     <>
       <TieuDe
         ten={k.bai.trim() || 'Bài mới'}
-        mo={laMau ? 'Đang chạy thử với AI mẫu (nội dung dựng sẵn, không gọi AI thật).' : dungSample ? 'Soạn bằng Claude trong tài khoản claude.ai của thầy/cô. Bản nháp tự lưu trên máy này.' : khoa ? `Soạn bằng ${TEN_NCC[khoa.ncc]}. Bản nháp tự lưu trên máy này.` : 'Bản nháp tự lưu trên máy này.'}
+        mo={k.nguon ? `Soạn lại từ giáo án “${k.nguon.tenTep}”: AI giữ kiến thức của giáo án, thiết kế hoạt động mới.` : laMau ? 'Đang chạy thử với AI mẫu (nội dung dựng sẵn, không gọi AI thật).' : dungSample ? 'Soạn bằng Claude trong tài khoản claude.ai của thầy/cô. Bản nháp tự lưu trên máy này.' : khoa ? `Soạn bằng ${TEN_NCC[khoa.ncc]}. Bản nháp tự lưu trên máy này.` : 'Bản nháp tự lưu trên máy này.'}
         phai={<Nut kieu="nhe" onClick={baiMoi}><BieuTuong ten="plus" className="w-4 h-4" />Bài mới</Nut>}
       />
       <ol className="flex flex-wrap items-center gap-x-2 gap-y-2 mb-7 text-sm" aria-label="Các bước soạn">

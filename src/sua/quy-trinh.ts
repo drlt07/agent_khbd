@@ -7,7 +7,9 @@ import LUAT_SOAN from '../../rules/soan.md?raw';
 import { MA_MON, laMaAi, moTaMa, maTichHopHopLe, TEN_MON, type MaMon } from '../thu-vien';
 import { chamDiem, DIEM_DAT, kiemTraVanBan, boChuNguHs } from '../soan/luat';
 import type { GoiAi } from '../soan/ai';
-import type { DauVet, Khbd } from '../soan/kieu';
+import { TEN_HD, type DauVet, type Khbd, type MaHd } from '../soan/kieu';
+import { phanBoMacDinh } from '../soan/phan-bo';
+import { huongDanTuGoiY } from '../soan/goi-y';
 import type { Doan } from './doc-docx';
 import type { HoatDongCu, HoatDongGoiY } from '../soan/goi-y';
 
@@ -74,6 +76,36 @@ export function hoatDongCu(k: SuaKhbd, h: SuaKhbd['hoatDong'][number]): HoatDong
   const ds = a >= 0 && b >= a ? k.doan.slice(a, b + 1) : [];
   const noiDung = ds.map((d) => (d.loai === 'bang' && d.hang ? d.hang.map((r) => r.join(' | ')).join('\n') : d.text)).join('\n').slice(0, 4000);
   return { ten: h.ten, phut: h.phut, noiDung };
+}
+
+/**
+ * Soạn lại cả KHBD từ giáo án cũ: lấy môn, lớp, bài, YCCĐ đã xác nhận, tích hợp, thiết bị và toàn văn giáo án làm nguồn kiến thức.
+ * Mặc định theo CV 5512, 4 hoạt động khớp thứ tự giáo án cũ; phương án "Đổi mới hoạt động" đã chọn thành hướng dẫn soạn hoạt động tương ứng.
+ */
+export function taoKhbdTuGiaoAnCu(s: SuaKhbd): Khbd {
+  const tongPhut = s.hoatDong.reduce((t, h) => t + (Number(h.phut) || 0), 0);
+  const soTiet = Math.min(5, Math.max(1, Math.round(tongPhut / 45) || 1));
+  const huongDan: Partial<Record<MaHd, string>> = {};
+  for (const m of s.hoatDongMoi ?? []) {
+    const i = s.hoatDong.findIndex((h) => h.ten === m.hoatDong);
+    if (i >= 0 && i < 4) huongDan[`HD${i + 1}` as MaHd] = huongDanTuGoiY(m.goiY);
+  }
+  return {
+    id: `k${Date.now().toString(36)}`, mon: s.mon, lop: s.lop, boSach: '', bai: s.bai, soTiet, phuongPhap: 'cv5512',
+    tichHop: s.tichHop, dieuKien: s.dieuKien,
+    yccd: s.yccd, yccdDaXacNhan: s.yccdDaXacNhan,
+    phanBo: phanBoMacDinh('cv5512', soTiet),
+    hoatDong: (['HD1', 'HD2', 'HD3', 'HD4'] as MaHd[]).map((ma) => ({ ma, ten: TEN_HD.cv5512[ma], phut: 0 })),
+    maTichHop: [], maBo: [],
+    dauVet: [{ buoc: 1, phan: 'Nguồn', ketQua: 'dat', lyDo: `Soạn lại từ giáo án cũ ${s.tenTep}`, thoiDiem: new Date().toISOString() }],
+    capNhat: new Date().toISOString(),
+    nguon: {
+      tenTep: s.tenTep,
+      toanVan: s.doan.map((d) => d.text).filter(Boolean).join('\n').slice(0, 12000),
+      hoatDong: s.hoatDong.map((h) => hoatDongCu(s, h)),
+      huongDan,
+    },
+  };
 }
 
 /** Bối cảnh bài (dạng KHBD) để dùng chung bộ gợi ý hoạt động với lối soạn mới. */

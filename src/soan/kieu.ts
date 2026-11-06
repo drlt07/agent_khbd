@@ -116,6 +116,17 @@ export interface HoatDong {
 
 export interface DauVet { buoc: number; thoiDiem: string; phan: string; ketQua: 'dat' | 'soan_lai' | 'bo_ma' | 'loi' | 'gv_sua'; lyDo?: string; luot?: number }
 
+/** KHBD soạn lại từ giáo án cũ: giữ kiến thức của giáo án, thiết kế hoạt động mới. */
+export interface NguonGiaoAnCu {
+  tenTep: string;
+  /** Toàn văn giáo án cũ (đã lược bớt nếu quá dài) để AI bám đúng kiến thức */
+  toanVan: string;
+  /** Các hoạt động trong giáo án cũ, theo thứ tự */
+  hoatDong: { ten: string; phut: number; noiDung: string }[];
+  /** Phương án hoạt động mới giáo viên đã chọn ở lối Sửa, theo hoạt động của KHBD mới */
+  huongDan?: Partial<Record<MaHd, string>>;
+}
+
 export interface Khbd {
   id: string;
   mon: MaMon;
@@ -140,6 +151,7 @@ export interface Khbd {
   giaiDoan3?: z.infer<typeof GiaiDoan3Out>;
   dauVet: DauVet[];
   capNhat: string;
+  nguon?: NguonGiaoAnCu;
 }
 
 export const TEN_HD: Record<PhuongPhap, Record<MaHd, string>> = {
