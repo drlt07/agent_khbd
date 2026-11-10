@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { kiemTraGoiY, chuanHoaGoiY, goiYHoatDong, huongDanTuGoiY, type GoiY, type HoatDongGoiY } from '../src/soan/goi-y';
+import { kiemTraGoiY, chuanHoaGoiY, goiYHoatDong, huongDanTuGoiY, laChungChung, nhacGoiY, type GoiY, type HoatDongGoiY } from '../src/soan/goi-y';
 import { soanPhan } from '../src/soan/quy-trinh';
 import { phanBoMacDinh } from '../src/soan/phan-bo';
 import { TEN_HD, type Khbd } from '../src/soan/kieu';
@@ -10,7 +10,7 @@ const o4 = <T,>(b: T[]) => ({ chuyenGiao: b[0], thucHien: b[1], baoCao: b[2], ke
 
 const hd = (ten: string, nhom: HoatDongGoiY['nhom'], p: Partial<HoatDongGoiY> = {}): HoatDongGoiY => ({
   ten, nhom, yTuong: 'ý tưởng', congNghe: '', canKiemTra: false, thoiLuong: 10, mucChuanBi: 'thap', thoiDiem: 'hinh_thanh',
-  mucTieu: 'm', chuanBi: ['Máy chiếu'], kichBan: [{ buoc: 'b1', phut: 4 }, { buoc: 'b2', phut: 6 }], vaiTro: 'GV/HS', cauHoiMau: 'Câu hỏi mẫu', sanPham: 'sp', danhGia: 'đg', chotKienThuc: 'chốt', duPhong: 'Dùng phiếu in', ...p,
+  mucTieu: 'm', diemTuDuy: 'Dự đoán rồi kiểm chứng', tuCham: { tuDuy: 4, hapDan: 4, khaThi: 4, bamBai: 4 }, chuanBi: ['Máy chiếu'], kichBan: [{ buoc: 'b1', phut: 4 }, { buoc: 'b2', phut: 6 }], vaiTro: 'GV/HS', cauHoiMau: 'Câu hỏi mẫu', sanPham: 'sp', danhGia: 'đg', chotKienThuc: 'chốt', duPhong: 'Dùng phiếu in', ...p,
 });
 const goiY = (ds: HoatDongGoiY[]): GoiY => ({ phanTich: { trongTam: 't', khoKhan: ['k'], kieuHoatDong: 'x', coHoiAi: 'y' }, hoatDong: ds, uuTien: { deTrienKhai: 1, sangTao: 2, aiMoPhong: 3, lyDo: 'l' } });
 const k: Khbd = {
@@ -61,5 +61,49 @@ describe('Nhờ AI gợi ý hoạt động – quy trình', () => {
     expect(nhac).toContain('Khi tăng gấp đôi vận tốc');
     expect(nhac).toContain('TÔN TRỌNG ĐẶC TRƯNG MÔN HỌC');
     expect(k2.dauVet.at(-1)?.lyDo).toContain('Thí nghiệm ảo PhET');
+  });
+});
+
+describe('Nhờ AI gợi ý hoạt động – lọc phương án nhạt', () => {
+  const nam = () => [hd('Thí nghiệm ảo', 'B'), hd('Phá án năng lượng', 'C'), hd('Tranh biện', 'D'), hd('Trò chơi', 'G'), hd('Hỏi AI', 'I')];
+  it('tự chấm dưới 3 ở một tiêu chí → đánh dấu Nhạt', () => {
+    const ds = nam(); ds[1] = hd('Phá án năng lượng', 'C', { tuCham: { tuDuy: 2, hapDan: 4, khaThi: 5, bamBai: 4 } });
+    const r = kiemTraGoiY(goiY(ds), k);
+    expect(r.theoHoatDong[1].join(' ')).toContain('Nhạt: AI tự chấm thấp ở Tư duy 2/5');
+    expect(r.nghiem).toEqual([]); // còn 4 phương án không nhạt
+  });
+  it('cách tổ chức chung chung → Nhạt', () => {
+    expect(laChungChung('HS thảo luận nhóm rồi đại diện trình bày kết quả')).toBe(true);
+    expect(laChungChung('GV đặt câu hỏi, HS trả lời')).toBe(true);
+    expect(laChungChung('Nhóm tìm lỗi trong ba lời giải và đặt câu bẫy mới')).toBe(false);
+    const ds = nam(); ds[0] = hd('Thảo luận', 'J', { yTuong: 'Học sinh làm bài tập trong SGK rồi đổi vở chấm' });
+    expect(kiemTraGoiY(goiY(ds), k).theoHoatDong[0].join(' ')).toContain('chung chung');
+  });
+  it('ít hơn 3 phương án không nhạt → AI phải soạn lại', () => {
+    const thap = { tuDuy: 1, hapDan: 2, khaThi: 5, bamBai: 3 };
+    const r = kiemTraGoiY(goiY([hd('a', 'B', { tuCham: thap }), hd('b', 'C', { tuCham: thap }), hd('c', 'D', { tuCham: thap }), hd('d', 'G'), hd('e', 'I')]), k);
+    expect(r.nghiem.join(' ')).toContain('Chỉ có 2 phương án không nhạt');
+  });
+  it('thiếu điểm tư duy là thiếu mục bắt buộc', () => {
+    const r = kiemTraGoiY(goiY([hd('a', 'B', { diemTuDuy: ' ' }), hd('b', 'C'), hd('c', 'D')]), k);
+    expect(r.theoHoatDong[0].join(' ')).toContain('Thiếu điểm tư duy');
+    expect(r.nghiem.join(' ')).toContain('thiếu mục bắt buộc');
+  });
+  it('điểm tự chấm được làm tròn, kẹp trong 1–5', () => {
+    const g = chuanHoaGoiY(goiY([hd('a', 'B', { tuCham: { tuDuy: 7, hapDan: 0, khaThi: 3.6, bamBai: -2 } })]), k);
+    expect(g.hoatDong[0].tuCham).toEqual({ tuDuy: 5, hapDan: 1, khaThi: 4, bamBai: 1 });
+  });
+  it('lời nhắc nêu ý tưởng xuyên suốt và các hoạt động đã soạn để không lặp cơ chế', () => {
+    const k2: Khbd = {
+      ...k,
+      yTuong: { ten: 'Đường đua năng lượng', cotTruyen: 'Lớp thiết kế xe đua đồ chơi.', vaiHocSinh: 'Kĩ sư', cauHoiLon: 'Xe nào nhanh hơn?', sanPhamCuoi: 'Bản thiết kế', diemHay: 'x', ruiRo: 'y',
+        hoatDong: (['HD1', 'HD2', 'HD3', 'HD4'] as const).map((h) => ({ hd: h, ten: `T${h}`, nhom: 'B' as const, viec: `Việc của ${h}`, diemTuDuy: 'd', ketNoi: 'n', congNghe: '' })) },
+      hoatDong: k.hoatDong.map((h) => (h.ma === 'HD1' ? { ...h, noiDung: { mucTieu: 'm', noiDung: 'Đoán xe nào về đích trước', sanPham: 's', buoc: [], cauHoi: [], anToan: '' } } : h)),
+    };
+    const n = nhacGoiY(k2, 'HD2');
+    expect(n).toContain('Đường đua năng lượng');
+    expect(n).toContain('Việc của HD2');
+    expect(n).toContain('Đoán xe nào về đích trước');
+    expect(n).toContain('điểm tư duy khó nhất');
   });
 });

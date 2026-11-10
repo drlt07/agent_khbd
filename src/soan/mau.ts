@@ -131,19 +131,19 @@ const TRA_LOI: Record<string, unknown> = {
     },
     hoatDong: [
       { ten: 'Thanh trượt bí ẩn', nhom: 'H', yTuong: 'GV kéo thanh trượt a trên GeoGebra, cả lớp dự đoán parabol thay đổi trước khi xem.', congNghe: 'GeoGebra', canKiemTra: false, thoiLuong: 7, mucChuanBi: 'thap', thoiDiem: 'khoi_dong',
-        mucTieu: 'Nhận ra vai trò của hệ số a.', chuanBi: ['Máy chiếu', 'Một máy tính có GeoGebra'], kichBan: [{ buoc: 'GV kéo a từ 2 về −2, dừng ở 3 mốc, HS giơ thẻ dự đoán', phut: 4 }, { buoc: 'HS phát biểu quy luật, GV ghi bảng', phut: 3 }],
+        mucTieu: 'Nhận ra vai trò của hệ số a.', diemTuDuy: 'Dự đoán hình dạng parabol trước khi thấy, rồi tự phát biểu quy luật về dấu của a.', tuCham: { tuDuy: 3, hapDan: 4, khaThi: 5, bamBai: 4 }, chuanBi: ['Máy chiếu', 'Một máy tính có GeoGebra'], kichBan: [{ buoc: 'GV kéo a từ 2 về −2, dừng ở 3 mốc, HS giơ thẻ dự đoán', phut: 4 }, { buoc: 'HS phát biểu quy luật, GV ghi bảng', phut: 3 }],
         vaiTro: 'GV thao tác, HS dự đoán và giải thích', cauHoiMau: 'Khi a đổi dấu, đỉnh và bề lõm thay đổi thế nào?', sanPham: 'Quy luật về dấu của a ghi trên bảng', danhGia: 'Tỉ lệ HS giơ đúng thẻ ở mốc thứ 3', chotKienThuc: 'a > 0 bề lõm hướng lên, a < 0 hướng xuống.', duPhong: 'Vẽ sẵn 3 parabol trên giấy A3' },
       { ten: 'Phá án bài giải sai', nhom: 'C', yTuong: 'Ba lời giải tìm đỉnh, mỗi lời giải cài một lỗi; nhóm tìm “thủ phạm”.', congNghe: '', canKiemTra: false, thoiLuong: 10, mucChuanBi: 'thap', thoiDiem: 'luyen_tap',
-        mucTieu: 'Tìm đúng đỉnh, nhận ra lỗi dấu.', chuanBi: ['Phiếu in 3 lời giải'], kichBan: [{ buoc: 'Nhóm đọc 3 lời giải, khoanh lỗi', phut: 6 }, { buoc: 'Đại diện trình bày, lớp phản biện', phut: 4 }],
+        mucTieu: 'Tìm đúng đỉnh, nhận ra lỗi dấu.', diemTuDuy: 'Chỉ ra đúng bước sai trong lời giải trông có vẻ đúng và giải thích vì sao sai.', tuCham: { tuDuy: 4, hapDan: 4, khaThi: 5, bamBai: 5 }, chuanBi: ['Phiếu in 3 lời giải'], kichBan: [{ buoc: 'Nhóm đọc 3 lời giải, khoanh lỗi', phut: 6 }, { buoc: 'Đại diện trình bày, lớp phản biện', phut: 4 }],
         vaiTro: 'HS suy luận, GV phản hồi', cauHoiMau: 'Lời giải nào tính sai x = −b/(2a) và sai ở đâu?', sanPham: 'Phiếu có lỗi được sửa', danhGia: 'Nhóm chỉ đúng lỗi và sửa đúng', chotKienThuc: 'Thay đúng dấu của b khi tính hoành độ đỉnh.', duPhong: 'Không cần công nghệ' },
       { ten: 'Tranh luận: parabol có luôn cắt trục hoành?', nhom: 'D', yTuong: 'Hai phe bảo vệ và phản bác, mỗi phe phải đưa ví dụ hoặc phản ví dụ.', congNghe: '', canKiemTra: false, thoiLuong: 8, mucChuanBi: 'thap', thoiDiem: 'hinh_thanh',
-        mucTieu: 'Liên hệ đỉnh, chiều mở với số giao điểm.', chuanBi: ['Bảng chia đôi'], kichBan: [{ buoc: 'Chia phe, chuẩn bị ví dụ', phut: 3 }, { buoc: 'Tranh luận, GV kết luận', phut: 5 }],
+        mucTieu: 'Liên hệ đỉnh, chiều mở với số giao điểm.', diemTuDuy: 'Tìm phản ví dụ: parabol không cắt trục hoành, lập luận bằng vị trí đỉnh và chiều mở.', tuCham: { tuDuy: 5, hapDan: 4, khaThi: 4, bamBai: 4 }, chuanBi: ['Bảng chia đôi'], kichBan: [{ buoc: 'Chia phe, chuẩn bị ví dụ', phut: 3 }, { buoc: 'Tranh luận, GV kết luận', phut: 5 }],
         vaiTro: 'HS lập luận, GV điều phối', cauHoiMau: 'Nêu một parabol không cắt trục hoành.', sanPham: 'Ví dụ và phản ví dụ trên bảng', danhGia: 'Ví dụ đúng và giải thích được', chotKienThuc: 'Số giao điểm phụ thuộc vị trí đỉnh và chiều mở.', duPhong: 'Không cần công nghệ' },
       { ten: 'Bóng rổ tối ưu', nhom: 'F', yTuong: 'Nhóm lập hàm số từ 3 số đo quỹ đạo bóng, tìm độ cao lớn nhất.', congNghe: 'GeoGebra', canKiemTra: false, thoiLuong: 12, mucChuanBi: 'vua', thoiDiem: 'van_dung',
-        mucTieu: 'Mô hình hóa bằng hàm bậc hai.', chuanBi: ['Phiếu số liệu', 'Điện thoại/máy tính bảng (1 máy/nhóm) nếu có'], kichBan: [{ buoc: 'Lập hệ tìm a, b, c', phut: 6 }, { buoc: 'Vẽ kiểm chứng, báo cáo', phut: 6 }],
+        mucTieu: 'Mô hình hóa bằng hàm bậc hai.', diemTuDuy: 'Chuyển số đo thực tế thành hệ phương trình và hiểu đỉnh là độ cao lớn nhất.', tuCham: { tuDuy: 5, hapDan: 5, khaThi: 3, bamBai: 5 }, chuanBi: ['Phiếu số liệu', 'Điện thoại/máy tính bảng (1 máy/nhóm) nếu có'], kichBan: [{ buoc: 'Lập hệ tìm a, b, c', phut: 6 }, { buoc: 'Vẽ kiểm chứng, báo cáo', phut: 6 }],
         vaiTro: 'HS mô hình hóa, GV hỗ trợ nhóm', cauHoiMau: 'Bóng lên cao nhất bao nhiêu mét, lúc nào?', sanPham: 'Hàm số và đồ thị', danhGia: 'Đỉnh tìm được khớp đồ thị', chotKienThuc: 'Giá trị lớn nhất đạt tại đỉnh khi a < 0.', duPhong: 'Vẽ đồ thị tay trên giấy kẻ ô' },
       { ten: 'AI học trò lú lẫn', nhom: 'I', yTuong: 'GV chiếu lời giải do chatbot viết (có lỗi), lớp đóng vai thầy chấm và sửa.', congNghe: 'Chatbot AI (Gemini/ChatGPT)', canKiemTra: false, thoiLuong: 8, mucChuanBi: 'thap', thoiDiem: 'luyen_tap',
-        mucTieu: 'Kiểm chứng lời giải, không tin AI mặc nhiên.', chuanBi: ['Bản in lời giải AI chuẩn bị trước'], kichBan: [{ buoc: 'HS chấm lời giải AI theo từng bước', phut: 5 }, { buoc: 'Thống nhất lỗi và cách sửa', phut: 3 }],
+        mucTieu: 'Kiểm chứng lời giải, không tin AI mặc nhiên.', diemTuDuy: 'Kiểm tra từng bước tính của AI, phân biệt bước đúng và bước sai có lí do.', tuCham: { tuDuy: 4, hapDan: 4, khaThi: 4, bamBai: 4 }, chuanBi: ['Bản in lời giải AI chuẩn bị trước'], kichBan: [{ buoc: 'HS chấm lời giải AI theo từng bước', phut: 5 }, { buoc: 'Thống nhất lỗi và cách sửa', phut: 3 }],
         vaiTro: 'AI là nguồn lời giải có lỗi, HS phản biện', cauHoiMau: 'Bước nào AI kết luận sai về giá trị lớn nhất?', sanPham: 'Bản chấm có ghi giữ/sửa/loại', danhGia: 'Chỉ đúng bước sai, có lí do', chotKienThuc: 'Luôn kiểm tra từng bước tính khi dùng AI.', duPhong: 'Dùng bản in lời giải đã chuẩn bị' },
     ],
     uuTien: { deTrienKhai: 2, sangTao: 4, aiMoPhong: 5, lyDo: 'Phá án chỉ cần phiếu in; Bóng rổ tối ưu gắn thực tế; AI học trò lú lẫn rèn kiểm chứng AI.' },
@@ -153,6 +153,47 @@ const TRA_LOI: Record<string, unknown> = {
     'Học sinh sai câu exit ticket làm lại câu tương tự và nộp trước buổi sau.',
     'Giáo viên ghi lại lỗi còn lại để dùng cho phần chỉnh lỗi của bài sau.',
   ] },
+};
+
+/** Ý tưởng cả bài dựng sẵn cho bài mẫu (3 kịch bản, chỉ dùng thiết bị mẫu). */
+(TRA_LOI as Record<string, unknown>).yTuong = {
+  kichBan: [
+    {
+      ten: 'Huấn luyện viên bóng rổ', cotTruyen: 'Đội bóng rổ của trường cần biết cú ném phạt nào bay cao nhất để tập. Lớp là tổ phân tích số liệu: từ ba lần đo độ cao quả bóng, dựng mô hình và đưa lời khuyên cho đội.',
+      vaiHocSinh: 'Chuyên viên phân tích số liệu thể thao', cauHoiLon: 'Bóng lên cao nhất bao nhiêu mét, vào lúc nào, và cú ném nào tốt hơn?',
+      hoatDong: [
+        { hd: 'HD1', ten: 'Dự đoán của huấn luyện viên', nhom: 'D', viec: 'Học sinh xem bảng 3 số đo, ghi dự đoán độ cao lớn nhất lên thẻ và bảo vệ dự đoán; sau đó phản biện hai nhận định sai về đỉnh, chiều mở.', diemTuDuy: 'Nhận ra độ cao tăng chậm dần nên đỉnh nằm giữa hai lần đo.', ketNoi: 'Dự đoán được giữ lại để đối chiếu ở HĐ III.', congNghe: 'Máy chiếu' },
+        { hd: 'HD2', ten: 'Phòng tập kĩ thuật', nhom: 'C', viec: 'Ba nhóm mức nhận "hồ sơ cú ném" với câu luyện tập theo mức; mỗi hồ sơ có một lời giải cài lỗi để nhóm tìm và sửa.', diemTuDuy: 'Tìm đúng chỗ sai dấu khi tính $x = -\\frac{b}{2a}$.', ketNoi: 'Kĩ năng tìm đỉnh dùng ngay cho mô hình ở HĐ III.', congNghe: 'Phiếu học tập in' },
+        { hd: 'HD3', ten: 'Báo cáo cho đội bóng', nhom: 'F', viec: 'Nhóm lập $h(t)$ từ 3 số đo, vẽ trên GeoGebra để kiểm chứng, hỏi chatbot kiểm tra một bước giải và ghi giữ/sửa/loại; viết lời khuyên 2 câu cho đội.', diemTuDuy: 'Hiểu đỉnh parabol chính là độ cao lớn nhất và thời điểm đạt được.', ketNoi: 'Trả lời câu hỏi lớn, so với dự đoán ở HĐ I.', congNghe: 'GeoGebra' },
+        { hd: 'HD4', ten: 'Vé ra sân', nhom: 'G', viec: 'Mỗi học sinh làm 3 câu exit ticket về một cú ném mới, đúng đủ thì "được ra sân"; viết một dòng còn vướng.', diemTuDuy: 'Tự áp dụng cách tìm đỉnh vào số liệu mới không có gợi ý.', ketNoi: 'Kết quả cho giáo viên biết ai cần củng cố ở bài sau.', congNghe: 'Phiếu học tập in' },
+      ],
+      sanPhamCuoi: 'Phiếu báo cáo có hàm số, đồ thị và lời khuyên cho đội bóng.', diemHay: 'Số liệu gần gũi, có câu hỏi thật cần trả lời, học sinh được kiểm chứng dự đoán của chính mình.', ruiRo: 'GeoGebra cần máy: nếu mất Internet, nhóm vẽ tay trên giấy kẻ ô và giáo viên chiếu đồ thị mẫu.',
+    },
+    {
+      ten: 'Thám tử parabol', cotTruyen: 'Một "học sinh AI" nộp bài kiểm tra về hàm số bậc hai với nhiều lỗi khó thấy. Lớp là đội thám tử phải tìm đủ lỗi, sửa lại và viết "biên bản" để AI không mắc lại.',
+      vaiHocSinh: 'Thám tử toán học', cauHoiLon: 'Những lỗi nào hay gặp khi làm việc với parabol, và làm sao tránh?',
+      hoatDong: [
+        { hd: 'HD1', ten: 'Hiện trường vụ án', nhom: 'C', viec: 'Giáo viên chiếu bài làm của "học sinh AI"; cặp đôi khoanh chỗ nghi sai trong 2 nhận định và giơ thẻ Đúng/Sai.', diemTuDuy: 'Phân biệt lỗi dấu hệ số với lỗi chiều mở parabol.', ketNoi: 'Các lỗi tìm được thành "manh mối" cho HĐ II.', congNghe: 'Máy chiếu' },
+        { hd: 'HD2', ten: 'Truy tìm theo manh mối', nhom: 'J', viec: 'Mỗi nhóm mức nhận một bộ câu theo mức, mỗi câu gắn một manh mối lỗi; nhóm làm, sửa và đổi phiếu kiểm tra chéo.', diemTuDuy: 'Giải thích vì sao phương án nhiễu sai, không chỉ chọn đáp án.', ketNoi: 'Danh sách lỗi đã sửa được dùng để chấm bài AI ở HĐ III.', congNghe: 'Phiếu học tập in' },
+        { hd: 'HD3', ten: 'Thẩm vấn chatbot', nhom: 'I', viec: 'Nhóm hỏi chatbot giải bài toán quả bóng, đối chiếu từng bước với lời giải tự làm, ghi giữ/sửa/loại kèm lí do.', diemTuDuy: 'Kiểm tra từng bước tính của AI thay vì tin kết quả cuối.', ketNoi: 'Hoàn thành biên bản điều tra, trả lời câu hỏi lớn.', congNghe: 'Chatbot AI (Gemini/ChatGPT)' },
+        { hd: 'HD4', ten: 'Khép hồ sơ', nhom: 'E', viec: 'Học sinh làm exit ticket, rồi viết một "quy tắc vàng" chống lỗi về parabol cho học sinh AI.', diemTuDuy: 'Khái quát lỗi thành quy tắc dùng được cho bài khác.', ketNoi: 'Quy tắc vàng dán vào góc lớp cho bài sau.', congNghe: 'Phiếu học tập in' },
+      ],
+      sanPhamCuoi: 'Biên bản điều tra liệt kê lỗi, cách sửa và quy tắc vàng.', diemHay: 'Học sinh được "chấm" AI, tò mò tìm lỗi và hiểu sâu chỗ hay sai của chính mình.', ruiRo: 'Chatbot có thể trả lời đúng hết: giáo viên chuẩn bị sẵn bản in lời giải AI có lỗi để dùng thay.',
+    },
+    {
+      ten: 'Kiến trúc sư cổng vòm', cotTruyen: 'Trường muốn dựng cổng vòm hình parabol cho ngày hội. Lớp là các nhóm kiến trúc sư phải chọn hàm số cho cổng đủ cao, đủ rộng và trình bày phương án.',
+      vaiHocSinh: 'Kiến trúc sư thiết kế cổng', cauHoiLon: 'Hàm số nào cho cổng vòm cao 4 m, rộng 6 m?',
+      hoatDong: [
+        { hd: 'HD1', ten: 'Đơn đặt hàng', nhom: 'A', viec: 'Giáo viên đóng vai ban tổ chức đặt yêu cầu cổng; học sinh nêu cần biết gì về parabol để thiết kế và sửa hai nhận định sai.', diemTuDuy: 'Liên hệ chiều cao cổng với đỉnh, độ rộng với giao điểm trục hoành.', ketNoi: 'Yêu cầu của ban tổ chức là đề bài cho HĐ III.', congNghe: 'Máy chiếu' },
+        { hd: 'HD2', ten: 'Xưởng thử mẫu', nhom: 'H', viec: 'Nhóm làm câu luyện tập theo mức; nhóm Nắm tốt dùng thanh trượt GeoGebra kiểm tra dự đoán về a, b, c.', diemTuDuy: 'Dự đoán ảnh hưởng của từng hệ số trước khi kiểm tra.', ketNoi: 'Hiểu vai trò hệ số để chọn hàm cho cổng.', congNghe: 'GeoGebra' },
+        { hd: 'HD3', ten: 'Bản vẽ cổng vòm', nhom: 'F', viec: 'Nhóm lập hàm số qua 3 điểm (chân cổng và đỉnh), vẽ kiểm chứng, trình bày bản vẽ 2 phút và trả lời chất vấn của "ban tổ chức".', diemTuDuy: 'Chọn hệ trục tọa độ hợp lí để lập hàm ngắn gọn nhất.', ketNoi: 'Bản vẽ trả lời câu hỏi lớn.', congNghe: 'GeoGebra' },
+        { hd: 'HD4', ten: 'Nghiệm thu công trình', nhom: 'D', viec: 'Học sinh làm exit ticket; bình chọn bản vẽ hợp lí nhất bằng một lí do toán học.', diemTuDuy: 'Đánh giá phương án theo tiêu chí toán học, không theo hình thức.', ketNoi: 'Phản tư: điều gì quyết định hình dạng parabol.', congNghe: 'Phiếu học tập in' },
+      ],
+      sanPhamCuoi: 'Bản vẽ cổng vòm có hàm số và đồ thị kiểm chứng.', diemHay: 'Sản phẩm nhìn thấy được, học sinh phải ra quyết định thiết kế và bảo vệ bằng lập luận toán.', ruiRo: 'Nhóm yếu khó chọn hệ trục: giáo viên đưa sẵn gợi ý đặt gốc tọa độ ở chân cổng.',
+    },
+  ],
+  deXuat: 1,
+  lyDo: 'Huấn luyện viên bóng rổ dùng đúng tình huống quả bóng đã có, ít chuẩn bị nhất và nối liền 4 hoạt động.',
 };
 
 /** Gợi ý mã năng lực dựng sẵn cho bài mẫu Hàm số bậc hai (giáo viên vẫn tự tích chọn). */

@@ -4,6 +4,7 @@ import { laMaAi, moTaMa, NANG_LUC_DAC_THU, TEN_MON } from '../thu-vien';
 import { phutTheoHoatDong, tietCuaHoatDong } from './phan-bo';
 import { TEN_HD, type Khbd, type MaHd } from './kieu';
 import { nguyenTacHoatDong } from './goi-y';
+import { huongDanTuYTuong, tomTatYTuong } from './y-tuong';
 
 export const PHIEN_BAN_LUAT = (LUAT_SOAN.match(/phien_ban:\s*([^\s·]+)/)?.[1] ?? '?');
 
@@ -20,6 +21,7 @@ function boiCanh(k: Khbd): string {
     `Mức học sinh: ${MUC_HS[k.dieuKien.mucHs]}.${k.dieuKien.ghiChu.trim() ? ` Ghi chú của giáo viên: ${k.dieuKien.ghiChu.trim()}` : ''}`,
     `Thiết bị, công cụ giáo viên khai báo (chỉ được dùng các thứ này): ${k.dieuKien.thietBi.join('; ') || 'không có'}.`,
   ];
+  if (k.yTuong) dong.push(tomTatYTuong(k.yTuong));
   if (k.yccd.length) dong.push(`Yêu cầu cần đạt đã được giáo viên xác nhận:\n${k.yccd.map((y) => `${y.ma}: ${y.noiDung}`).join('\n')}`);
   if (k.nguon) dong.push([
     `KHBD này được soạn lại từ giáo án cũ của giáo viên (${k.nguon.tenTep}). Giữ đúng nội dung kiến thức, yêu cầu cần đạt, ví dụ và bài tập cốt lõi của giáo án cũ; THIẾT KẾ HOẠT ĐỘNG MỚI: cách tổ chức khác, học sinh tích cực hơn, không chép lại câu chữ và cách tổ chức cũ.`,
@@ -114,7 +116,8 @@ export function nhacHoatDong(k: Khbd, hd: MaHd, huongDan = ''): string {
     hoatDongCuTuongUng(k, hd),
       `Câu hỏi, bài tập (viết ĐẦY ĐỦ, không chỉ ghi "câu 1–4"): ${YEU_CAU_CAU_HOI[k.phuongPhap][hd]}`,
     k.phuongPhap === 'lhdn' && hd === 'HD4' && cauHd2(k).length ? `Câu HĐ II đã có (exit ticket không được trùng):\n${cauHd2(k).map((c) => `- ${c.cauHoi}`).join('\n')}` : '',
-    huongDan ? `PHƯƠNG ÁN GIÁO VIÊN ĐÃ CHỌN (bám sát):\n${huongDan}` : '',
+    k.yTuong ? huongDanTuYTuong(k.yTuong, hd) : '',
+    huongDan ? `PHƯƠNG ÁN GIÁO VIÊN ĐÃ CHỌN (bám sát${k.yTuong ? '; phương án này được ưu tiên hơn phần ý tưởng xuyên suốt ở trên, lồng vào cốt truyện nếu hợp' : ''}):\n${huongDan}` : '',
     nguyenTacHoatDong(),
   ].filter(Boolean).join('\n');
 }

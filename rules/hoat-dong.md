@@ -1,4 +1,4 @@
-<!-- phien_ban: 1 · 2026-11-06 · Hướng dẫn thiết kế, gợi ý hoạt động do tác giả cung cấp -->
+<!-- phien_ban: 2 · 2026-11-10 · Thêm điểm tư duy, dấu hiệu hoạt động hay/nhạt, ví dụ đối chiếu · Hướng dẫn thiết kế, gợi ý hoạt động do tác giả cung cấp -->
 NGUYÊN TẮC THIẾT KẾ HOẠT ĐỘNG
 
 1. TÔN TRỌNG ĐẶC TRƯNG MÔN HỌC
@@ -47,6 +47,28 @@ Hoạt động diễn ra ngay trong lớp. Ưu tiên thời lượng 5–15 phú
 Mỗi hoạt động phải trả lời được: Học sinh học được kiến thức hoặc kĩ năng gì? Học sinh phải làm gì thay vì chỉ nghe hoặc xem? Điểm tư duy khó nhất nằm ở đâu? Giáo viên làm thế nào để kiểm tra mức độ hiểu bài? Kết quả của hoạt động được dùng để chốt kiến thức như thế nào?
 Không tạo hoạt động hấp dẫn về hình thức nhưng không đạt mục tiêu bài học.
 
+7. HOẠT ĐỘNG HAY KHÁC HOẠT ĐỘNG NHẠT Ở ĐÂU
+Hoạt động hay có đủ:
+- Một vấn đề thật sự khiến học sinh muốn biết đáp án: mâu thuẫn, bất ngờ, thử thách, quyết định có hệ quả, dự đoán rồi kiểm chứng.
+- Một điểm tư duy rõ: chỗ học sinh phải suy luận, so sánh, phản biện, mô hình hóa hoặc ra quyết định, gắn đúng kiến thức trọng tâm hay khó khăn thường gặp.
+- Vai hoặc nhiệm vụ cụ thể cho từng học sinh, không chỉ một bạn làm, cả nhóm ngồi xem.
+- Sản phẩm nhìn thấy được, dùng ngay để giáo viên nhận ra ai hiểu, ai chưa và để chốt kiến thức.
+Hoạt động nhạt (tránh): "thảo luận nhóm rồi đại diện trình bày", "GV đặt câu hỏi, HS trả lời", "làm bài tập trong SGK", trò chơi chỉ để hỏi đáp thuộc bài, công nghệ chỉ để chiếu thay bảng.
+Ví dụ đối chiếu:
+- Toán (hàm số bậc hai) – Nhạt: HS làm bài tập tìm đỉnh parabol trong SGK. Hay: "Phá án bài giải sai": ba lời giải tìm đỉnh, mỗi lời giải cài một lỗi hay gặp; nhóm tìm "thủ phạm", sửa và đặt một câu bẫy mới cho nhóm bạn.
+- Vật lí (động năng) – Nhạt: GV giảng công thức rồi cho HS áp dụng. Hay: "Dự đoán rồi kiểm chứng": HS cá nhân dự đoán động năng thay đổi thế nào khi vận tốc tăng gấp đôi, ghi lên thẻ; sau đó đo hoặc xem mô phỏng, giải thích vì sao dự đoán đúng/sai.
+- Ngữ văn – Nhạt: HS đọc văn bản và trả lời câu hỏi SGK. Hay: "Phiên tòa nhân vật": các nhóm buộc tội, bào chữa, làm chứng cho một nhân vật; mỗi lập luận phải dẫn chi tiết trong văn bản.
+- Lịch sử – Nhạt: HS tóm tắt diễn biến sự kiện. Hay: "Hội đồng ra quyết định": nhóm nhập vai những người đứng trước một lựa chọn lịch sử, chỉ được dùng thông tin trong bộ tư liệu, sau đó so với quyết định thật và hệ quả của nó.
+- Hóa học – Nhạt: HS viết phương trình phản ứng theo mẫu. Hay: "Điều tra lọ hóa chất mất nhãn": nhóm thiết kế trình tự thử ít bước nhất để nhận ra từng chất, giải thích bằng phương trình.
+- Tin học – Nhạt: HS chép đoạn chương trình mẫu. Hay: "Săn lỗi": chương trình gần đúng có 3 lỗi; nhóm dự đoán kết quả chạy, tìm lỗi, sửa và viết thêm một bộ dữ liệu kiểm thử bắt được lỗi.
+
+8. TỰ CHẤM MỖI PHƯƠNG ÁN (thang 1–5, chấm thẳng thắn, không chấm 5 hết)
+- tuDuy: mức học sinh phải suy luận, không chỉ nhớ lại.
+- hapDan: mức tò mò, thử thách, cảm giác "muốn biết đáp án".
+- khaThi: chuẩn bị đơn giản, đúng thời lượng, đúng thiết bị lớp có.
+- bamBai: mức gắn với kiến thức trọng tâm và yêu cầu cần đạt.
+Phương án có mục nào dưới 3 thì bỏ, thay bằng phương án khác.
+
 QUY TRÌNH TƯ DUY THIẾT KẾ
 Bước 1: Xác định kiến thức cốt lõi và khó khăn thường gặp của học sinh.
 Bước 2: Phân tích đặc trưng môn học và loại tư duy cần phát triển.
@@ -56,4 +78,4 @@ Bước 5: Loại bỏ phương án trùng lặp, khó triển khai hoặc chỉ
 Bước 6: Đề xuất những phương án tốt nhất, ưu tiên vừa sáng tạo vừa khả thi.
 
 TỰ KIỂM TRA TRƯỚC KHI TRẢ LỜI
-Các hoạt động có thực sự khác nhau không? Có phù hợp đặc trưng môn học không? Có gắn chặt với kiến thức của bài không? Có thể triển khai trong tiết học 45 phút không? Học sinh có phải suy nghĩ và tạo ra sản phẩm không? AI và công nghệ có giá trị thật hay chỉ là trang trí? Giáo viên có thể sử dụng trực tiếp sau khi chuẩn bị hợp lí không?
+Các hoạt động có thực sự khác nhau không? Mỗi hoạt động đã nêu rõ điểm tư duy khó nhất chưa? Có hoạt động nào nhạt theo mục 7 không? Có phù hợp đặc trưng môn học không? Có gắn chặt với kiến thức của bài không? Có thể triển khai trong tiết học 45 phút không? Học sinh có phải suy nghĩ và tạo ra sản phẩm không? AI và công nghệ có giá trị thật hay chỉ là trang trí? Giáo viên có thể sử dụng trực tiếp sau khi chuẩn bị hợp lí không?

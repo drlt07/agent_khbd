@@ -3,7 +3,7 @@ import { ChuCT } from '../../thanh-phan/cong-thuc';
 import { The, HopBao, Nut, NhanAiLam } from '../../thanh-phan/chung';
 import { BieuTuong } from '../../thanh-phan/bieu-tuong';
 import { LoiAi, type GoiAi } from '../../soan/ai';
-import { goiYHoatDong, huongDanTuGoiY, MUC_CHUAN_BI, NHOM_HINH_THUC, THOI_DIEM, type GoiY, type HoatDongCu, type HoatDongGoiY, type KetQuaLuatGoiY } from '../../soan/goi-y';
+import { goiYHoatDong, huongDanTuGoiY, MUC_CHUAN_BI, NHOM_HINH_THUC, THOI_DIEM, TIEU_CHI_CHAM, tongDiemGoiY, type GoiY, type HoatDongCu, type HoatDongGoiY, type KetQuaLuatGoiY } from '../../soan/goi-y';
 import { TEN_HD, type Khbd, type MaHd } from '../../soan/kieu';
 
 const YEU_CAU_NHANH = ['Cách tổ chức khác', 'Lớp yếu', 'Chỉ có 1 máy tính và máy chiếu', 'Không cần Internet', 'Thêm năng lực số', 'Rút ngắn thời gian'];
@@ -41,6 +41,10 @@ export default function GoiYHoatDong({ k, hd, cu, ai, dong, dung }: {
     return [u?.deTrienKhai === i + 1 && 'Dễ triển khai nhất', u?.sangTao === i + 1 && 'Sáng tạo nhất', u?.aiMoPhong === i + 1 && 'Khai thác AI/mô phỏng tốt nhất'].filter(Boolean) as string[];
   };
 
+  const laNhat = (i: number) => (kq?.luat.theoHoatDong[i] ?? []).some((l) => l.startsWith('Nhạt'));
+  /** Phương án không nhạt lên trước, điểm tự chấm cao lên trước; giữ số thứ tự gốc để khớp Phần D. */
+  const thuTu = kq ? kq.goiY.hoatDong.map((h, i) => ({ h, i })).sort((a, b) => Number(laNhat(a.i)) - Number(laNhat(b.i)) || tongDiemGoiY(b.h) - tongDiemGoiY(a.h)) : [];
+
   return (
     <The className="p-5 border-accent-line">
       <div className="flex flex-wrap items-start justify-between gap-2">
@@ -73,11 +77,12 @@ export default function GoiYHoatDong({ k, hd, cu, ai, dong, dung }: {
 
           {/* PHẦN B + C */}
           <div className="flex flex-col gap-3">
-            {kq.goiY.hoatDong.map((h, i) => {
+            {thuTu.map(({ h, i }, viTri) => {
               const u = uuTien(i);
+              const nhat = laNhat(i);
               const loiHd = kq.luat.theoHoatDong[i] ?? [];
               return (
-                <div key={`${h.ten}-${i}`} style={{ ['--i' as string]: i }} className="vao-lan rounded-xl border border-line p-4">
+                <div key={`${h.ten}-${i}`} style={{ ['--i' as string]: viTri }} className={`vao-lan rounded-xl border border-line p-4 ${nhat ? 'opacity-70' : ''}`}>
                   <div className="flex flex-wrap items-start gap-2">
                     <span className="so text-muted w-5">{i + 1}.</span>
                     <div className="flex-1 min-w-0">
@@ -88,8 +93,11 @@ export default function GoiYHoatDong({ k, hd, cu, ai, dong, dung }: {
                         <span className="px-2 py-0.5 rounded-full bg-surface-2 border border-line so">{h.thoiLuong} phút</span>
                         <span className={`px-2 py-0.5 rounded-full border ${h.mucChuanBi === 'cao' ? 'bg-warn-bg text-warn-fg border-warn-line' : 'bg-surface-2 border-line'}`}>Chuẩn bị: {MUC_CHUAN_BI[h.mucChuanBi]}</span>
                         {u.map((x) => <span key={x} className="px-2 py-0.5 rounded-full bg-ok-bg text-ok-fg">★ {x}</span>)}
+                        {nhat && <span className="px-2 py-0.5 rounded-full bg-warn-bg text-warn-fg">Nhạt</span>}
                       </div>
                       <p className="text-[14.5px] mt-2"><ChuCT t={h.yTuong} /></p>
+                      {h.diemTuDuy && <p className="text-[13.5px] mt-1"><b>Điểm tư duy:</b> <ChuCT t={h.diemTuDuy} /></p>}
+                      <p className="text-[12.5px] text-muted mt-1 so" title="AI tự chấm, thang 1–5; chỉ để tham khảo và sắp xếp">AI tự chấm: {(Object.keys(TIEU_CHI_CHAM) as (keyof typeof TIEU_CHI_CHAM)[]).map((c) => `${TIEU_CHI_CHAM[c]} ${h.tuCham[c]}`).join(' · ')}</p>
                       {h.congNghe && <p className="text-[13.5px] mt-1"><b>Công nghệ/AI:</b> {h.congNghe}{h.canKiemTra && <span className="text-warn-fg"> · cần kiểm tra quyền truy cập, chi phí, tiếng Việt</span>}</p>}
                       {loiHd.map((l) => <p key={l} className="text-[13px] text-warn-fg mt-1">! {l}</p>)}
                     </div>

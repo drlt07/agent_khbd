@@ -26,7 +26,7 @@ export const dungHoatDong = (pp: Khbd['phuongPhap']) => (['HD1', 'HD2', 'HD3', '
 /** Xóa mọi nội dung đã soạn (khi đổi thông tin nền của bài). */
 export const xoaNoiDung = (k: Khbd): Khbd => ({
   ...k, mucTieu: undefined, giaiDoan1: undefined, giaiDoan3: undefined, clil: undefined,
-  hoatDong: dungHoatDong(k.phuongPhap), maTichHop: [], maBo: [],
+  hoatDong: dungHoatDong(k.phuongPhap), maTichHop: [], maBo: [], yTuong: undefined,
 });
 
 export const coNoiDung = (k: Khbd) => !!(k.mucTieu || k.giaiDoan1 || k.hoatDong.some((h) => h.noiDung) || k.maTichHop.length);
@@ -75,6 +75,8 @@ export function chuanHoaKhbd(tho: unknown): Khbd | null {
     giaiDoan3: k.giaiDoan3 ? { viec: mang(k.giaiDoan3.viec) } : undefined,
     maTichHop: mang(k.maTichHop), maBo: mang(k.maBo), dauVet: mang(k.dauVet),
     capNhat: String(k.capNhat ?? ''),
+    // Ý tưởng hỏng khuôn (bản nháp sửa tay, phiên bản khác) thì bỏ, không làm hỏng trang
+    yTuong: k.yTuong && typeof k.yTuong === 'object' && typeof k.yTuong.ten === 'string' && Array.isArray(k.yTuong.hoatDong) ? k.yTuong : undefined,
   };
 }
 

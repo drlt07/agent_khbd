@@ -79,7 +79,7 @@ export async function soanPhan(k: Khbd, phan: MaPhan, ai: GoiAi, huongDan = '', 
     r.buoc = r.buoc.map((b) => ({ ...b, phut: Math.round(b.phut) }));
     const loi = [...kiemTraBuoc(r.buoc, phut, ten, k.phuongPhap), ...kiemTraCauHoi(r.cauHoi, hd, k.phuongPhap, ten, k.hoatDong.find((x) => x.ma === 'HD2')?.noiDung?.cauHoi), ...kiemTraVanBan(vanBanHoatDong(r), ten)].filter((l) => l.muc === 'nghiem');
     ketQua = r;
-    if (!loi.length) { dauVet.push(vet(6, ten, 'dat', huongDan ? `Theo gợi ý GV chọn: ${huongDan.match(/"([^"]+)"/)?.[1] ?? ''}` : undefined, luot)); break; }
+    if (!loi.length) { dauVet.push(vet(6, ten, 'dat', huongDan ? `Theo gợi ý GV chọn: ${huongDan.match(/"([^"]+)"/)?.[1] ?? ''}` : k.yTuong ? `Theo ý tưởng xuyên suốt: ${k.yTuong.ten}` : undefined, luot)); break; }
     dauVet.push(vet(6, ten, luot < SO_LUOT_SOAN_LAI ? 'soan_lai' : 'loi', loi.map((l) => l.thongBao).join(' '), luot));
     nhac = `${nhacGoc}\n\nLần soạn trước bị luật bắt lỗi, sửa lại: ${loi.map((l) => l.thongBao).join(' ')}`;
   }
@@ -131,3 +131,8 @@ async function soanTichHop(k: Khbd, ai: GoiAi): Promise<Khbd> {
 }
 
 export const nguyenVan = moTaMa;
+
+/** Giáo viên chọn (hoặc bỏ) ý tưởng xuyên suốt: ghi dấu vết, không tự soạn lại hoạt động đã có. */
+export function chonYTuong(k: Khbd, y: Khbd['yTuong']): Khbd {
+  return { ...k, yTuong: y, dauVet: [...k.dauVet, vet(4, 'Ý tưởng cả bài', 'gv_sua', y ? `Giáo viên chọn ý tưởng: ${y.ten}` : 'Giáo viên bỏ ý tưởng xuyên suốt')] };
+}

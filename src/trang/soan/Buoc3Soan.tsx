@@ -1,11 +1,12 @@
 import { useRef, useState } from 'react';
 import { The, HopBao, Nut, NhanAiLam } from '../../thanh-phan/chung';
 import { BieuTuong } from '../../thanh-phan/bieu-tuong';
-import { danhSachPhan, soanPhan, type MaPhan } from '../../soan/quy-trinh';
+import { chonYTuong, danhSachPhan, soanPhan, type MaPhan } from '../../soan/quy-trinh';
 import { LoiAi, type GoiAi } from '../../soan/ai';
 import type { Khbd } from '../../soan/kieu';
 import XemKhbd from './XemKhbd';
 import GoiYHoatDong from './GoiYHoatDong';
+import YTuongBai from './YTuongBai';
 import type { MaHd } from '../../soan/kieu';
 
 type TrangThai = 'cho' | 'dang' | 'xong' | 'loi';
@@ -86,6 +87,9 @@ export default function Buoc3Soan({ k, datKhbd, ai }: { k: Khbd; datKhbd: (k: Kh
         {!ai && <p className="text-sm text-warn-fg mt-3">Cần khóa AI để soạn. <a href="#khoa-ai" className="underline">Thêm khóa</a></p>}
       </The>
       <div className="flex flex-col gap-5 min-w-0">
+        <YTuongBai k={k} ai={ai} ban={!!dangChay}
+          chon={(y) => { const moi = chonYTuong(kRef.current, y); kRef.current = moi; datKhbd(moi); }}
+          soanLaiHoatDong={() => chay(['HD1', 'HD2', 'HD3', 'HD4'])} />
         {goiYCho && <div className="vao"><GoiYHoatDong k={k} hd={goiYCho} ai={ai} dong={() => setGoiYCho(null)} dung={async (huongDan) => {
           const moi = await soanPhan(kRef.current, goiYCho, ai!, huongDan);
           kRef.current = moi; datKhbd(moi);

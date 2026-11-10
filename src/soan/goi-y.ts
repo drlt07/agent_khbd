@@ -42,6 +42,13 @@ export const GoiYOut = z.object({
     mucChuanBi: z.enum(['thap', 'vua', 'cao']),
     thoiDiem: z.enum(['khoi_dong', 'hinh_thanh', 'luyen_tap', 'van_dung']),
     mucTieu: z.string(),
+    diemTuDuy: z.string().describe('Điểm tư duy khó nhất học sinh phải vượt qua trong hoạt động (suy luận, so sánh, phản biện, mô hình hóa, ra quyết định gì)'),
+    tuCham: z.object({
+      tuDuy: z.number().describe('1–5: mức học sinh phải suy luận, không chỉ nhớ lại'),
+      hapDan: z.number().describe('1–5: mức tò mò, thử thách'),
+      khaThi: z.number().describe('1–5: chuẩn bị đơn giản, đúng thời lượng, đúng thiết bị lớp'),
+      bamBai: z.number().describe('1–5: mức gắn với kiến thức trọng tâm, yêu cầu cần đạt'),
+    }).describe('Tự chấm thẳng thắn theo mục 8 của nguyên tắc'),
     chuanBi: z.array(z.string()).describe('Thiết bị, học liệu, công cụ; đường dẫn chính thức nếu chắc chắn'),
     kichBan: z.array(z.object({ buoc: z.string(), phut: z.number() })).describe('Từng bước, có thời gian'),
     vaiTro: z.string().describe('Ai thao tác, ai suy luận, ai phản hồi'),
@@ -61,12 +68,43 @@ export const GoiYOut = z.object({
 export type GoiY = z.infer<typeof GoiYOut>;
 export type HoatDongGoiY = GoiY['hoatDong'][number];
 
+/** Điểm tự chấm 1–5 (AI tự chấm, chỉ để sắp xếp và lọc phương án nhạt). */
+export const TIEU_CHI_CHAM = { tuDuy: 'Tư duy', hapDan: 'Hấp dẫn', khaThi: 'Khả thi', bamBai: 'Bám bài' } as const;
+export const DIEM_CHAM_TOI_THIEU = 3;
+export const tongDiemGoiY = (h: Pick<HoatDongGoiY, 'tuCham'>) => h.tuCham.tuDuy + h.tuCham.hapDan + h.tuCham.khaThi + h.tuCham.bamBai;
+
+/** Cách tổ chức nhạt, chung chung (rules/hoat-dong.md mục 7, rules/soan.md luật 8). */
+const CHUNG_CHUNG: RegExp[] = [
+  /thảo luận( theo)? nhóm,?( rồi| và| sau đó)? (cử )?đại diện (nhóm )?trình bày/,
+  /(gv|giáo viên) (đặt|nêu) câu hỏi,? (hs|học sinh) trả lời/,
+  /(hs|học sinh) trả lời (các )?câu hỏi (trong |ở )?(sgk|sách giáo khoa)/,
+  /làm (các )?bài tập (trong |ở )?(sgk|sách giáo khoa)/,
+  /đại diện (nhóm )?trình bày,? (gv|giáo viên) nhận xét/,
+];
+export const laChungChung = (s: string) => { const t = s.toLowerCase(); return CHUNG_CHUNG.some((r) => r.test(t)); };
+
+/** Công cụ có trong danh sách (khớp lỏng: "GeoGebra trên điện thoại" khớp "GeoGebra"). */
+export const coTrongDanhSach = (congCu: string, ds: string[]) => {
+  const cc = congCu.trim().toLowerCase();
+  return !cc || ds.some((d) => { const x = d.trim().toLowerCase(); return !!x && (cc.includes(x) || x.includes(cc)); });
+};
+
 /* ---------------- Lời nhắc ---------------- */
 
 export const nguyenTacHoatDong = () => LUAT_HOAT_DONG.replace(/<!--.*?-->\s*/s, '');
 
 /** Hoạt động trong giáo án cũ mà giáo viên muốn đổi mới (lối "Sửa KHBD cũ"). */
 export interface HoatDongCu { ten: string; phut: number; noiDung: string }
+
+/** Ý tưởng xuyên suốt đã chọn và các hoạt động đã soạn: gợi ý phải hợp mạch và không lặp cơ chế. */
+function boiCanhBai(k: Khbd, hd?: MaHd): string {
+  const yt = k.yTuong;
+  const khac = k.hoatDong.filter((h) => h.noiDung && h.ma !== hd).map((h) => `- ${h.ten}: ${h.noiDung!.noiDung.slice(0, 200)}`);
+  return [
+    yt ? `Bài đang theo ý tưởng xuyên suốt giáo viên đã chọn: "${yt.ten}". ${yt.cotTruyen} Vai học sinh: ${yt.vaiHocSinh}. Ưu tiên phương án lồng vào cốt truyện này; được đề xuất 1–2 phương án ngoài cốt truyện nếu thật sự hay hơn.${hd ? ` Phần ý tưởng cho hoạt động này: ${yt.hoatDong.find((x) => x.hd === hd)?.viec ?? ''}` : ''}` : '',
+    khac.length ? `Các hoạt động khác của bài đã soạn (không lặp lại cơ chế tổ chức của chúng):\n${khac.join('\n')}` : '',
+  ].filter(Boolean).join('\n');
+}
 
 export function nhacGoiY(k: Khbd, hd?: MaHd, yeuCau = '', cu?: HoatDongCu): string {
   const phut = hd ? phutTheoHoatDong(k.phanBo)[hd] : 0;
@@ -81,7 +119,9 @@ export function nhacGoiY(k: Khbd, hd?: MaHd, yeuCau = '', cu?: HoatDongCu): stri
       `Đề xuất hoạt động mới thay thế hoặc làm mới hoạt động này: giữ đúng mục tiêu và kiến thức, đổi cách tổ chức cho hấp dẫn, tích cực hơn; thời lượng không vượt ${cu.phut} phút. Phần A nêu ngắn điểm mạnh và điểm cần đổi mới của cách tổ chức hiện tại.`,
     ].join('\n')
       : hd ? `Giáo viên đang tìm phương án cho "${TEN_HD[k.phuongPhap][hd]}" (khoảng ${phut} phút). Ưu tiên các hoạt động hợp thời điểm này, nhưng vẫn đa dạng nhóm hình thức.` : '',
+    cu ? '' : boiCanhBai(k, hd),
     yeuCau.trim() ? `Yêu cầu thêm của giáo viên: ${yeuCau.trim()}` : '',
+    'Mỗi hoạt động nêu rõ điểm tư duy khó nhất và tự chấm 4 tiêu chí (mục 8); bỏ phương án nhạt (mục 7) hoặc có tiêu chí dưới 3.',
     'Trả về: Phần A – phân tích bài học; Phần B và C – 5 đến 8 hoạt động (mỗi hoạt động đủ các mục triển khai); Phần D – 3 đề xuất ưu tiên (dễ triển khai nhất, sáng tạo nhất, khai thác AI hoặc mô phỏng tốt nhất) kèm lí do ngắn.',
   ].filter(Boolean).join('\n\n');
 }
@@ -107,13 +147,19 @@ export function kiemTraGoiY(g: GoiY, k: Pick<Khbd, 'dieuKien'>, phutToiDa?: numb
     if (!h.duPhong.trim()) loi.push('Thiếu phương án dự phòng khi không có công nghệ/Internet.');
     if (!h.cauHoiMau.trim()) loi.push('Thiếu câu hỏi hoặc nhiệm vụ mẫu.');
     if (!h.danhGia.trim() || !h.chotKienThuc.trim()) loi.push('Thiếu cách đánh giá hoặc chốt kiến thức.');
+    if (!h.diemTuDuy.trim()) loi.push('Thiếu điểm tư duy khó nhất.');
+    const thap = (Object.keys(TIEU_CHI_CHAM) as (keyof typeof TIEU_CHI_CHAM)[]).filter((c) => h.tuCham[c] < DIEM_CHAM_TOI_THIEU);
+    if (thap.length) loi.push(`Nhạt: AI tự chấm thấp ở ${thap.map((c) => `${TIEU_CHI_CHAM[c]} ${h.tuCham[c]}/5`).join(', ')}.`);
+    if (laChungChung(`${h.yTuong}\n${h.kichBan.map((b) => b.buoc).join('\n')}`)) loi.push('Nhạt: cách tổ chức chung chung (thảo luận rồi trình bày, hỏi – đáp, làm bài SGK).');
     if (h.thoiLuong > 15) loi.push(`Dài ${h.thoiLuong} phút (ưu tiên 5–15).`);
     if (phutToiDa && h.thoiLuong > phutToiDa) loi.push(`Dài hơn thời lượng hoạt động (${phutToiDa} phút).`);
     const tongKichBan = h.kichBan.reduce((s, b) => s + b.phut, 0);
     if (h.kichBan.length && tongKichBan !== h.thoiLuong) loi.push(`Kịch bản cộng ${tongKichBan} phút, khác thời lượng ${h.thoiLuong} phút.`);
     return loi;
   });
-  if (theoHoatDong.some((l) => l.some((x) => /Thiếu/.test(x)))) nghiem.push('Có hoạt động thiếu mục bắt buộc (dự phòng, câu hỏi mẫu, đánh giá, chốt kiến thức).');
+  if (theoHoatDong.some((l) => l.some((x) => /Thiếu/.test(x)))) nghiem.push('Có hoạt động thiếu mục bắt buộc (dự phòng, câu hỏi mẫu, đánh giá, chốt kiến thức, điểm tư duy).');
+  const soHay = theoHoatDong.filter((l) => !l.some((x) => x.startsWith('Nhạt'))).length;
+  if (n >= 3 && soHay < 3) nghiem.push(`Chỉ có ${soHay} phương án không nhạt; cần ít nhất 3. Thay phương án nhạt bằng phương án có vấn đề thật, điểm tư duy rõ.`);
   const sttHopLe = (i: number) => Number.isInteger(i) && i >= 1 && i <= n;
   if (![g.uuTien.deTrienKhai, g.uuTien.sangTao, g.uuTien.aiMoPhong].every(sttHopLe)) nhac.push('Phần D chỉ đến hoạt động không có trong danh sách.');
   return { nghiem, nhac, theoHoatDong };
@@ -127,7 +173,9 @@ export function chuanHoaGoiY(g: GoiY, k: Pick<Khbd, 'dieuKien'>): GoiY {
     hoatDong: g.hoatDong.map((h) => {
       const cc = h.congNghe.trim().toLowerCase();
       const la = cc && !daBiet.some((d) => cc.includes(d) || d.includes(cc));
-      return { ...h, thoiLuong: Math.round(h.thoiLuong), canKiemTra: h.canKiemTra || !!la, kichBan: h.kichBan.map((b) => ({ ...b, phut: Math.round(b.phut) })) };
+      const c = (x: number) => Math.min(5, Math.max(1, Math.round(Number(x) || 1)));
+      const tuCham = { tuDuy: c(h.tuCham.tuDuy), hapDan: c(h.tuCham.hapDan), khaThi: c(h.tuCham.khaThi), bamBai: c(h.tuCham.bamBai) };
+      return { ...h, tuCham, thoiLuong: Math.round(h.thoiLuong), canKiemTra: h.canKiemTra || !!la, kichBan: h.kichBan.map((b) => ({ ...b, phut: Math.round(b.phut) })) };
     }),
   };
 }
@@ -152,6 +200,7 @@ export function huongDanTuGoiY(h: HoatDongGoiY): string {
   return [
     `Thiết kế hoạt động theo phương án giáo viên đã chọn: "${h.ten}" (${NHOM_HINH_THUC[h.nhom]}).`,
     `Ý tưởng: ${h.yTuong}`,
+    h.diemTuDuy ? `Điểm tư duy khó nhất (giữ trong các bước): ${h.diemTuDuy}` : '',
     h.congNghe ? `Công nghệ/AI: ${h.congNghe}${h.canKiemTra ? ' (cần kiểm tra quyền truy cập)' : ''}. Phương án dự phòng: ${h.duPhong}` : '',
     `Kịch bản gợi ý: ${h.kichBan.map((b) => `${b.buoc} (${b.phut}')`).join('; ')}`,
     `Câu hỏi/nhiệm vụ mẫu: ${h.cauHoiMau}`,

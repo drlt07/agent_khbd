@@ -118,6 +118,27 @@ export const TichHopOut = z.object({
 
 export const GiaiDoan3Out = z.object({ viec: z.array(z.string()) });
 
+/** Ý tưởng xuyên suốt cả bài (cốt truyện, vai, câu hỏi lớn) và việc của từng hoạt động. Xem src/soan/y-tuong.ts. */
+export const YTuongBaiOut = z.object({
+  ten: z.string().describe('Tên ý tưởng ngắn, gợi tò mò, ví dụ "Kĩ sư cầu vồng thép"'),
+  cotTruyen: z.string().describe('Tình huống, vai hoặc nhiệm vụ lớn xuyên suốt bài, gắn thực tế, 2–4 câu'),
+  vaiHocSinh: z.string().describe('Vai của học sinh trong cả bài'),
+  cauHoiLon: z.string().describe('Câu hỏi lớn học sinh trả lời được ở cuối bài'),
+  hoatDong: z.array(z.object({
+    hd: z.enum(['HD1', 'HD2', 'HD3', 'HD4']),
+    ten: z.string().describe('Tên hoạt động có bản sắc'),
+    nhom: z.enum(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']).describe('Nhóm hình thức A–J theo nguyên tắc thiết kế'),
+    viec: z.string().describe('Học sinh làm gì, nghĩ gì, tạo ra gì (1–3 câu, cụ thể với bài)'),
+    diemTuDuy: z.string().describe('Điểm tư duy khó nhất trong hoạt động'),
+    ketNoi: z.string().describe('Hoạt động nối với cốt truyện và hoạt động trước như thế nào'),
+    congNghe: z.string().describe('Công cụ dùng, chỉ trong danh sách thiết bị đã khai báo; không dùng thì chuỗi rỗng'),
+  })).describe('Đúng 4 phần tử HD1, HD2, HD3, HD4 theo thứ tự'),
+  sanPhamCuoi: z.string().describe('Sản phẩm cuối bài của học sinh'),
+  diemHay: z.string().describe('Vì sao học sinh hứng thú và phải tư duy'),
+  ruiRo: z.string().describe('Rủi ro khi triển khai và cách khắc phục; phương án khi mất Internet'),
+});
+export type YTuongBai = z.infer<typeof YTuongBaiOut>;
+
 export type MaTichHop = z.infer<typeof MaTichHopOut> & { diem?: number; truDiem?: string[] };
 export type Buoc = z.infer<typeof BuocOut>;
 
@@ -174,6 +195,8 @@ export interface Khbd {
   dauVet: DauVet[];
   capNhat: string;
   nguon?: NguonGiaoAnCu;
+  /** Ý tưởng xuyên suốt giáo viên đã chọn; mọi hoạt động soạn bám theo. */
+  yTuong?: YTuongBai;
 }
 
 export const TEN_HD: Record<PhuongPhap, Record<MaHd, string>> = {

@@ -153,3 +153,20 @@ Trước đây bấm "Soạn lại" mà lỗi vẫn y nguyên vì: (1) AI không
 - Bước 1 (Chọn tích hợp): nút "AI gợi ý mã theo bài" (`src/soan/goi-y-ma.ts`). AI đọc tên bài, YCCĐ, thiết bị lớp và toàn bộ thư viện (55 chỉ báo NLS bậc THPT, 4 mã NLa–NLd), gợi ý 1–3 mã NLS và 0–2 mã AI, mỗi mã một lí do (học sinh làm gì, công cụ gì, hoạt động nào).
 - Luật code `locGoiYMa`: chỉ giữ mã có trong thư viện và đúng loại, bỏ trùng, tối đa 3 NLS / 2 AI, ghi lại mã bị loại. App không tự tích; giáo viên tích từng mã hoặc bấm "Chọn tất cả gợi ý".
 - Mã gợi ý hiện kèm lí do ở đầu thẻ Năng lực số và thẻ Năng lực AI; danh sách mặc định theo môn bỏ các mã đã có trong gợi ý. Bài mẫu có gợi ý dựng sẵn (5.3.5.1, 1.3.5.1, NLc).
+
+## Ý tưởng cho cả bài + lọc phương án nhạt – 10/11/2026
+
+Vấn đề: soạn thường thì AI viết lần lượt từng hoạt động, không có ý tưởng chung, nên hoạt động rời rạc và na ná nhau; gợi ý từng hoạt động đôi khi có phương án hấp dẫn về hình thức nhưng ít tư duy.
+
+- **Ý tưởng cho cả bài** (`src/soan/y-tuong.ts`, `src/trang/soan/YTuongBai.tsx`): ở bước Soạn nội dung, AI đề xuất 3 kịch bản khác hẳn nhau, mỗi kịch bản có cốt truyện/vai/câu hỏi lớn xuyên suốt, sản phẩm cuối, điểm hay, rủi ro và việc của HĐ 1–4 (nhóm hình thức, điểm tư duy, kết nối). Không bắt buộc.
+  - Luật code `kiemTraYTuong` (nghiêm → AI đề xuất lại ≤ 2 lượt): đủ HD1–HD4, ≥ 3 nhóm hình thức trong 4 hoạt động, có cốt truyện và câu hỏi lớn, chỉ dùng thiết bị đã khai báo, không dùng cách tổ chức chung chung, không trùng tên; nhắc khi hai ý tưởng cùng chuỗi hình thức.
+  - Giáo viên chọn → `Khbd.yTuong`, ghi dấu vết (`chonYTuong`). Bối cảnh mọi phần soạn có tóm tắt ý tưởng; lời nhắc từng hoạt động có phần việc của hoạt động đó. Phương án chọn từ "Gợi ý hoạt động" được ưu tiên hơn ý tưởng. Đã soạn hoạt động trước khi chọn thì có nút "Soạn lại 4 hoạt động theo ý tưởng". App không tự soạn lại.
+  - Đổi thông tin nền của bài thì xóa ý tưởng; bản nháp có ý tưởng hỏng khuôn thì bỏ ý tưởng.
+- **Gợi ý từng hoạt động hay hơn** (`src/soan/goi-y.ts`, `rules/hoat-dong.md` phiên bản 2): mỗi phương án thêm `diemTuDuy` (điểm tư duy khó nhất) và `tuCham` (Tư duy, Hấp dẫn, Khả thi, Bám bài, 1–5).
+  - Luật: thiếu điểm tư duy là thiếu mục bắt buộc; tự chấm < 3 hoặc cách tổ chức chung chung (thảo luận rồi đại diện trình bày, hỏi – đáp, làm bài SGK) → "Nhạt"; ít hơn 3 phương án không nhạt → AI soạn lại.
+  - Lời nhắc gợi ý có ý tưởng xuyên suốt và các hoạt động đã soạn để không lặp cơ chế.
+  - Giao diện: phương án không nhạt và điểm cao lên trước (giữ số thứ tự gốc cho Phần D), hiện điểm tư duy và điểm AI tự chấm (ghi rõ là AI tự chấm).
+- `rules/hoat-dong.md` v2: mục 7 (hoạt động hay/nhạt, ví dụ đối chiếu 6 môn), mục 8 (tự chấm).
+- AI mẫu: 3 ý tưởng cho bài Hàm số bậc hai; điểm tư duy, tự chấm cho gợi ý mẫu (cả lối Sửa KHBD cũ).
+- Kiểm thử: `tests/y-tuong.test.ts` (11) + 6 kiểm thử mới trong `tests/goi-y.test.ts`; tổng 151 đạt.
+- Giới hạn: điểm tự chấm do AI tự khai, chỉ dùng để sắp xếp và lọc; chưa chạy thử với khóa AI thật trong phiên này.
