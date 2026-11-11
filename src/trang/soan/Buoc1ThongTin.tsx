@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { boSachCo, taiMucLucSgk, type MucLucSgk } from '../../soan/muc-luc-sgk';
 import { The, HopBao } from '../../thanh-phan/chung';
 import { BieuTuong } from '../../thanh-phan/bieu-tuong';
 import { CHI_BAO_MAC_DINH, MIEN_GOI_Y_THEO_MON, NANG_LUC_AI, NANG_LUC_DAC_THU, NGUON_AI_2422, layChiBao, layNangLucAi, layThanhPhan, moTaMa, timChiBao, type MaMon } from '../../thu-vien';
@@ -14,6 +15,13 @@ const o = 'w-full px-3 py-2.5 rounded-xl border border-line-strong bg-surface fo
 
 export default function Buoc1ThongTin({ k, sua, ai }: { k: Khbd; sua: (f: (k: Khbd) => Khbd) => void; ai: GoiAi | null }) {
   const deXuat = soTietDeXuat(k);
+  // Bộ sách có mục lục dựng sẵn cho môn – lớp này (Ngoại ngữ: các bộ Tiếng Anh)
+  const [sgk, setSgk] = useState<MucLucSgk | null>(null);
+  useEffect(() => { taiMucLucSgk().then(setSgk).catch(() => {}); }, []);
+  const dsBoSach = useMemo(() => {
+    const co = sgk ? boSachCo(sgk, k.mon, k.lop) : [];
+    return k.mon === 'NGOAI_NGU' && co.length ? co : [...new Set([...BO_SACH, ...co])];
+  }, [sgk, k.mon, k.lop]);
   const [timMa, setTimMa] = useState('');
   const [tbMoi, setTbMoi] = useState('');
   const goiY = useMemo(() => (MIEN_GOI_Y_THEO_MON[k.mon] ?? []).map((tp) => CHI_BAO_MAC_DINH[tp]).filter(Boolean), [k.mon]);
@@ -66,12 +74,12 @@ export default function Buoc1ThongTin({ k, sua, ai }: { k: Khbd; sua: (f: (k: Kh
               </select>
             </Truong>
             <div className="col-span-2"><Truong nhan="Bộ sách" id="bo-sach">
-              <select id="bo-sach" value={BO_SACH.includes(k.boSach) ? k.boSach : k.boSach ? 'khac' : ''} onChange={(e) => sua((x) => ({ ...x, boSach: e.target.value === 'khac' ? ' ' : e.target.value, bai: '' }))} className={o}>
+              <select id="bo-sach" value={dsBoSach.includes(k.boSach) ? k.boSach : k.boSach ? 'khac' : ''} onChange={(e) => sua((x) => ({ ...x, boSach: e.target.value === 'khac' ? ' ' : e.target.value, bai: '' }))} className={o}>
                 <option value="">– Chọn bộ sách –</option>
-                {BO_SACH.map((b) => <option key={b} value={b}>{b}</option>)}
+                {dsBoSach.map((b) => <option key={b} value={b}>{b}</option>)}
                 <option value="khac">Bộ sách khác…</option>
               </select>
-              {k.boSach && !BO_SACH.includes(k.boSach) && <input aria-label="Tên bộ sách" value={k.boSach.trim()} onChange={(e) => sua((x) => ({ ...x, boSach: e.target.value || ' ' }))} placeholder="Tên bộ sách" className={`${o} mt-2`} />}
+              {k.boSach && !dsBoSach.includes(k.boSach) && <input aria-label="Tên bộ sách" value={k.boSach.trim()} onChange={(e) => sua((x) => ({ ...x, boSach: e.target.value || ' ' }))} placeholder="Tên bộ sách" className={`${o} mt-2`} />}
             </Truong></div>
             <div className="col-span-2">
               <div className="block text-sm font-semibold mb-1.5">Bài</div>

@@ -12,3 +12,8 @@ Các file JSON trong thư mục này được trích nguyên văn từ bản app
 | `nang_luc_ai_cu.json` | Bộ mã AI cũ NLa, NLc, NLd (tự đặt, không có căn cứ văn bản). | **Không dùng nữa.** Giữ lại để đối chiếu và chuyển đổi KHBD cũ. Xem bảng chuyển đổi trong `docs/KHUNG_KHBD.md`. |
 
 Mã môn dùng thống nhất: `NGU_VAN, TOAN, NGOAI_NGU, VAT_LI, HOA_HOC, SINH_HOC, LICH_SU, DIA_LI, GDKT_PL, CONG_NGHE, TIN_HOC, GDTC, AM_NHAC, MI_THUAT, HDTN_HN`.
+
+## muc_luc_sgk.json (11/11/2026)
+Mục lục SGK lớp 10–12: 118 sách (Kết nối tri thức, Chân trời sáng tạo, Cánh diều, Cùng khám phá; 6 bộ Tiếng Anh), 4.836 mục. Chỉ tên chủ đề/chương và tên bài; **không có số tiết** (do kế hoạch dạy học của tổ quyết định).
+Nguồn: trang giải SGK theo bộ sách trên loigiaihay.com, lấy ngày 11/11/2026. Trạng thái: **chưa đối chiếu** với sách in (`da_doi_chieu: false`). Sách nguồn chưa đủ bài được gắn `chuaDu` (hiện có: Tin học 10 Cánh diều).
+Cách lấy lại: `scripts/muc-luc-sgk/README.md`.

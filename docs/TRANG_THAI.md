@@ -217,3 +217,10 @@ Trước: khoảng 12 lần gọi AI nối đuôi nhau cho một bài (4 lần n
 
 - `MO_HINH_MAC_DINH.gemini` đổi từ `gemini-2.5-flash` sang `gemini-3.6-flash` (giáo viên đang dùng mô hình này; trước phải gõ tay vào ô "Mô hình"). Giáo viên vẫn đổi được ở ô "Mô hình".
 - Lưu ý: khóa Gemini miễn phí với mô hình này theo các trang bên ngoài đo được chỉ khoảng 5 lần gọi/phút, 20 lần/ngày (Google không công bố bảng chính thức); một bài cần ≥ 14 lần gọi. Chưa làm: tự chờ khi bị giới hạn, chế độ tiết kiệm lượt.
+
+## Mục lục SGK dựng sẵn – 11/11/2026
+
+- `data/muc_luc_sgk.json`: 118 sách lớp 10–12 (3 bộ sách chính, Cùng khám phá, 6 bộ Tiếng Anh), 4.836 mục; tên chủ đề/chương + tên bài, không có số tiết. Nguồn loigiaihay.com, chưa đối chiếu sách in. Script lấy lại: `scripts/muc-luc-sgk/`.
+- `src/soan/muc-luc-sgk.ts`: nạp lười, kiểm khuôn zod; tìm sách theo môn – lớp – bộ sách (không phân biệt hoa thường, dấu, tên rút gọn).
+- Bước chọn bài: chọn môn, lớp, bộ sách là có ngay danh sách bài ("Mục lục SGK"). PPCT tổ/giáo viên tải lên vẫn được ưu tiên; "Sửa trong Excel" cho file mẫu đã điền sẵn tên bài để ghi số tiết. Ô bộ sách lấy theo dữ liệu (Ngoại ngữ: các bộ Tiếng Anh).
+- Kiểm thử `tests/muc-luc-sgk.test.ts` (bắt được lỗi gán nhầm sách Hoạt động trải nghiệm thành Hóa học); tổng 182 đạt.

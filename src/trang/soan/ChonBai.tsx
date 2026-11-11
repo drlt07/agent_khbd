@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Nut, NhanAiLam } from '../../thanh-phan/chung';
 import { BieuTuong } from '../../thanh-phan/bieu-tuong';
 import { boDau, TEN_MON } from '../../thu-vien';
@@ -6,6 +6,7 @@ import { LoiAi, type GoiAi } from '../../soan/ai';
 import { aiGoiYMucLuc, docPpct, khoaMucLuc, layMucLuc, luuMucLuc, type BaiHoc, type MucLuc } from '../../soan/muc-luc';
 import type { Khbd } from '../../soan/kieu';
 import { docExcelPpct, taoMauPpct, tenTepMau } from '../../soan/ppct-excel';
+import { baiTuSach, taiMucLucSgk, timSach, type MucLucSgk } from '../../soan/muc-luc-sgk';
 import { luuTep } from '../../thanh-phan/luu-tep';
 
 const o = 'w-full px-3 py-2.5 rounded-xl border border-line-strong bg-surface focus:border-accent outline-none';
@@ -14,7 +15,12 @@ const o = 'w-full px-3 py-2.5 rounded-xl border border-line-strong bg-surface fo
 export default function ChonBai({ k, sua, ai }: { k: Khbd; sua: (f: (k: Khbd) => Khbd) => void; ai: GoiAi | null }) {
   const khoa = khoaMucLuc(k.mon, k.lop, k.boSach);
   const [, lamMoi] = useState(0);
-  const mucLuc: MucLuc | null = k.boSach.trim() ? layMucLuc(khoa) : null;
+  const daLuu: MucLuc | null = k.boSach.trim() ? layMucLuc(khoa) : null;
+  // Không có PPCT của tổ/giáo viên thì dùng mục lục SGK dựng sẵn
+  const [sgk, setSgk] = useState<MucLucSgk | null>(null);
+  useEffect(() => { taiMucLucSgk().then(setSgk).catch(() => {}); }, []);
+  const sach = sgk && k.boSach.trim() ? timSach(sgk, k.mon, k.lop, k.boSach) : null;
+  const mucLuc: MucLuc | null = daLuu ?? (sach ? { nguon: 'sgk', bai: baiTuSach(sach), capNhat: sgk!.phien_ban } : null);
   const [tim, setTim] = useState('');
   const [moDan, setMoDan] = useState(false);
   const [dan, setDan] = useState('');
@@ -80,8 +86,10 @@ export default function ChonBai({ k, sua, ai }: { k: Khbd; sua: (f: (k: Khbd) =>
         <>
           <div className="flex flex-wrap items-center justify-between gap-2">
             <span className="text-sm text-muted">{mucLuc.bai.length} bài · {TEN_MON[k.mon]} {k.lop}</span>
-            {mucLuc.nguon === 'ai' ? <NhanAiLam ai="ai" /> : <span className="text-[12px] px-2 py-0.5 rounded-full bg-ok-bg text-ok-fg">Theo PPCT của thầy/cô</span>}
+            {mucLuc.nguon === 'ai' ? <NhanAiLam ai="ai" /> : mucLuc.nguon === 'sgk' ? <span className="text-[12px] px-2 py-0.5 rounded-full bg-surface-2 border border-line">Mục lục SGK</span> : <span className="text-[12px] px-2 py-0.5 rounded-full bg-ok-bg text-ok-fg">Theo PPCT của thầy/cô</span>}
           </div>
+          {mucLuc.nguon === 'sgk' && <p className="text-[13px] text-muted">Tên bài theo mục lục SGK{sgk?.da_doi_chieu ? '' : ' (chưa đối chiếu với sách in)'}. Chưa có số tiết: bấm “Sửa trong Excel” để có file đã điền sẵn tên bài, ghi số tiết theo PPCT của tổ rồi tải lên lại.</p>}
+          {mucLuc.nguon === 'sgk' && sach?.chuaDu && <p className="text-[13px] text-warn-fg">Danh sách bộ sách này có thể chưa đủ bài. Không thấy bài cần dạy thì nhập tên bài ở ô bên dưới.</p>}
           {mucLuc.nguon === 'ai' && <p className="text-[13px] text-warn-fg">AI đề xuất từ trí nhớ: đối chiếu tên bài và số tiết với SGK, PPCT của trường.</p>}
           {mucLuc.bai.length > 8 && <input value={tim} onChange={(e) => setTim(e.target.value)} placeholder="Tìm bài…" aria-label="Tìm bài" className={o} />}
           <div className="max-h-[300px] overflow-y-auto rounded-xl border border-line divide-y divide-line" role="listbox" aria-label="Danh sách bài">
@@ -105,10 +113,10 @@ export default function ChonBai({ k, sua, ai }: { k: Khbd; sua: (f: (k: Khbd) =>
           </div>
           <div className="flex flex-wrap gap-x-4 gap-y-1 text-[13px]">
             <button onClick={taiMau} className="underline text-muted">Sửa trong Excel</button>
-            <button onClick={() => tepExcel.current?.click()} className="underline text-muted">Tải lên Excel khác</button>
-            <button onClick={() => setMoDan(true)} className="underline text-muted">Dán PPCT khác</button>
+            <button onClick={() => tepExcel.current?.click()} className="underline text-muted">{mucLuc.nguon === 'sgk' ? 'Tải lên Excel PPCT của tổ' : 'Tải lên Excel khác'}</button>
+            <button onClick={() => setMoDan(true)} className="underline text-muted">{mucLuc.nguon === 'sgk' ? 'Dán PPCT' : 'Dán PPCT khác'}</button>
             {ai && <button onClick={goiYAi} disabled={dang} className="underline text-muted disabled:opacity-50">{dang ? 'AI đang gợi ý…' : 'AI gợi ý lại'}</button>}
-            <button onClick={() => luu(null)} className="underline text-muted">Xóa danh sách</button>
+            {mucLuc.nguon !== 'sgk' && <button onClick={() => luu(null)} className="underline text-muted">{sach ? 'Dùng lại mục lục SGK' : 'Xóa danh sách'}</button>}
           </div>
         </>
       ) : moDan ? (
