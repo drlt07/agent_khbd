@@ -13,6 +13,7 @@ export function khbdMau(nenTangTuHoc?: string): Partial<Khbd> {
   return {
     mon: 'TOAN', lop: 10, boSach: 'Kết nối tri thức với cuộc sống', bai: 'Hàm số bậc hai', soTiet: 1, phuongPhap: 'lhdn', nenTangTuHoc,
     tichHop: { nls: ['5.3.5.1'], ai: ['NLc'], tiengAnh: 'clil' },
+    ppdh: ['lop_hoc_dao_nguoc', 'giai_quyet_van_de'],
     dieuKien: { thietBi: THIET_BI_MAU, mucHs: 'tb', ghiChu: '' },
     phanBo: phanBoMacDinh('lhdn', 1),
   };
@@ -176,6 +177,25 @@ const NLC_CHATBOT = { ma: 'NLc', congCu: 'Chatbot AI (Gemini/ChatGPT)', minhChun
     { hd: 'HD4', ten: 'Vé ra sân: tìm đỉnh parabol', nhom: 'G', yTuong: 'Ba câu exit ticket về một parabol mới; đúng đủ thì "được ra sân", sai thì nhận thẻ luyện thêm.', hocSinhLam: 'Làm cá nhân 3 câu: chiều mở, đỉnh, giá trị lớn nhất; viết một dòng còn vướng.', diemTuDuy: 'Tự áp dụng cách tìm đỉnh vào số liệu mới không có gợi ý.', sanPham: 'Phiếu exit ticket.', congCu: 'Phiếu học tập in', thoiLuong: 8, duPhong: 'Không cần công nghệ.', nls: [], tuCham: { tuDuy: 4, hapDan: 4, khaThi: 5, bamBai: 5 } },
     { hd: 'HD4', ten: 'Cài bẫy parabol cho bạn', nhom: 'J', yTuong: 'Mỗi học sinh viết một câu hỏi có cài bẫy về parabol kèm đáp án, đổi cho bạn bên cạnh làm và chấm.', hocSinhLam: 'Chọn một lỗi hay gặp (dấu của $b$, chiều mở), viết câu hỏi nhắm vào lỗi đó, chấm bài của bạn.', diemTuDuy: 'Hiểu lỗi đủ rõ để thiết kế câu hỏi bắt được lỗi đó.', sanPham: 'Câu hỏi bẫy và bài chấm.', congCu: '', thoiLuong: 8, duPhong: 'Không cần công nghệ.', nls: [], tuCham: { tuDuy: 5, hapDan: 4, khaThi: 4, bamBai: 4 } },
     { hd: 'HD4', ten: 'Chấm bài parabol của AI', nhom: 'I', yTuong: 'Chiếu lời giải exit ticket do chatbot viết có một lỗi; từng học sinh chấm, chỉ ra bước sai và viết lại.', hocSinhLam: 'Chấm từng bước lời giải của AI, khoanh bước sai, viết một dòng sửa và lí do.', diemTuDuy: 'Phát hiện lỗi trong lời giải trông có vẻ đúng.', sanPham: 'Bản chấm có ghi sửa và lí do.', congCu: 'Máy chiếu', thoiLuong: 8, duPhong: 'Dùng bản in lời giải.', nls: [{ ...NLC_CHATBOT, congCu: 'Máy chiếu', minhChung: 'Bản chấm lời giải AI', hanhVi: 'đánh giá tính đúng đắn của lời giải do AI tạo ra, chỉ ra bước sai và sửa có lí do', tieuChi: 'Đạt khi chỉ đúng bước sai và lí do sửa đúng kiến thức' }], tuCham: { tuDuy: 4, hapDan: 4, khaThi: 5, bamBai: 4 } },
+  ],
+};
+
+/** Bước 2 "Nội dung bài" và bước 3 "Phương pháp" dựng sẵn cho bài mẫu. */
+(TRA_LOI as Record<string, unknown>).noiDung = {
+  yccd: (TRA_LOI.yccd as { yccd: string[] }).yccd,
+  donVi: [
+    { ten: 'Khái niệm hàm số bậc hai, hệ số a, b, c', yc: [1] },
+    { ten: 'Đồ thị hàm số bậc hai: đỉnh, trục đối xứng, chiều mở của parabol', yc: [2] },
+    { ten: 'Ứng dụng: giá trị lớn nhất, nhỏ nhất trong bài toán thực tế', yc: [3] },
+  ],
+  khoKhan: ['Nhầm dấu khi tính hoành độ đỉnh $x = -\\frac{b}{2a}$', 'Không thấy vai trò dấu của $a$ với chiều mở parabol', 'Tính sai tung độ đỉnh do thứ tự phép tính', 'Khó chuyển tình huống thực tế thành hàm số'],
+};
+(TRA_LOI as Record<string, unknown>).goiYPpdh = {
+  phuongPhap: [
+    { ma: 'giai_quyet_van_de', lyDo: 'Bài có tình huống quả bóng bay cao nhất: học sinh phải lập hàm số bậc hai và tìm đỉnh parabol để trả lời (YC3).', apDung: 'Mở đầu nêu tình huống, Vận dụng giải trọn tình huống.' },
+    { ma: 'kham_pha', lyDo: 'Học sinh tự rút ra quy luật dấu của hệ số a với chiều mở và công thức đỉnh từ việc kéo thanh trượt GeoGebra (YC2).', apDung: 'Hình thành đơn vị 2: đồ thị, đỉnh, trục đối xứng.' },
+    { ma: 'theo_tram', lyDo: 'Phần luyện tập có ba mức (nhận biết hệ số, tìm đỉnh, lập parabol) chia được thành ba trạm độc lập.', apDung: 'Luyện tập phân hóa theo ba trạm.' },
+    { ma: 'lop_hoc_dao_nguoc', lyDo: 'Định nghĩa và công thức đỉnh tự đọc được ở nhà; thời gian trên lớp dành cho chỉnh lỗi và mô hình hóa.', apDung: 'Giai đoạn 1 tự học, trên lớp luyện tập và vận dụng.' },
   ],
 };
 

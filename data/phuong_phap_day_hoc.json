@@ -1,0 +1,21 @@
+{
+  "phien_ban": "2026-11-11",
+  "can_cu": "Công văn 5512/BGDĐT-GDTrH (18/12/2020): xây dựng và tổ chức kế hoạch bài dạy theo hướng sử dụng phương pháp, kĩ thuật dạy học tích cực; Chương trình GDPT 2018 (TT 32/2018), phần Phương pháp giáo dục của từng môn.",
+  "ghi_chu": "Danh sách để giáo viên chọn; tổ chuyên môn bổ sung, chỉnh sửa. Lớp học đảo ngược dùng khung KHBD riêng (Giai đoạn 1–3); các phương pháp khác trình bày theo mẫu Phụ lục IV CV 5512.",
+  "phuong_phap": [
+    { "ma": "giai_quyet_van_de", "nhom": "Phổ biến", "ten": "Dạy học giải quyết vấn đề", "mo_ta": "Học sinh đối mặt tình huống có vấn đề, đề xuất giả thuyết, giải quyết và rút ra kiến thức.", "hop_voi": "Bài có tình huống thực tế, mâu thuẫn nhận thức, bài toán mở." },
+    { "ma": "hop_tac", "nhom": "Phổ biến", "ten": "Dạy học hợp tác (nhóm)", "mo_ta": "Học sinh làm việc nhóm có phân vai, cùng tạo sản phẩm; mỗi thành viên có trách nhiệm rõ.", "hop_voi": "Nội dung chia được thành phần việc, cần trao đổi nhiều góc nhìn." },
+    { "ma": "kham_pha", "nhom": "Phổ biến", "ten": "Dạy học khám phá, kiến tạo", "mo_ta": "Học sinh quan sát, thử nghiệm, tìm quy luật rồi tự phát biểu kiến thức.", "hop_voi": "Khái niệm, quy luật rút ra được từ ví dụ, số liệu, thí nghiệm, mô phỏng." },
+    { "ma": "dam_thoai", "nhom": "Phổ biến", "ten": "Đàm thoại gợi mở", "mo_ta": "Hệ thống câu hỏi dẫn dắt từng bước để học sinh tự tìm ra kiến thức.", "hop_voi": "Nội dung có logic suy luận nối tiếp, cần dẫn dắt từng bước." },
+    { "ma": "theo_tram", "nhom": "Tổ chức không gian", "ten": "Dạy học theo trạm", "mo_ta": "Nội dung chia thành các trạm, nhóm lần lượt đi qua từng trạm làm nhiệm vụ.", "hop_voi": "Bài có nhiều nội dung song song, độc lập tương đối; luyện tập theo mức." },
+    { "ma": "theo_goc", "nhom": "Tổ chức không gian", "ten": "Dạy học theo góc", "mo_ta": "Mỗi góc một cách tiếp cận (phân tích, quan sát, trải nghiệm, áp dụng); học sinh chọn góc theo phong cách học.", "hop_voi": "Cùng một nội dung tiếp cận được bằng nhiều cách." },
+    { "ma": "du_an", "nhom": "Dự án, liên môn", "ten": "Dạy học dự án", "mo_ta": "Học sinh thực hiện nhiệm vụ phức hợp gắn thực tiễn, tạo sản phẩm, trình bày và đánh giá.", "hop_voi": "Chủ đề nhiều tiết, gắn thực tế, có sản phẩm cụ thể." },
+    { "ma": "stem", "nhom": "Dự án, liên môn", "ten": "Giáo dục STEM", "mo_ta": "Học sinh vận dụng kiến thức khoa học, công nghệ, kĩ thuật, toán để thiết kế, chế tạo, thử nghiệm sản phẩm.", "hop_voi": "Bài có thể chuyển thành bài toán thiết kế, chế tạo." },
+    { "ma": "trai_nghiem", "nhom": "Dự án, liên môn", "ten": "Dạy học qua trải nghiệm", "mo_ta": "Học sinh trải nghiệm thực tế, quan sát, suy ngẫm, khái quát và vận dụng (chu trình Kolb).", "hop_voi": "Nội dung gắn với hoạt động thực tế, kĩ năng sống, hướng nghiệp." },
+    { "ma": "dong_vai", "nhom": "Nhập vai, tình huống", "ten": "Đóng vai", "mo_ta": "Học sinh nhập vai nhân vật, người trong cuộc để giải quyết tình huống hoặc tái hiện.", "hop_voi": "Văn học, lịch sử, pháp luật, giao tiếp, tình huống ứng xử." },
+    { "ma": "nghien_cuu_truong_hop", "nhom": "Nhập vai, tình huống", "ten": "Nghiên cứu trường hợp", "mo_ta": "Học sinh phân tích một trường hợp thật hoặc mô phỏng để rút ra kết luận, đề xuất giải pháp.", "hop_voi": "Kinh tế, pháp luật, địa lí, sinh học, sức khỏe." },
+    { "ma": "tranh_bien", "nhom": "Nhập vai, tình huống", "ten": "Tranh biện", "mo_ta": "Hai phía bảo vệ quan điểm đối lập bằng lập luận và bằng chứng.", "hop_voi": "Vấn đề có nhiều quan điểm, cần lập luận, phản biện." },
+    { "ma": "mo_hinh_5e", "nhom": "Mô hình", "ten": "Mô hình 5E", "mo_ta": "Gắn kết – Khám phá – Giải thích – Củng cố, mở rộng – Đánh giá.", "hop_voi": "Khoa học tự nhiên, toán: hình thành khái niệm qua khám phá." },
+    { "ma": "lop_hoc_dao_nguoc", "nhom": "Mô hình", "ten": "Lớp học đảo ngược", "mo_ta": "Học sinh tự học lí thuyết ở nhà, lên lớp luyện tập, vận dụng, chỉnh lỗi. KHBD theo khung riêng (Giai đoạn 1–3, HĐ I–IV).", "hop_voi": "Lí thuyết tự đọc được; lớp có nền tảng tự học." }
+  ]
+}

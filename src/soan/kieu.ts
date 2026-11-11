@@ -18,6 +18,26 @@ export const ChuanBiOut = z.object({
 });
 export type ChuanBi = z.infer<typeof ChuanBiOut>;
 
+/** Nội dung bài (bước 2): YCCĐ theo chương trình môn, đơn vị kiến thức, khó khăn thường gặp. */
+export const NoiDungBaiOut = z.object({
+  yccd: z.array(z.string()).describe('2–5 yêu cầu cần đạt theo chương trình môn GDPT 2018, mỗi ý bắt đầu bằng động từ đo được, không đánh số'),
+  donVi: z.array(z.object({
+    ten: z.string().describe('Tên đơn vị kiến thức, ngắn, đúng thuật ngữ môn'),
+    yc: z.array(z.number()).describe('Số thứ tự (từ 1) các yêu cầu cần đạt mà đơn vị này phục vụ'),
+  })).describe('2–5 đơn vị kiến thức, theo thứ tự dạy'),
+  khoKhan: z.array(z.string()).describe('2–4 khó khăn, lỗi hiểu thường gặp của học sinh khi học bài này'),
+});
+export interface DonViKienThuc { ten: string; yc: string[] }
+
+/** AI gợi ý phương pháp dạy học (bước 3); mã phải có trong data/phuong_phap_day_hoc.json. */
+export const GoiYPpdhOut = z.object({
+  phuongPhap: z.array(z.object({
+    ma: z.string().describe('Mã phương pháp, chép đúng từ danh sách được giao'),
+    lyDo: z.string().describe('Vì sao hợp với nội dung bài này (nêu đơn vị kiến thức, YCCĐ cụ thể)'),
+    apDung: z.string().describe('Dùng ở hoạt động nào, học sinh làm gì'),
+  })).describe('3–4 phương pháp hợp nhất, xếp từ hợp nhất'),
+});
+
 export const MucTieuOut = z.object({
   nangLucDacThu: z.array(z.object({
     thanhPhan: z.string().describe('Tên thành phần năng lực đặc thù, chép đúng từ danh sách được cung cấp'),
@@ -238,6 +258,12 @@ export interface Khbd {
   dauVet: DauVet[];
   capNhat: string;
   nguon?: NguonGiaoAnCu;
+  /** Bước 2: đơn vị kiến thức (theo thứ tự dạy) và khó khăn thường gặp; giáo viên xác nhận cùng YCCĐ. */
+  donVi?: DonViKienThuc[];
+  khoKhan?: string[];
+  /** Bước 3: phương pháp dạy học giáo viên chọn (mã trong data/phuong_phap_day_hoc.json), và gợi ý của AI. */
+  ppdh?: string[];
+  goiYPpdh?: { ma: string; lyDo: string; apDung: string }[];
   /** Ý tưởng xuyên suốt giáo viên đã chọn; mọi hoạt động soạn bám theo. */
   yTuong?: YTuongBai;
   /** "Hoạt động gợi ý cho bài" ở bước Lập kế hoạch: kết quả AI (theo tên bài lúc gợi ý) và mã bị luật loại. */

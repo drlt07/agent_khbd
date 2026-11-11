@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { tenPpdh } from '../../soan/phuong-phap';
 import { moTaMa, vanBanGoc, TEN_MON } from '../../thu-vien';
 import { phutTheoHoatDong } from '../../soan/phan-bo';
 import { TEN_HD, type Khbd, type MaHd } from '../../soan/kieu';
@@ -56,6 +57,7 @@ export default function XemKhbd({ k, sua, suaDuoc = false, dangSoan = [] }: { k:
       </Muc>
 
       <Muc ten="III. Tiến trình dạy học">
+        {tenPpdh(k).length > 0 && <p className="text-[15px] mb-2"><b>Phương pháp dạy học:</b> {tenPpdh(k).join('; ')}.</p>}
         {k.phuongPhap === 'lhdn' && (
           <GiaiDoan so={1} ten="Giai đoạn 1: Tự học ở nhà trước tiết học">
             {k.giaiDoan1 ? (

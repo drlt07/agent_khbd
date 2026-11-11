@@ -236,3 +236,19 @@ Góp ý của tác giả: hoạt động hình thành kiến thức phải sinh 
 - Luật prompt `rules/hoat-dong.md` phiên bản 3 (mục 9) và `TEN_VA_AI` trong mọi lời nhắc gợi ý.
 - Dữ liệu mẫu đặt lại tên gắn với bài (vd "Phá án đỉnh parabol", "Phòng thí nghiệm động năng ảo").
 - Kiểm thử `tests/ten-va-ai.test.ts`; tổng 190 đạt.
+
+## Trình tự soạn mới: 8 bước bám công văn – 11/11/2026
+
+Góp ý của tác giả: biết bài dạy gì trước, rồi mới chọn dạy thế nào, tích hợp gì, hoạt động; AI đề xuất phải bám công văn. "Dạy học thông thường" không phải phương pháp (CV 5512 là mẫu trình bày KHBD).
+
+1. **Chọn bài**: môn, lớp, bộ sách, bài (mục lục SGK dựng sẵn hoặc PPCT của tổ), số tiết, điều kiện lớp.
+2. **Nội dung bài** (`src/soan/phuong-phap.ts` `rutNoiDung`, `BuocNoiDung.tsx`): AI đề xuất YCCĐ (TT 32/2018, TT 17/2025), đơn vị kiến thức gắn mã YCCĐ, khó khăn thường gặp; giáo viên sửa, xác nhận (luật 1.2). Báo YCCĐ chưa có đơn vị.
+3. **Phương pháp** (`data/phuong_phap_day_hoc.json`, 14 phương pháp, căn cứ CV 5512; `BuocPhuongPhap.tsx`): AI gợi ý 3–4 phương pháp kèm lí do gắn nội dung bài và chỗ áp dụng (luật: chỉ mã trong danh sách); giáo viên chọn 1–2. Chọn "Lớp học đảo ngược" thì dùng khung LHĐN, còn lại trình bày theo mẫu Phụ lục IV CV 5512. Phân bổ thời lượng đặt ở bước này.
+4. **Tích hợp**: năng lực số, năng lực AI, tiếng Anh (AI gợi ý mã theo nội dung và phương pháp; giáo viên tích chọn).
+5. **Hoạt động**: "Hoạt động gợi ý cho bài" (bám đơn vị kiến thức, khó khăn, phương pháp, mã).
+6. Soạn nội dung · 7. Kiểm tra, duyệt · 8. Tải về.
+
+- Đơn vị kiến thức, khó khăn, phương pháp đi vào bối cảnh mọi lần AI soạn; Hoạt động 2 (CV 5512) hình thành lần lượt từng đơn vị kiến thức. File Word và bản xem ghi "Phương pháp dạy học: …" ở mục III.
+- Bản nháp cũ (5 bước) được đổi số bước tự động; trường mặc định LHĐN chọn sẵn phương pháp này.
+- Chưa làm: tách Hoạt động 2 thành các hoạt động con 2.1, 2.2… theo đơn vị kiến thức (hiện một hoạt động hình thành lần lượt các đơn vị).
+- Kiểm thử `tests/trinh-tu.test.ts`; tổng 199 đạt. Đã chạy cả 8 bước với bài mẫu trên trình duyệt.

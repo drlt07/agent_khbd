@@ -15,6 +15,7 @@ import type { GoiAi } from './ai';
 import { coBatAi, coDungAi, coTrongDanhSach, ganVoiBai, HAP_DAN_HINH_THANH, kepTuCham, laChungChung, laNhatHoacKhongHop, LOI_AI, LOI_TEN, nguyenTacHoatDong, NHOM_HINH_THUC, TEN_VA_AI, tieuChiThap, tongDiemGoiY, tuKhoaBai } from './goi-y';
 import { phutTheoHoatDong } from './phan-bo';
 import { HUONG_DAN_HD } from './prompt';
+import { layPpdh, MA_LHDN } from './phuong-phap';
 import { NganHangOut, PhuongAnHdOut, TEN_HD, type Khbd, type MaHd, type NganHang, type PhuongAnHd } from './kieu';
 
 export const MA_HD: MaHd[] = ['HD1', 'HD2', 'HD3', 'HD4'];
@@ -54,6 +55,9 @@ export function nhacNganHang(k: Khbd, yeuCau = '', hd: MaHd = 'HD1', daCo: Phuon
     `Môn ${TEN_MON[k.mon]}, lớp ${k.lop}, bài "${k.bai}"${k.boSach.trim() ? ` (bộ sách ${k.boSach.trim()})` : ''}, ${k.soTiet} tiết.`,
     k.yccd.length ? `Yêu cầu cần đạt:\n${k.yccd.map((y) => `${y.ma}: ${y.noiDung}`).join('\n')}` : 'Yêu cầu cần đạt: giáo viên chưa xác nhận; bám chương trình môn học GDPT 2018 của bài này.',
     `Thiết bị lớp đang có (chỉ được dùng các thứ này): ${k.dieuKien.thietBi.join('; ') || 'chỉ bảng và phấn'}. Mức học sinh: ${{ yeu: 'yếu', tb: 'trung bình', kha: 'khá' }[k.dieuKien.mucHs]}.${k.dieuKien.ghiChu.trim() ? ` Ghi chú của giáo viên: ${k.dieuKien.ghiChu.trim()}` : ''}`,
+    k.donVi?.length ? `Đơn vị kiến thức (theo thứ tự dạy): ${k.donVi.map((d, i) => `(${i + 1}) ${d.ten}`).join('; ')}.` : '',
+    k.khoKhan?.length ? `Khó khăn thường gặp: ${k.khoKhan.join('; ')}.` : '',
+    (k.ppdh ?? []).filter((m) => m !== MA_LHDN).length ? `Phương pháp dạy học giáo viên đã chọn (phương án phải thể hiện phương pháp này): ${(k.ppdh ?? []).filter((m) => m !== MA_LHDN).map((m) => layPpdh(m)?.ten).filter(Boolean).join('; ')}.` : '',
     `Các hoạt động của bài (${k.phuongPhap === 'lhdn' ? 'lớp học đảo ngược, học sinh đã tự học lí thuyết ở nhà' : 'dạy học thông thường theo CV 5512'}): ${MA_HD.map((h) => `${h} – ${TEN_HD[k.phuongPhap][h]} (${phut[h]} phút)`).join('; ')}.`,
     `HOẠT ĐỘNG CẦN GỢI Ý LẦN NÀY: ${hd} – ${TEN_HD[k.phuongPhap][hd]} (tối đa ${phut[hd]} phút). Định hướng: ${HUONG_DAN_HD[k.phuongPhap][hd]}`,
     daCo.length ? '' : `Để cả bài đa dạng, ${hd} chọn 3 trong 4 nhóm hình thức sau (chỉ dùng nhóm khác khi thật sự hợp bài hơn): ${nhomUuTien(k, hd).map((n) => `${n} (${NHOM_HINH_THUC[n]})`).join('; ')}.`,

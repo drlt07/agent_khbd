@@ -11,12 +11,15 @@ import { danhSachPhan } from '../../soan/quy-trinh';
 import type { Khbd } from '../../soan/kieu';
 import { coNoiDung, dungHoatDong, khbdMoi, useBanNhap, xoaNoiDung } from './trang-thai';
 import Buoc1ThongTin from './Buoc1ThongTin';
-import Buoc2KeHoach from './Buoc2KeHoach';
+import BuocNoiDung from './BuocNoiDung';
+import BuocPhuongPhap from './BuocPhuongPhap';
+import NganHangHoatDong from './NganHangHoatDong';
 import Buoc3Soan from './Buoc3Soan';
 import Buoc4KiemTra from './Buoc4KiemTra';
 import Buoc5TaiVe from './Buoc5TaiVe';
 
-const BUOC = ['Chọn tích hợp', 'Lập kế hoạch', 'Soạn nội dung', 'Kiểm tra, duyệt', 'Tải về'];
+/** Trình tự: biết bài dạy gì → dạy thế nào → tích hợp gì → hoạt động → soạn. */
+export const BUOC = ['Chọn bài', 'Nội dung bài', 'Phương pháp', 'Tích hợp', 'Hoạt động', 'Soạn nội dung', 'Kiểm tra, duyệt', 'Tải về'];
 
 export default function SoanBai() {
   const { phien } = usePhien();
@@ -48,7 +51,10 @@ export default function SoanBai() {
   const choPhep = [
     true,
     !!k.bai.trim(),
-    k.yccdDaXacNhan && kiemTraPhanBo(k.phanBo, k.soTiet, k.phuongPhap).nghiem.length === 0,
+    k.yccdDaXacNhan,
+    (k.ppdh ?? []).length > 0 && kiemTraPhanBo(k.phanBo, k.soTiet, k.phuongPhap).nghiem.length === 0,
+    true,
+    true,
     danhSachPhan(k).every((p) => (p.ma === 'mucTieu' ? !!k.mucTieu : p.ma === 'giaiDoan1' ? !!k.giaiDoan1 : p.ma === 'giaiDoan3' ? !!k.giaiDoan3 : p.ma === 'tichHop' ? true : !!k.hoatDong.find((h) => h.ma === p.ma)?.noiDung)),
     !chanXuat(kiemTraKhbd(k)),
   ];
@@ -81,20 +87,25 @@ export default function SoanBai() {
 
       {/* Đổi bước: nội dung mới mờ dần và nhích lên, cho biết đã sang bước khác */}
       <div key={buoc} className="vao">
-        {buoc === 0 && <Buoc1ThongTin k={k} sua={doiNen} ai={ai} />}
-        {buoc === 1 && <Buoc2KeHoach k={k} sua={sua} ai={ai} />}
-        {buoc === 2 && <Buoc3Soan k={k} datKhbd={(x) => datKhbd(x)} ai={ai} />}
-        {buoc === 3 && <Buoc4KiemTra k={k} sua={sua} ai={ai} datKhbd={(x) => datKhbd(x)} />}
-        {buoc === 4 && <Buoc5TaiVe k={k} baiMoi={baiMoi} />}
+        {buoc === 0 && <Buoc1ThongTin k={k} sua={doiNen} ai={ai} phan="bai" />}
+        {buoc === 1 && <BuocNoiDung k={k} sua={sua} ai={ai} />}
+        {buoc === 2 && <BuocPhuongPhap k={k} sua={sua} doiNen={doiNen} ai={ai} />}
+        {buoc === 3 && <Buoc1ThongTin k={k} sua={sua} ai={ai} phan="tichHop" />}
+        {buoc === 4 && <NganHangHoatDong k={k} sua={sua} ai={ai} />}
+        {buoc === 5 && <Buoc3Soan k={k} datKhbd={(x) => datKhbd(x)} ai={ai} />}
+        {buoc === 6 && <Buoc4KiemTra k={k} sua={sua} ai={ai} datKhbd={(x) => datKhbd(x)} />}
+        {buoc === 7 && <Buoc5TaiVe k={k} baiMoi={baiMoi} />}
       </div>
 
-      {buoc < 4 && (
+      {buoc < BUOC.length - 1 && (
         <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-line pt-5">
           {buoc > 0 && <Nut onClick={() => datBuoc(buoc - 1)}>Quay lại</Nut>}
           <Nut kieu="chinh" disabled={!choPhep[buoc + 1]} onClick={() => datBuoc(buoc + 1)}>Tiếp: {BUOC[buoc + 1]}<BieuTuong ten="arrow" className="w-4 h-4" /></Nut>
           {!choPhep[buoc + 1] && <span className="text-sm text-muted">{[
-            'Nhập tên bài để tiếp tục.',
-            'Xác nhận YCCĐ và để mỗi tiết đúng 45 phút.',
+            'Chọn hoặc nhập tên bài để tiếp tục.',
+            'Kiểm tra và xác nhận nội dung bài để tiếp tục.',
+            'Chọn ít nhất một phương pháp và để mỗi tiết đúng 45 phút.',
+            '', '',
             'Soạn xong mọi phần để tiếp tục.',
             'Sửa hết lỗi phải sửa để tải về.',
           ][buoc]}</span>}

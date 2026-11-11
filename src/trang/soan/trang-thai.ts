@@ -4,6 +4,7 @@ import type { CauHinhTruong } from '../../cau-hinh';
 import { TEN_HD, type Khbd, type MaHd } from '../../soan/kieu';
 import { phanBoMacDinh } from '../../soan/phan-bo';
 import { NganHangCoBoQua } from '../../soan/ngan-hang';
+import { layPpdh, MA_LHDN } from '../../soan/phuong-phap';
 import { PhuongAnHdOut } from '../../soan/kieu';
 
 const KHOA = 'khbd.ban-nhap';
@@ -18,6 +19,8 @@ export function khbdMoi(ch: CauHinhTruong): Khbd {
     dieuKien: { thietBi: ['Máy chiếu', 'Phiếu học tập in'], mucHs: 'tb', ghiChu: '' },
     yccd: [], yccdDaXacNhan: false,
     phanBo: phanBoMacDinh(phuongPhap, 1),
+    // Trường mặc định lớp học đảo ngược: chọn sẵn phương pháp này (giáo viên bỏ được)
+    ppdh: phuongPhap === 'lhdn' ? [MA_LHDN] : [],
     hoatDong: dungHoatDong(phuongPhap),
     maTichHop: [], maBo: [], dauVet: [], capNhat: new Date().toISOString(),
   };
@@ -81,6 +84,10 @@ export function chuanHoaKhbd(tho: unknown): Khbd | null {
     nganHang: NganHangCoBoQua.safeParse(k.nganHang).success ? k.nganHang : undefined,
     keHoachHd: k.keHoachHd && typeof k.keHoachHd === 'object'
       ? Object.fromEntries(Object.entries(k.keHoachHd).filter(([hd, p]) => /^HD[1-4]$/.test(hd) && PhuongAnHdOut.safeParse(p).success)) : undefined,
+    ppdh: k.ppdh === undefined ? (pp === 'lhdn' ? [MA_LHDN] : []) : mang<string>(k.ppdh).filter((m) => !!layPpdh(m)),
+    goiYPpdh: mang<any>(k.goiYPpdh).filter((g) => g && layPpdh(g.ma) && typeof g.lyDo === 'string').map((g) => ({ ma: g.ma, lyDo: g.lyDo, apDung: String(g.apDung ?? '') })),
+    donVi: mang<any>(k.donVi).filter((d) => d && typeof d.ten === 'string').map((d) => ({ ten: d.ten, yc: mang<string>(d.yc) })),
+    khoKhan: mang<string>(k.khoKhan).filter((t) => typeof t === 'string'),
     keHoachAi: mang<string>(k.keHoachAi).filter((h) => /^HD[1-4]$/.test(h)) as MaHd[],
     yTuong: k.yTuong && typeof k.yTuong === 'object' && typeof k.yTuong.ten === 'string' && Array.isArray(k.yTuong.hoatDong) ? k.yTuong : undefined,
   };
@@ -91,7 +98,10 @@ function doc(): { khbd: Khbd | null; buoc: number; laMau: boolean } | null {
     const s = localStorage.getItem(KHOA);
     if (!s) return null;
     const d = JSON.parse(s);
-    return { khbd: chuanHoaKhbd(d?.khbd), buoc: Number.isInteger(d?.buoc) ? d.buoc : 0, laMau: !!d?.laMau };
+    const buoc = Number.isInteger(d?.buoc) ? d.buoc : 0;
+    // Bản nháp trước khi đổi sang 8 bước: 0 Chọn tích hợp, 1 Lập kế hoạch, 2 Soạn, 3 Kiểm tra, 4 Tải về
+    const buocMoi = d?.phienBanBuoc === 2 ? buoc : ([0, 1, 5, 6, 7][buoc] ?? 0);
+    return { khbd: chuanHoaKhbd(d?.khbd), buoc: buocMoi, laMau: !!d?.laMau };
   } catch { return null; }
 }
 
@@ -102,7 +112,7 @@ export function useBanNhap() {
   const [laMau, datLaMau] = useState(dau.current?.laMau ?? false);
   useEffect(() => {
     const t = setTimeout(() => {
-      try { khbd ? localStorage.setItem(KHOA, JSON.stringify({ khbd: { ...khbd, capNhat: new Date().toISOString() }, buoc, laMau })) : localStorage.removeItem(KHOA); } catch { /* bộ nhớ trình duyệt bị chặn */ }
+      try { khbd ? localStorage.setItem(KHOA, JSON.stringify({ khbd: { ...khbd, capNhat: new Date().toISOString() }, buoc, laMau, phienBanBuoc: 2 })) : localStorage.removeItem(KHOA); } catch { /* bộ nhớ trình duyệt bị chặn */ }
     }, 300);
     return () => clearTimeout(t);
   }, [khbd, buoc, laMau]);

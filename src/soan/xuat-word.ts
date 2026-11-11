@@ -8,6 +8,7 @@ import { khoaDoThi, nhanHam, svgSangPng, veSvg, type DoThi } from './do-thi';
 import { laMaAi, moTaMa, vanBanGoc, TEN_MON } from '../thu-vien';
 import { phutTheoHoatDong } from './phan-bo';
 import { TEN_HD, type Khbd } from './kieu';
+import { tenPpdh } from './phuong-phap';
 import { tachDong } from './dinh-dang';
 import { dongPhuongAn, nhanCau, nhomCauHoi, tieuDeCauHoi } from './cau-hoi';
 
@@ -109,8 +110,9 @@ export function dungTaiLieu(k: Khbd, o: { dauVet?: boolean; anh?: Map<string, Ui
     if (!cb.thietBi.length && !cb.hocLieu.length) con.push(...gach('Không yêu cầu chuẩn bị riêng.'));
   });
 
-  // III. Tiến trình
+  // III. Tiến trình (ghi phương pháp dạy học giáo viên đã chọn ở bước 3)
   con.push(muc('III. TIẾN TRÌNH DẠY HỌC'));
+  if (tenPpdh(k).length) con.push(doan([chu('Phương pháp dạy học: ', { dam: true }), chu(`${tenPpdh(k).join('; ')}.`)], { canh: AlignmentType.LEFT }));
   if (k.phuongPhap === 'lhdn' && k.giaiDoan1) {
     con.push(muc('GIAI ĐOẠN 1: TỰ HỌC Ở NHÀ TRƯỚC TIẾT HỌC', MAU_GD[1]));
     con.push(doan([chu(`Nhiệm vụ của học sinh${k.nenTangTuHoc ? ` trên ${k.nenTangTuHoc}` : ''}:`, { dam: true })]));
