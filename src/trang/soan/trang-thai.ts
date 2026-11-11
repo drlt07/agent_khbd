@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from 'react';
 import type { CauHinhTruong } from '../../cau-hinh';
 import { TEN_HD, type Khbd, type MaHd } from '../../soan/kieu';
 import { phanBoMacDinh } from '../../soan/phan-bo';
+import { NganHangCoBoQua } from '../../soan/ngan-hang';
+import { PhuongAnHdOut } from '../../soan/kieu';
 
 const KHOA = 'khbd.ban-nhap';
 
@@ -26,7 +28,7 @@ export const dungHoatDong = (pp: Khbd['phuongPhap']) => (['HD1', 'HD2', 'HD3', '
 /** Xóa mọi nội dung đã soạn (khi đổi thông tin nền của bài). */
 export const xoaNoiDung = (k: Khbd): Khbd => ({
   ...k, mucTieu: undefined, giaiDoan1: undefined, giaiDoan3: undefined, clil: undefined,
-  hoatDong: dungHoatDong(k.phuongPhap), maTichHop: [], maBo: [], yTuong: undefined,
+  hoatDong: dungHoatDong(k.phuongPhap), maTichHop: [], maBo: [], yTuong: undefined, nganHang: undefined, keHoachHd: undefined,
 });
 
 export const coNoiDung = (k: Khbd) => !!(k.mucTieu || k.giaiDoan1 || k.hoatDong.some((h) => h.noiDung) || k.maTichHop.length);
@@ -76,6 +78,9 @@ export function chuanHoaKhbd(tho: unknown): Khbd | null {
     maTichHop: mang(k.maTichHop), maBo: mang(k.maBo), dauVet: mang(k.dauVet),
     capNhat: String(k.capNhat ?? ''),
     // Ý tưởng hỏng khuôn (bản nháp sửa tay, phiên bản khác) thì bỏ, không làm hỏng trang
+    nganHang: NganHangCoBoQua.safeParse(k.nganHang).success ? k.nganHang : undefined,
+    keHoachHd: k.keHoachHd && typeof k.keHoachHd === 'object'
+      ? Object.fromEntries(Object.entries(k.keHoachHd).filter(([hd, p]) => /^HD[1-4]$/.test(hd) && PhuongAnHdOut.safeParse(p).success)) : undefined,
     yTuong: k.yTuong && typeof k.yTuong === 'object' && typeof k.yTuong.ten === 'string' && Array.isArray(k.yTuong.hoatDong) ? k.yTuong : undefined,
   };
 }

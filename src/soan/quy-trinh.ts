@@ -4,11 +4,12 @@
  */
 import { z } from 'zod/v4';
 import { moTaMa, maTichHopHopLe } from '../thu-vien';
-import { GiaiDoan1Out, GiaiDoan3Out, HoatDongOut, HoatDong5512Out, tuHoatDong5512, MucTieuOut, TEN_HD, TichHopOut, YccdOut, type DauVet, type Khbd, type MaHd, type MaTichHop } from './kieu';
+import { GiaiDoan1Out, GiaiDoan3Out, HoatDongOut, HoatDong5512Out, tuHoatDong5512, MucTieuOut, TEN_HD, TichHopOut, YccdOut, type DauVet, type PhuongAnHd, type Khbd, type MaHd, type MaTichHop } from './kieu';
 import type { GoiAi } from './ai';
 import { heThong, nhacGiaiDoan1, nhacGiaiDoan3, nhacHoatDong, nhacMucTieu, nhacTichHop, nhacYccd } from './prompt';
 import { chamDiem, DIEM_DAT, kiemTraBuoc, kiemTraCauHoi, kiemTraVanBan, vanBanHoatDong, boChuNguHs } from './luat';
 import { phutTheoHoatDong } from './phan-bo';
+import { huongDanTuPhuongAn, keHoachTichHop } from './ngan-hang';
 
 export const SO_LUOT_SOAN_LAI = 2;
 export type MaPhan = 'mucTieu' | 'giaiDoan1' | MaHd | 'tichHop' | 'giaiDoan3';
@@ -65,7 +66,8 @@ export async function soanPhan(k: Khbd, phan: MaPhan, ai: GoiAi, huongDan = '', 
 
   // Hoạt động: luật 4.2 – 4.3 (nghiêm) → soạn lại tối đa 2 lượt
   const hd = phan;
-  huongDan = huongDan || k.nguon?.huongDan?.[hd] || '';
+  // Ưu tiên: phương án chọn từ "Gợi ý hoạt động" > giáo án cũ > phương án chọn ở bước Lập kế hoạch
+  huongDan = huongDan || k.nguon?.huongDan?.[hd] || (k.keHoachHd?.[hd] ? huongDanTuPhuongAn(k.keHoachHd[hd]!, k) : '');
   const ten = TEN_HD[k.phuongPhap][hd];
   const phut = phutTheoHoatDong(k.phanBo)[hd];
   // Soạn lại từ bước Kiểm tra: AI được biết bản hiện tại đang lỗi gì
@@ -95,7 +97,8 @@ async function soanTichHop(k: Khbd, ai: GoiAi): Promise<Khbd> {
   const datDuoc = new Map<string, MaTichHop>();
   const lanCuoi = new Map<string, MaTichHop>();
   let clil: Khbd['clil'] = null;
-  let nhac = nhacTichHop(k);
+  const nhacGoc = [nhacTichHop(k), keHoachTichHop(k)].filter(Boolean).join('\n\n');
+  let nhac = nhacGoc;
 
   for (let luot = 0; luot <= SO_LUOT_SOAN_LAI; luot++) {
     const r = await ai({ ten: 'tichHop', he, nhac, schema: TichHopOut });
@@ -117,7 +120,7 @@ async function soanTichHop(k: Khbd, ai: GoiAi): Promise<Khbd> {
     if (!canSoan.length) break;
     if (luot < SO_LUOT_SOAN_LAI) {
       truot.forEach((t) => dauVet.push(vet(6, `Mã ${t.split(':')[0]}`, 'soan_lai', t, luot)));
-      nhac = `${nhacTichHop(k)}\n\nChỉ soạn lại các mã chưa đạt sau, sửa đúng chỗ bị trừ điểm:\n${truot.join('\n')}`;
+      nhac = `${nhacGoc}\n\nChỉ soạn lại các mã chưa đạt sau, sửa đúng chỗ bị trừ điểm:\n${truot.join('\n')}`;
     }
   }
   const maBo = canSoan.map((ma) => {
@@ -133,6 +136,13 @@ async function soanTichHop(k: Khbd, ai: GoiAi): Promise<Khbd> {
 export const nguyenVan = moTaMa;
 
 /** Giáo viên chọn (hoặc bỏ) ý tưởng xuyên suốt: ghi dấu vết, không tự soạn lại hoạt động đã có. */
+/** Giáo viên chọn (hoặc bỏ chọn) phương án cho một hoạt động ở bước Lập kế hoạch; ghi dấu vết. */
+export function chonPhuongAn(k: Khbd, hd: MaHd, p: PhuongAnHd | undefined): Khbd {
+  const keHoachHd = { ...k.keHoachHd };
+  if (p) keHoachHd[hd] = p; else delete keHoachHd[hd];
+  return { ...k, keHoachHd, dauVet: [...k.dauVet, vet(2, `Kế hoạch ${TEN_HD[k.phuongPhap][hd]}`, 'gv_sua', p ? `Giáo viên chọn phương án: ${p.ten}` : 'Giáo viên bỏ phương án đã chọn')] };
+}
+
 export function chonYTuong(k: Khbd, y: Khbd['yTuong']): Khbd {
   return { ...k, yTuong: y, dauVet: [...k.dauVet, vet(4, 'Ý tưởng cả bài', 'gv_sua', y ? `Giáo viên chọn ý tưởng: ${y.ten}` : 'Giáo viên bỏ ý tưởng xuyên suốt')] };
 }

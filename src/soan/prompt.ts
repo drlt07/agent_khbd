@@ -60,7 +60,7 @@ export function nhacGiaiDoan1(k: Khbd): string {
   ].join('\n');
 }
 
-const HUONG_DAN_HD: Record<'lhdn' | 'cv5512', Record<MaHd, string>> = {
+export const HUONG_DAN_HD: Record<'lhdn' | 'cv5512', Record<MaHd, string>> = {
   lhdn: {
     HD1: 'Nêu tình huống mở đầu gắn thực tế (sẽ được giải trọn ở HĐ III) và 2–3 nhận định dễ nhầm ứng với lỗi hay gặp ở phần tự học, kèm kết luận đúng. Không giảng lại toàn bộ lí thuyết.',
     HD2: 'Luyện tập phân hóa: ghép nhóm cùng mức (Nắm tốt / Cần củng cố / Cần hỗ trợ), học sinh làm câu theo dạng của môn, nhận phản hồi và sửa lỗi ngay trong hoạt động, có sản phẩm ghi lại được.',

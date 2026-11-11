@@ -170,3 +170,17 @@ Vấn đề: soạn thường thì AI viết lần lượt từng hoạt động
 - AI mẫu: 3 ý tưởng cho bài Hàm số bậc hai; điểm tư duy, tự chấm cho gợi ý mẫu (cả lối Sửa KHBD cũ).
 - Kiểm thử: `tests/y-tuong.test.ts` (11) + 6 kiểm thử mới trong `tests/goi-y.test.ts`; tổng 151 đạt.
 - Giới hạn: điểm tự chấm do AI tự khai, chỉ dùng để sắp xếp và lọc; chưa chạy thử với khóa AI thật trong phiên này.
+
+## Hoạt động gợi ý cho bài + bản đồ năng lực số – 11/11/2026
+
+Phản hồi của tác giả: gợi ý chưa đủ đa dạng và đến muộn (phải vào bước Soạn nội dung, bấm từng hoạt động). Giáo viên cần AI gợi ý hoạt động ngay khi chọn bài, và cần thấy năng lực số được tích hợp cụ thể thế nào.
+
+- **Bước Lập kế hoạch – "Hoạt động gợi ý cho bài"** (`src/soan/ngan-hang.ts`, `src/trang/soan/NganHangHoatDong.tsx`): AI đưa 3 phương án cho MỖI hoạt động (12 phương án). Mỗi phương án có: cơ chế, học sinh làm gì, điểm tư duy, sản phẩm, công cụ, thời lượng, dự phòng, AI tự chấm, và **cách tích hợp năng lực số/AI** (mã – hành vi số – công cụ – minh chứng – tiêu chí "Đạt khi…").
+  - Luật code (nghiêm → AI gợi ý lại ≤ 2 lượt): mỗi hoạt động ≥ 2 phương án, các phương án của một hoạt động khác nhóm hình thức; cả bộ ≥ 6 nhóm hình thức; mỗi hoạt động ≥ 2 phương án đạt (không nhạt, đủ mục, không vượt thời lượng); mỗi mã giáo viên đã chọn có ít nhất 1 phương án tích hợp (nhắc nếu chỉ có 1). Mã ngoài thư viện bị loại và ghi lại; công cụ chưa khai báo được đánh dấu "Cần thiết bị chưa khai báo" (không chặn).
+  - Chưa chọn mã: AI gợi ý tối đa 1 mã cho phương án có hành vi số thật; giáo viên bấm "+ Thêm mã này vào tích hợp". App không tự thêm mã.
+  - Giáo viên chọn phương án cho từng hoạt động (`Khbd.keHoachHd`, ghi dấu vết; bỏ chọn được). Không chọn thì AI tự thiết kế như trước.
+  - **Bản đồ năng lực số** (`banDoNls`, luật của app): với mỗi mã đã chọn, hiện hoạt động đã chọn có mã đó và hành vi số; chưa có thì chỉ ra phương án có sẵn để chọn.
+- Soạn nội dung: phương án đã chọn thành hướng dẫn soạn hoạt động (`huongDanTuPhuongAn`; chỉ đưa mã giáo viên đã chọn – luật 3). Thứ tự ưu tiên: phương án từ "Gợi ý hoạt động" > giáo án cũ > phương án ở bước Lập kế hoạch. Bước gắn mã nhận "Kế hoạch tích hợp giáo viên đã chọn" (`keHoachTichHop`). Danh sách phần soạn ghi "Theo phương án: …".
+- Bản nháp lưu gợi ý (theo tên bài; đổi bài thì báo gợi ý cũ) và phương án đã chọn; dữ liệu hỏng khuôn bị bỏ; đổi phương pháp/số tiết thì xóa.
+- AI mẫu: 12 phương án cho Hàm số bậc hai, tích hợp 5.3.5.1 và NLc, vừa thời lượng cả hai phương pháp.
+- Kiểm thử: `tests/ngan-hang.test.ts` (14); tổng 165 đạt.

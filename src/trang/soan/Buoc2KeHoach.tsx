@@ -5,6 +5,7 @@ import { kiemTraPhanBo, phanBoMacDinh } from '../../soan/phan-bo';
 import { rutYccd } from '../../soan/quy-trinh';
 import { LoiAi, type GoiAi } from '../../soan/ai';
 import type { Khbd } from '../../soan/kieu';
+import NganHangHoatDong from './NganHangHoatDong';
 
 export default function Buoc2KeHoach({ k, sua, ai }: { k: Khbd; sua: (f: (k: Khbd) => Khbd) => void; ai: GoiAi | null }) {
   const [dang, setDang] = useState(false);
@@ -26,6 +27,7 @@ export default function Buoc2KeHoach({ k, sua, ai }: { k: Khbd; sua: (f: (k: Khb
   const danhLaiMa = (ds: Khbd['yccd']) => ds.map((y, i) => ({ ...y, ma: `YC${i + 1}` }));
 
   return (
+    <div className="flex flex-col gap-6">
     <div className="grid grid-cols-1 gap-6 xl:grid-cols-2 items-start">
       <The className="p-5">
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -91,6 +93,8 @@ export default function Buoc2KeHoach({ k, sua, ai }: { k: Khbd; sua: (f: (k: Khb
         {pb.nghiem.filter((l) => !l.startsWith('Tiết')).map((l) => <p key={l} className="text-sm text-err-fg mt-1">{l}</p>)}
         {pb.nhac.map((l) => <p key={l} className="text-sm text-warn-fg mt-1">{l}</p>)}
       </The>
+    </div>
+    <NganHangHoatDong k={k} sua={sua} ai={ai} />
     </div>
   );
 }

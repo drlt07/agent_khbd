@@ -9,7 +9,7 @@ import LUAT_HOAT_DONG from '../../rules/hoat-dong.md?raw';
 import { TEN_MON, moTaMa } from '../thu-vien';
 import type { GoiAi } from './ai';
 import { phutTheoHoatDong } from './phan-bo';
-import { TEN_HD, type Khbd, type MaHd } from './kieu';
+import { TEN_HD, TuChamOut, type Khbd, type MaHd } from './kieu';
 
 export const NHOM_HINH_THUC = {
   A: 'Nhập vai và mô phỏng xã hội', B: 'Thí nghiệm và mô phỏng khoa học', C: 'Điều tra, phá án và giải quyết vấn đề',
@@ -43,12 +43,7 @@ export const GoiYOut = z.object({
     thoiDiem: z.enum(['khoi_dong', 'hinh_thanh', 'luyen_tap', 'van_dung']),
     mucTieu: z.string(),
     diemTuDuy: z.string().describe('Điểm tư duy khó nhất học sinh phải vượt qua trong hoạt động (suy luận, so sánh, phản biện, mô hình hóa, ra quyết định gì)'),
-    tuCham: z.object({
-      tuDuy: z.number().describe('1–5: mức học sinh phải suy luận, không chỉ nhớ lại'),
-      hapDan: z.number().describe('1–5: mức tò mò, thử thách'),
-      khaThi: z.number().describe('1–5: chuẩn bị đơn giản, đúng thời lượng, đúng thiết bị lớp'),
-      bamBai: z.number().describe('1–5: mức gắn với kiến thức trọng tâm, yêu cầu cần đạt'),
-    }).describe('Tự chấm thẳng thắn theo mục 8 của nguyên tắc'),
+    tuCham: TuChamOut,
     chuanBi: z.array(z.string()).describe('Thiết bị, học liệu, công cụ; đường dẫn chính thức nếu chắc chắn'),
     kichBan: z.array(z.object({ buoc: z.string(), phut: z.number() })).describe('Từng bước, có thời gian'),
     vaiTro: z.string().describe('Ai thao tác, ai suy luận, ai phản hồi'),
@@ -71,7 +66,15 @@ export type HoatDongGoiY = GoiY['hoatDong'][number];
 /** Điểm tự chấm 1–5 (AI tự chấm, chỉ để sắp xếp và lọc phương án nhạt). */
 export const TIEU_CHI_CHAM = { tuDuy: 'Tư duy', hapDan: 'Hấp dẫn', khaThi: 'Khả thi', bamBai: 'Bám bài' } as const;
 export const DIEM_CHAM_TOI_THIEU = 3;
-export const tongDiemGoiY = (h: Pick<HoatDongGoiY, 'tuCham'>) => h.tuCham.tuDuy + h.tuCham.hapDan + h.tuCham.khaThi + h.tuCham.bamBai;
+type TuCham = z.infer<typeof TuChamOut>;
+export const tongDiemGoiY = (h: { tuCham: TuCham }) => h.tuCham.tuDuy + h.tuCham.hapDan + h.tuCham.khaThi + h.tuCham.bamBai;
+/** Tiêu chí tự chấm dưới mức tối thiểu, dạng "Tư duy 2/5". */
+export const tieuChiThap = (t: TuCham) => (Object.keys(TIEU_CHI_CHAM) as (keyof typeof TIEU_CHI_CHAM)[]).filter((c) => t[c] < DIEM_CHAM_TOI_THIEU).map((c) => `${TIEU_CHI_CHAM[c]} ${t[c]}/5`);
+/** Làm tròn, kẹp điểm tự chấm trong 1–5. */
+export const kepTuCham = (t: TuCham): TuCham => {
+  const c = (x: number) => Math.min(5, Math.max(1, Math.round(Number(x) || 1)));
+  return { tuDuy: c(t.tuDuy), hapDan: c(t.hapDan), khaThi: c(t.khaThi), bamBai: c(t.bamBai) };
+};
 
 /** Cách tổ chức nhạt, chung chung (rules/hoat-dong.md mục 7, rules/soan.md luật 8). */
 const CHUNG_CHUNG: RegExp[] = [
@@ -148,8 +151,8 @@ export function kiemTraGoiY(g: GoiY, k: Pick<Khbd, 'dieuKien'>, phutToiDa?: numb
     if (!h.cauHoiMau.trim()) loi.push('Thiếu câu hỏi hoặc nhiệm vụ mẫu.');
     if (!h.danhGia.trim() || !h.chotKienThuc.trim()) loi.push('Thiếu cách đánh giá hoặc chốt kiến thức.');
     if (!h.diemTuDuy.trim()) loi.push('Thiếu điểm tư duy khó nhất.');
-    const thap = (Object.keys(TIEU_CHI_CHAM) as (keyof typeof TIEU_CHI_CHAM)[]).filter((c) => h.tuCham[c] < DIEM_CHAM_TOI_THIEU);
-    if (thap.length) loi.push(`Nhạt: AI tự chấm thấp ở ${thap.map((c) => `${TIEU_CHI_CHAM[c]} ${h.tuCham[c]}/5`).join(', ')}.`);
+    const thap = tieuChiThap(h.tuCham);
+    if (thap.length) loi.push(`Nhạt: AI tự chấm thấp ở ${thap.join(', ')}.`);
     if (laChungChung(`${h.yTuong}\n${h.kichBan.map((b) => b.buoc).join('\n')}`)) loi.push('Nhạt: cách tổ chức chung chung (thảo luận rồi trình bày, hỏi – đáp, làm bài SGK).');
     if (h.thoiLuong > 15) loi.push(`Dài ${h.thoiLuong} phút (ưu tiên 5–15).`);
     if (phutToiDa && h.thoiLuong > phutToiDa) loi.push(`Dài hơn thời lượng hoạt động (${phutToiDa} phút).`);
@@ -173,9 +176,7 @@ export function chuanHoaGoiY(g: GoiY, k: Pick<Khbd, 'dieuKien'>): GoiY {
     hoatDong: g.hoatDong.map((h) => {
       const cc = h.congNghe.trim().toLowerCase();
       const la = cc && !daBiet.some((d) => cc.includes(d) || d.includes(cc));
-      const c = (x: number) => Math.min(5, Math.max(1, Math.round(Number(x) || 1)));
-      const tuCham = { tuDuy: c(h.tuCham.tuDuy), hapDan: c(h.tuCham.hapDan), khaThi: c(h.tuCham.khaThi), bamBai: c(h.tuCham.bamBai) };
-      return { ...h, tuCham, thoiLuong: Math.round(h.thoiLuong), canKiemTra: h.canKiemTra || !!la, kichBan: h.kichBan.map((b) => ({ ...b, phut: Math.round(b.phut) })) };
+      return { ...h, tuCham: kepTuCham(h.tuCham), thoiLuong: Math.round(h.thoiLuong), canKiemTra: h.canKiemTra || !!la, kichBan: h.kichBan.map((b) => ({ ...b, phut: Math.round(b.phut) })) };
     }),
   };
 }

@@ -66,6 +66,7 @@ export default function Buoc3Soan({ k, datKhbd, ai }: { k: Khbd; datKhbd: (k: Kh
                 </span>
                 <div className="flex-1 min-w-0">
                   <div className={`text-[15px] leading-snug ${t === 'dang' ? 'font-semibold text-accent' : ''}`}>{p.ten}</div>
+                  {laHd && k.keHoachHd?.[p.ma as MaHd] && <div className="text-[12.5px] text-muted">Theo phương án: {k.keHoachHd[p.ma as MaHd]!.ten}</div>}
                   {t === 'dang' ? <div className="text-[12.5px] text-muted cho-ai">AI đang soạn…</div>
                     : (laHd || t === 'xong' || t === 'loi') && (
                       <div className="flex gap-3 text-[12.5px] mt-0.5">
