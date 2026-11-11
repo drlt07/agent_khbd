@@ -100,6 +100,13 @@ function hoatDongCuTuongUng(k: Khbd, hd: MaHd): string {
   return cu ? `Hoạt động tương ứng trong giáo án cũ: "${cu.ten}" (${cu.phut} phút). Giữ kiến thức, đổi mới cách tổ chức:\n<<<\n${cu.noiDung}\n>>>` : '';
 }
 
+/** Phương án của các hoạt động CHƯA soạn (đang soạn song song): để hoạt động này nối đúng mạch cả bài. */
+function keHoachKhac(k: Khbd, hd: MaHd): string {
+  const ds = (['HD1', 'HD2', 'HD3', 'HD4'] as MaHd[]).filter((h) => h !== hd && k.keHoachHd?.[h] && !k.hoatDong.find((x) => x.ma === h)?.noiDung)
+    .map((h) => `${TEN_HD[k.phuongPhap][h]}: "${k.keHoachHd![h]!.ten}" – ${k.keHoachHd![h]!.yTuong}`);
+  return ds.length ? `Kế hoạch các hoạt động khác của bài (đang được soạn riêng; giữ mạch liên kết, không lặp nội dung của chúng):\n${ds.join('\n')}` : '';
+}
+
 export function nhacHoatDong(k: Khbd, hd: MaHd, huongDan = ''): string {
   const phut = phutTheoHoatDong(k.phanBo)[hd];
   const tiet = tietCuaHoatDong(k.phanBo, hd);
@@ -113,6 +120,7 @@ export function nhacHoatDong(k: Khbd, hd: MaHd, huongDan = ''): string {
       : `Chia ${phut < 10 ? '2–3' : '2–5'} bước, mỗi bước có số phút nguyên ≥ 1; tổng số phút các bước đúng bằng ${phut}. Nếu hoạt động trải qua nhiều tiết, có bước nhắc lại đầu tiết sau và chốt, giao nhiệm vụ cuối tiết trước.`,
     ma.length ? `Năng lực số/AI giáo viên đã chọn (chỉ thiết kế hành vi số trong hoạt động này nếu thật sự phù hợp, có thao tác cụ thể trên công cụ đã khai báo):\n${ma.join('\n')}` : '',
     truoc.length ? `Các hoạt động đã soạn (giữ mạch liên kết):\n${truoc.join('\n')}` : '',
+    keHoachKhac(k, hd),
     hoatDongCuTuongUng(k, hd),
       `Câu hỏi, bài tập (viết ĐẦY ĐỦ, không chỉ ghi "câu 1–4"): ${YEU_CAU_CAU_HOI[k.phuongPhap][hd]}`,
     k.phuongPhap === 'lhdn' && hd === 'HD4' && cauHd2(k).length ? `Câu HĐ II đã có (exit ticket không được trùng):\n${cauHd2(k).map((c) => `- ${c.cauHoi}`).join('\n')}` : '',

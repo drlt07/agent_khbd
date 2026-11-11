@@ -92,6 +92,17 @@ export function aiGemini(cfg: CauHinhKhoa, fetchFn: typeof fetch = fetch): GoiAi
   };
 }
 
+/** Giới hạn số yêu cầu AI chạy cùng lúc (soạn song song mà không vượt giới hạn của nhà cung cấp); yêu cầu thừa xếp hàng chờ. */
+export function gioiHan(ai: GoiAi, toiDa = 4): GoiAi {
+  let dang = 0;
+  const cho: (() => void)[] = [];
+  return async (y) => {
+    if (dang >= toiDa) await new Promise<void>((r) => cho.push(r));
+    dang++;
+    try { return await ai(y); } finally { dang--; cho.shift()?.(); }
+  };
+}
+
 export const taoAi = (cfg: CauHinhKhoa): GoiAi => (cfg.ncc === 'claude' ? aiClaude(cfg) : aiGemini(cfg));
 
 /* ---------------- Claude trong tài khoản claude.ai (chỉ bản demo) ---------------- */

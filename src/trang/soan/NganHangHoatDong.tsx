@@ -39,7 +39,7 @@ export default function NganHangHoatDong({ k, sua, ai }: { k: Khbd; sua: (f: (k:
     try {
       await goiYNganHang(k, ai, [...yeuCau, ghi].filter(Boolean).join('; '), {
         daCo: tiep ? nh!.ketQua : undefined,
-        batDauHd: (hd, thu, tong) => setTienDo(`${tenNgan(k, hd)} (${thu}/${tong})`),
+        tienDo: (xong, tong) => setTienDo(`(xong ${xong}/${tong} hoạt động)`),
         moiHd: (r) => sua((x) => ({ ...x, nganHang: { bai: x.bai, ketQua: r.ketQua, boQua: r.boQua } })),
       });
     } catch (e) { setLoi(e instanceof LoiAi ? `${e.loi.thongBao} ${e.loi.cachXuLy}` : `Không lấy được gợi ý. (${String((e as Error)?.message ?? e).slice(0, 120)})`); }
@@ -68,7 +68,7 @@ export default function NganHangHoatDong({ k, sua, ai }: { k: Khbd; sua: (f: (k:
         {conThieu && !dang && <Nut kieu="chinh" onClick={() => xin(true)} disabled={!ai} className="shrink-0">Gợi ý tiếp phần còn lại</Nut>}
         <Nut kieu={nh && !cu ? 'phu' : 'chinh'} onClick={() => xin(false)} dang={dang} disabled={!ai || dang || !k.bai.trim()} className="shrink-0">{dang ? `AI đang gợi ý ${tienDo}…` : nh && !cu ? 'Gợi ý lại từ đầu' : 'AI gợi ý hoạt động'}</Nut>
       </div>
-      {dang && <p className="text-[13px] text-muted mt-2">AI gợi ý lần lượt từng hoạt động; hoạt động nào xong hiện ngay bên dưới.</p>}
+      {dang && <p className="text-[13px] text-muted mt-2">AI gợi ý các hoạt động cùng lúc; hoạt động nào xong hiện ngay bên dưới.</p>}
       {!ai && <p className="text-sm text-warn-fg mt-2">Cần khóa AI để gợi ý. <a href="#khoa-ai" className="underline">Thêm khóa</a></p>}
       {!k.yccdDaXacNhan && <p className="text-[13px] text-muted mt-2">Mẹo: xác nhận yêu cầu cần đạt trước thì gợi ý bám bài sát hơn.</p>}
       {loi && <HopBao kieu="err" className="mt-3">{loi}{conThieu && ' Phần đã gợi ý được giữ lại; bấm “Gợi ý tiếp phần còn lại”.'}</HopBao>}

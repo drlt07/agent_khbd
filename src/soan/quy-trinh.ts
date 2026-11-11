@@ -147,12 +147,12 @@ export function chonPhuongAn(k: Khbd, hd: MaHd, p: PhuongAnHd | undefined): Khbd
  * Trước khi soạn hoạt động: hoạt động nào giáo viên chưa chọn phương án thì AI nghĩ 3 phương án (nếu chưa có),
  * luật lọc, app chọn phương án tốt nhất và ghi dấu vết. Không đụng phương án giáo viên đã chọn, không gọi AI nếu đã đủ.
  */
-export async function chuanBiKeHoach(k: Khbd, ai: GoiAi, hds: MaHd[], tc: Pick<TuyChonNganHang, 'batDauHd'> = {}): Promise<Khbd> {
+export async function chuanBiKeHoach(k: Khbd, ai: GoiAi, hds: MaHd[], tc: Pick<TuyChonNganHang, 'tienDo'> = {}): Promise<Khbd> {
   const can = hds.filter((hd) => !k.keHoachHd?.[hd] && !k.nguon?.huongDan?.[hd]);
   if (!can.length) return k;
   let nganHang = k.nganHang?.bai === k.bai ? k.nganHang : undefined;
   if (!nganHang || !nganHangDu(nganHang.ketQua)) {
-    const r = await goiYNganHang(k, ai, '', { daCo: nganHang?.ketQua, batDauHd: tc.batDauHd });
+    const r = await goiYNganHang(k, ai, '', { daCo: nganHang?.ketQua, tienDo: tc.tienDo });
     nganHang = { bai: k.bai, ketQua: r.ketQua, boQua: [...(nganHang?.boQua ?? []), ...r.boQua] };
   }
   const chon = chonTuDong(nganHang.ketQua, k, can);
@@ -163,6 +163,33 @@ export async function chuanBiKeHoach(k: Khbd, ai: GoiAi, hds: MaHd[], tc: Pick<T
     dauVet.push(vet(2, `Kế hoạch ${TEN_HD[k.phuongPhap][c.hd]}`, 'dat', `AI chọn phương án "${c.phuongAn.ten}" trong 3 phương án (${c.lyDo}); giáo viên đổi được`));
   }
   return { ...k, nganHang, keHoachHd, keHoachAi: [...new Set([...(k.keHoachAi ?? []), ...chon.map((c) => c.hd)])], dauVet };
+}
+
+/**
+ * Thứ tự soạn theo đợt; các phần trong một đợt soạn CÙNG LÚC vì không phụ thuộc nhau.
+ * Đợt 1 chạy cùng lúc với việc nghĩ phương án hoạt động. HD3, HD4 cần HD1, HD2 (giải tình huống mở đầu,
+ * không trùng câu luyện tập); phần gắn mã cần đủ 4 hoạt động.
+ */
+export const DOT_SOAN: MaPhan[][] = [['mucTieu', 'giaiDoan1', 'giaiDoan3'], ['HD1', 'HD2'], ['HD3', 'HD4'], ['tichHop']];
+
+/** Ghép kết quả của MỘT phần (soạn trên ảnh chụp `goc`, ra `moi`) vào bản hiện tại, không ghi đè phần khác soạn song song. Hàm thuần. */
+export function gopPhan(hienTai: Khbd, goc: Khbd, moi: Khbd, phan: MaPhan): Khbd {
+  const dauVet = [...hienTai.dauVet, ...moi.dauVet.slice(goc.dauVet.length)];
+  if (phan === 'mucTieu') return { ...hienTai, mucTieu: moi.mucTieu, dauVet };
+  if (phan === 'giaiDoan1') return { ...hienTai, giaiDoan1: moi.giaiDoan1, dauVet };
+  if (phan === 'giaiDoan3') return { ...hienTai, giaiDoan3: moi.giaiDoan3, dauVet };
+  if (phan === 'tichHop') return { ...hienTai, maTichHop: moi.maTichHop, maBo: moi.maBo, clil: moi.clil, dauVet };
+  return { ...hienTai, hoatDong: hienTai.hoatDong.map((h) => (h.ma === phan ? moi.hoatDong.find((x) => x.ma === phan) ?? h : h)), dauVet };
+}
+
+/** Ghép kết quả chuanBiKeHoach vào bản hiện tại; phương án giáo viên vừa chọn trong lúc chờ được giữ. Hàm thuần. */
+export function gopKeHoach(hienTai: Khbd, goc: Khbd, moi: Khbd): Khbd {
+  if (moi === goc) return hienTai;
+  // Hoạt động giáo viên tự chọn/đổi trong lúc AI đang nghĩ: lựa chọn của giáo viên thắng
+  const gvDoi = (['HD1', 'HD2', 'HD3', 'HD4'] as MaHd[]).filter((hd) => hienTai.keHoachHd?.[hd] && hienTai.keHoachHd[hd] !== goc.keHoachHd?.[hd]);
+  const keHoachHd = { ...moi.keHoachHd };
+  for (const hd of gvDoi) keHoachHd[hd] = hienTai.keHoachHd![hd];
+  return { ...hienTai, nganHang: moi.nganHang, keHoachHd, keHoachAi: (moi.keHoachAi ?? []).filter((hd) => !gvDoi.includes(hd)), dauVet: [...hienTai.dauVet, ...moi.dauVet.slice(goc.dauVet.length)] };
 }
 
 export function chonYTuong(k: Khbd, y: Khbd['yTuong']): Khbd {

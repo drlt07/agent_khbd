@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { PhuongAnMotHdOut, banDoNls, chonTuDong, chuanHoaNganHang, goiYNganHang, huongDanTuPhuongAn, kiemTraNganHang, keHoachTichHop, nganHangDu, nhacNganHang } from '../src/soan/ngan-hang';
 import { aiSample, LoiAi, loiTuSample } from '../src/soan/ai';
-import { chonPhuongAn, chuanBiKeHoach, soanPhan } from '../src/soan/quy-trinh';
+import { chonPhuongAn, chuanBiKeHoach, DOT_SOAN, gopKeHoach, gopPhan, soanPhan } from '../src/soan/quy-trinh';
+import { gioiHan } from '../src/soan/ai';
 import { phanBoMacDinh } from '../src/soan/phan-bo';
 import { aiMau, khbdMau } from '../src/soan/mau';
 import { chuanHoaKhbd, xoaNoiDung } from '../src/trang/soan/trang-thai';
@@ -78,7 +79,8 @@ describe('Hoạt động gợi ý cho bài – luật', () => {
     const n = nhacNganHang(k, 'Lớp yếu');
     expect(n).toContain('5.3.5.1 (năng lực số, TT 02/2025)');
     expect(n).toContain('ít nhất 2 phương án');
-    expect(n).toContain('NLa');
+    expect(n).not.toContain('1.1.5.2:'); // đã chọn mã thì không gửi cả thư viện
+    expect(n).toContain('chọn 3 trong 4 nhóm hình thức');
     expect(n).toContain('HOẠT ĐỘNG CẦN GỢI Ý LẦN NÀY: HD1 – Hoạt động 1: Mở đầu (tối đa 5 phút)');
     const n2 = nhacNganHang(k, '', 'HD3', tot().phuongAn.filter((p) => p.hd === 'HD1'));
     expect(n2).toContain('HOẠT ĐỘNG CẦN GỢI Ý LẦN NÀY: HD3');
@@ -86,7 +88,10 @@ describe('Hoạt động gợi ý cho bài – luật', () => {
     expect(n2).toContain('Mã CHƯA có phương án nào tích hợp: 5.3.5.1');
     expect(n2).not.toMatch(/\n0\n/);
     expect(n).toContain('Lớp yếu');
-    expect(nhacNganHang({ ...k, tichHop: { nls: [], ai: [], tiengAnh: 'khong' } })).toContain('Giáo viên chưa chọn mã');
+    const n0 = nhacNganHang({ ...k, tichHop: { nls: [], ai: [], tiengAnh: 'khong' } });
+    expect(n0).toContain('Giáo viên chưa chọn mã');
+    expect(n0).toContain('NLa');
+    expect(n0).toContain('1.1.5.2:');
   });
 });
 
@@ -98,33 +103,41 @@ describe('Hoạt động gợi ý cho bài – quy trình', () => {
     const nh = bo(hd, dem.filter((x) => x === hd).length);
     return y.schema.parse({ ...nh, phuongAn: nh.phuongAn.filter((p) => p.hd === hd) });
   };
-  it('gợi ý lần lượt 4 hoạt động; hoạt động chưa đạt thì gợi ý lại riêng hoạt động đó', async () => {
+  it('gợi ý 4 hoạt động cùng lúc; hoạt động chưa đạt thì gợi ý lại riêng hoạt động đó', async () => {
     const dem: string[] = [];
     const xau = tot(); xau.phuongAn = xau.phuongAn.map((p) => ({ ...p, nhom: 'J' as const }));
     const moi: number[] = [];
     const r = await goiYNganHang(k, aiTheoHd((hd, lan) => (hd === 'HD2' && lan === 1 ? xau : tot()), dem), '', { moiHd: (x) => moi.push(x.ketQua.phuongAn.length) });
-    expect(dem).toEqual(['HD1', 'HD2', 'HD2', 'HD3', 'HD4']);
+    expect(dem).toEqual(['HD1', 'HD2', 'HD3', 'HD4', 'HD2']);
     expect(moi).toEqual([3, 6, 9, 12]);
     expect(r.luot).toBe(1);
     expect(r.luat.nghiem).toEqual([]);
     expect(nganHangDu(r.ketQua)).toBe(true);
   });
-  it('lần cuối kiểm cả bộ: mã đã chọn chưa có phương án nào thì gợi ý lại hoạt động cuối', async () => {
+  it('xong cả bộ mới kiểm mã đã chọn: chưa phương án nào tích hợp thì gợi ý lại hoạt động vận dụng (HD3)', async () => {
     const dem: string[] = [];
     const khongMa = tot(); khongMa.phuongAn = khongMa.phuongAn.map((p) => ({ ...p, nls: [] }));
-    await goiYNganHang(k, aiTheoHd((hd, lan) => (hd === 'HD4' && lan > 1 ? tot() : hd === 'HD4' ? khongMa : khongMa), dem));
-    expect(dem.filter((x) => x === 'HD4').length).toBe(3);
+    const r = await goiYNganHang(k, aiTheoHd((hd, lan) => (hd === 'HD3' && lan > 1 ? tot() : khongMa), dem));
+    expect(dem).toEqual(['HD1', 'HD2', 'HD3', 'HD4', 'HD3']);
+    expect(r.luat.nghiem).toEqual([]);
+    expect(r.ketQua.phuongAn).toHaveLength(12);
+  });
+  it('các yêu cầu chạy song song, không chờ nhau', async () => {
+    let dang = 0, dinh = 0;
+    const ai: GoiAi = async (y) => { dang++; dinh = Math.max(dinh, dang); await new Promise((r) => setTimeout(r, 20)); dang--; const hd = y.nhac.match(/LẦN NÀY: (HD\d)/)![1]; const nh = tot(); return y.schema.parse({ ...nh, phuongAn: nh.phuongAn.filter((p) => p.hd === hd) }); };
+    await goiYNganHang(k, ai);
+    expect(dinh).toBe(4);
   });
   it('bị ngắt giữa chừng: phần đã xong vẫn được giữ; gợi ý tiếp chỉ gọi hoạt động còn thiếu', async () => {
     let giu: NganHang | undefined;
     const dem: string[] = [];
     const hong: GoiAi = async (y) => { if (/LẦN NÀY: HD3/.test(y.nhac)) throw loiTuSample({ code: 'upstream_error' }); return aiTheoHd(() => tot(), dem)(y); };
     await expect(goiYNganHang(k, hong, '', { moiHd: (x) => { giu = x.ketQua; } })).rejects.toBeInstanceOf(LoiAi);
-    expect(giu!.phuongAn.map((p) => p.hd)).toEqual(['HD1', 'HD1', 'HD1', 'HD2', 'HD2', 'HD2']);
+    expect(giu!.phuongAn.map((p) => p.hd)).toEqual(['HD1', 'HD1', 'HD1', 'HD2', 'HD2', 'HD2', 'HD4', 'HD4', 'HD4']);
     expect(nganHangDu(giu!)).toBe(false);
     const dem2: string[] = [];
     const r = await goiYNganHang(k, aiTheoHd(() => tot(), dem2), '', { daCo: giu });
-    expect(dem2).toEqual(['HD3', 'HD4']);
+    expect(dem2).toEqual(['HD3']);
     expect(r.ketQua.phuongAn).toHaveLength(12);
     expect(r.luat.nghiem).toEqual([]);
   });
@@ -243,5 +256,40 @@ describe('AI tự chọn phương án khi giáo viên chưa chọn', () => {
     const k4 = chonPhuongAn(k2, 'HD2', k2.nganHang!.ketQua.phuongAn[5]);
     expect(k4.keHoachAi).toEqual(['HD1', 'HD3', 'HD4']);
     expect((await chuanBiKeHoach(k4, ai, ['HD2'])).keHoachHd!.HD2!.ten).toBe('Thí nghiệm xe lăn');
+  });
+});
+
+describe('Soạn song song', () => {
+  it('ghép từng phần vào bản mới nhất, không ghi đè phần khác soạn cùng lúc; dấu vết nối đủ', () => {
+    const hdMoi = (ma: 'HD1' | 'HD2') => ({ ...k, hoatDong: k.hoatDong.map((h) => (h.ma === ma ? { ...h, phut: 5, noiDung: { mucTieu: ma, noiDung: 'n', sanPham: 's', buoc: [], cauHoi: [], anToan: '' } } : h)), dauVet: [...k.dauVet, { buoc: 6, phan: ma, ketQua: 'dat' as const, thoiDiem: '' }] });
+    let cur = gopPhan(k, k, hdMoi('HD1'), 'HD1');
+    cur = gopPhan(cur, k, hdMoi('HD2'), 'HD2');
+    cur = gopPhan(cur, k, { ...k, giaiDoan3: { viec: ['v'] } }, 'giaiDoan3');
+    expect(cur.hoatDong.map((h) => h.noiDung?.mucTieu)).toEqual(['HD1', 'HD2', undefined, undefined]);
+    expect(cur.giaiDoan3?.viec).toEqual(['v']);
+    expect(cur.dauVet.map((d) => d.phan)).toEqual(['HD1', 'HD2']);
+  });
+  it('các đợt soạn: hoạt động 3, 4 sau hoạt động 1, 2; gắn mã sau cùng; đủ mọi phần', () => {
+    const phang = DOT_SOAN.flat();
+    expect([...phang].sort()).toEqual(['HD1', 'HD2', 'HD3', 'HD4', 'giaiDoan1', 'giaiDoan3', 'mucTieu', 'tichHop']);
+    const dot = (p: string) => DOT_SOAN.findIndex((d) => d.includes(p as never));
+    expect(dot('HD3')).toBeGreaterThan(dot('HD1'));
+    expect(dot('HD4')).toBeGreaterThan(dot('HD2'));
+    expect(dot('tichHop')).toBe(DOT_SOAN.length - 1);
+  });
+  it('giáo viên chọn phương án trong lúc AI đang nghĩ: lựa chọn của giáo viên được giữ', () => {
+    const nh = tot();
+    const moi = { ...k, nganHang: { bai: k.bai, ketQua: nh, boQua: [] }, keHoachHd: { HD1: nh.phuongAn[0], HD2: nh.phuongAn[3] }, keHoachAi: ['HD1', 'HD2'] as ('HD1' | 'HD2')[] };
+    const hienTai = chonPhuongAn(k, 'HD2', nh.phuongAn[5]);
+    const r = gopKeHoach(hienTai, k, moi);
+    expect(r.keHoachHd!.HD2!.ten).toBe('Thí nghiệm xe lăn');
+    expect(r.keHoachHd!.HD1!.ten).toBe('Đoán va chạm');
+    expect(r.keHoachAi).toEqual(['HD1']);
+  });
+  it('giới hạn số yêu cầu AI chạy cùng lúc, yêu cầu thừa xếp hàng', async () => {
+    let dang = 0, dinh = 0;
+    const ai = gioiHan(async (y) => { dang++; dinh = Math.max(dinh, dang); await new Promise((r) => setTimeout(r, 10)); dang--; return y.schema.parse({ phuongAn: [] }); }, 3);
+    await Promise.all(Array.from({ length: 8 }, () => ai({ ten: 'x', he: '', nhac: '', schema: PhuongAnMotHdOut })));
+    expect(dinh).toBe(3);
   });
 });

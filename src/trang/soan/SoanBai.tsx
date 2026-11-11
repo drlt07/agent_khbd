@@ -3,7 +3,7 @@ import { TieuDe, The, HopBao, Nut } from '../../thanh-phan/chung';
 import { BieuTuong } from '../../thanh-phan/bieu-tuong';
 import { usePhien } from '../../phien';
 import { docKhoa, TEN_NCC, LA_BAN_DEMO } from '../../khoa-ai/khoa';
-import { aiSample, laySample, taoAi, type GoiAi, type HamSample } from '../../soan/ai';
+import { aiSample, gioiHan, laySample, taoAi, type GoiAi, type HamSample } from '../../soan/ai';
 import { aiMau, khbdMau } from '../../soan/mau';
 import { kiemTraPhanBo, phanBoMacDinh } from '../../soan/phan-bo';
 import { chanXuat, kiemTraKhbd } from '../../soan/luat';
@@ -28,7 +28,7 @@ export default function SoanBai() {
   const [sample, setSample] = useState<HamSample | null>(null);
   useEffect(() => { if (LA_BAN_DEMO) laySample().then(setSample); }, []);
   const dungSample = LA_BAN_DEMO && !!sample;
-  const ai: GoiAi | null = useMemo(() => (laMau ? aiMau : dungSample ? aiSample(sample!) : khoa ? taoAi(khoa) : null), [laMau, dungSample, sample, khoa?.khoa, khoa?.ncc, khoa?.moHinh]);
+  const ai: GoiAi | null = useMemo(() => (laMau ? aiMau : dungSample ? gioiHan(aiSample(sample!), 3) : khoa ? gioiHan(taoAi(khoa), 4) : null), [laMau, dungSample, sample, khoa?.khoa, khoa?.ncc, khoa?.moHinh]);
 
   if (!khbd) return <ManHinhDau ch={ch} batDau={(k, mau) => { datKhbd(k); datLaMau(mau); datBuoc(mau ? 1 : 0); }} coKhoa={!!khoa} dungSample={dungSample} />;
 

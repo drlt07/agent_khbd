@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { The, HopBao, Nut, NhanAiLam } from '../../thanh-phan/chung';
 import { BieuTuong } from '../../thanh-phan/bieu-tuong';
-import { chonPhuongAn, chonYTuong, chuanBiKeHoach, danhSachPhan, soanPhan, type MaPhan } from '../../soan/quy-trinh';
+import { chonPhuongAn, chonYTuong, chuanBiKeHoach, danhSachPhan, DOT_SOAN, gopKeHoach, gopPhan, soanPhan, type MaPhan } from '../../soan/quy-trinh';
 import { kiemTraNganHang, laNhat } from '../../soan/ngan-hang';
 import { TEN_HD } from '../../soan/kieu';
 import { TheP } from './NganHangHoatDong';
@@ -18,7 +18,7 @@ const daCo = (k: Khbd, p: MaPhan) => (p === 'mucTieu' ? !!k.mucTieu : p === 'gia
     : !!k.hoatDong.find((h) => h.ma === p)?.noiDung);
 
 export default function Buoc3Soan({ k, datKhbd, ai }: { k: Khbd; datKhbd: (k: Khbd) => void; ai: GoiAi | null }) {
-  const [dangChay, setDangChay] = useState<MaPhan | null>(null);
+  const [dangChay, setDangChay] = useState<MaPhan[]>([]);
   const [goiYCho, setGoiYCho] = useState<MaHd | null>(null);
   const [doiCho, setDoiCho] = useState<MaHd | null>(null);
   /** AI đang nghĩ phương án cho hoạt động nào (trước khi soạn) */
@@ -27,47 +27,60 @@ export default function Buoc3Soan({ k, datKhbd, ai }: { k: Khbd; datKhbd: (k: Kh
   const huy = useRef(false);
   const kRef = useRef(k); kRef.current = k;
   const phan = danhSachPhan(k);
-  const tt = (p: MaPhan): TrangThai => (dangChay === p ? 'dang' : loi[p] ? 'loi' : daCo(k, p) ? 'xong' : 'cho');
+  const tt = (p: MaPhan): TrangThai => (dangChay.includes(p) ? 'dang' : loi[p] ? 'loi' : daCo(k, p) ? 'xong' : 'cho');
 
+  /** Áp một thay đổi lên bản mới nhất (nhiều phần soạn song song cùng ghi vào). */
+  const ap = (f: (k: Khbd) => Khbd) => { const moi = f(kRef.current); kRef.current = moi; datKhbd(moi); };
+  const baoLoi = (e: unknown) => (e instanceof LoiAi ? e.loi : { thongBao: 'Không soạn được phần này.', cachXuLy: String((e as Error).message) });
+
+  /** Soạn một phần trên ảnh chụp hiện tại rồi ghép riêng phần đó vào bản mới nhất. */
+  const soanMot = async (p: MaPhan): Promise<boolean> => {
+    if (!ai) return false;
+    setDangChay((d) => [...d, p]); setLoi((l) => ({ ...l, [p]: undefined }));
+    const goc = kRef.current;
+    try { const moi = await soanPhan(goc, p, ai); ap((c) => gopPhan(c, goc, moi, p)); return true; }
+    catch (e) { setLoi((l) => ({ ...l, [p]: baoLoi(e) })); return false; }
+    finally { setDangChay((d) => d.filter((x) => x !== p)); }
+  };
+
+  /** Hoạt động chưa có phương án: AI nghĩ 3 phương án (4 hoạt động cùng lúc), luật lọc, chọn phương án tốt nhất. */
+  const nghiKeHoach = async (hds: MaHd[]) => {
+    if (!ai || !hds.some((hd) => !kRef.current.keHoachHd?.[hd] && !kRef.current.nguon?.huongDan?.[hd])) return;
+    setNghi('…'); setLoi((l) => ({ ...l, keHoach: undefined }));
+    const goc = kRef.current;
+    try {
+      const moi = await chuanBiKeHoach(goc, ai, hds, { tienDo: (xong, tong) => setNghi(tong ? `(xong ${xong}/${tong})` : '…') });
+      ap((c) => gopKeHoach(c, goc, moi));
+    } catch (e) {
+      // Không nghĩ được phương án thì vẫn soạn như cũ, báo cho giáo viên biết
+      const l0 = baoLoi(e);
+      setLoi((l) => ({ ...l, keHoach: { thongBao: `Chưa nghĩ được phương án hoạt động: ${l0.thongBao}`, cachXuLy: `AI vẫn soạn tiếp, không theo phương án. ${l0.cachXuLy}` } }));
+    }
+    setNghi('');
+  };
+
+  /** Soạn theo đợt (DOT_SOAN): các phần không phụ thuộc nhau chạy cùng lúc. Đợt đầu chạy song song với việc nghĩ phương án. */
   const chay = async (ds: MaPhan[]) => {
     if (!ai) return;
     huy.current = false;
-    // Hoạt động chưa có phương án: AI nghĩ 3 phương án, luật lọc, chọn phương án tốt nhất rồi mới soạn
     const hds = ds.filter((p): p is MaHd => /^HD\d$/.test(p));
-    if (hds.length) {
-      setNghi('…'); setLoi((l) => ({ ...l, keHoach: undefined }));
-      try {
-        const moi = await chuanBiKeHoach(kRef.current, ai, hds, { batDauHd: (hd, thu, tong) => setNghi(`${TEN_HD[kRef.current.phuongPhap][hd].split(/[.:]/)[0]} (${thu}/${tong})`) });
-        kRef.current = moi; datKhbd(moi);
-      } catch (e) {
-        // Không nghĩ được phương án thì vẫn soạn như cũ, báo cho giáo viên biết
-        setLoi((l) => ({ ...l, keHoach: e instanceof LoiAi ? { thongBao: `Chưa nghĩ được phương án hoạt động: ${e.loi.thongBao}`, cachXuLy: `AI vẫn soạn tiếp, không theo phương án. ${e.loi.cachXuLy}` } : { thongBao: 'Chưa nghĩ được phương án hoạt động.', cachXuLy: 'AI vẫn soạn tiếp, không theo phương án.' } }));
-      }
-      setNghi('');
+    const [dau, ...con] = DOT_SOAN.map((dot) => dot.filter((p) => ds.includes(p)));
+    let ok = (await Promise.all([nghiKeHoach(hds).then(() => true), ...dau.map(soanMot)])).every(Boolean);
+    for (const dot of con) {
+      if (!ok || huy.current) break;
+      if (dot.length) ok = (await Promise.all(dot.map(soanMot))).every(Boolean);
     }
-    for (const p of ds) {
-      if (huy.current) break;
-      setDangChay(p); setLoi((l) => ({ ...l, [p]: undefined }));
-      try {
-        const moi = await soanPhan(kRef.current, p, ai);
-        kRef.current = moi; datKhbd(moi);
-      } catch (e) {
-        setLoi((l) => ({ ...l, [p]: e instanceof LoiAi ? e.loi : { thongBao: 'Không soạn được phần này.', cachXuLy: String((e as Error).message) } }));
-        break;
-      }
-    }
-    setDangChay(null);
   };
   const conLai = phan.filter((p) => !daCo(k, p.ma)).map((p) => p.ma);
   const soXong = phan.length - conLai.length;
-  const busy = !!dangChay || !!nghi;
+  const busy = dangChay.length > 0 || !!nghi;
   const luatNh = k.nganHang ? kiemTraNganHang(k.nganHang.ketQua, k) : null;
 
   return (
     <div className="grid grid-cols-1 gap-6 xl:grid-cols-[340px_1fr] items-start">
       <The className="p-5 xl:sticky xl:top-4">
         <div className="flex items-center justify-between gap-2"><h2 className="text-base">Soạn từng phần</h2><NhanAiLam ai="ai" /></div>
-        <p className="text-sm text-muted mt-1">Mỗi phần qua luật kiểm tra; sai thì AI soạn lại tối đa 2 lượt.</p>
+        <p className="text-sm text-muted mt-1">Các phần không phụ thuộc nhau được soạn cùng lúc. Mỗi phần qua luật kiểm tra; sai thì AI soạn lại tối đa 2 lượt.</p>
         {/* Tiến độ: bao nhiêu phần đã xong; vệt sáng chạy khi AI đang làm */}
         <div className="mt-4 flex items-center gap-3">
           <div className="relative flex-1 h-1.5 rounded-full bg-surface-2 border border-line overflow-hidden" role="progressbar" aria-valuemin={0} aria-valuemax={phan.length} aria-valuenow={soXong} aria-label="Tiến độ soạn">
@@ -76,7 +89,7 @@ export default function Buoc3Soan({ k, datKhbd, ai }: { k: Khbd; datKhbd: (k: Kh
           </div>
           <span className="text-[13px] text-muted so shrink-0">{soXong}/{phan.length}</span>
         </div>
-        {nghi && <div className="vao mt-3 rounded-lg bg-accent-soft px-3 py-2 text-[13.5px] cho-ai"><b className="text-accent">AI đang nghĩ phương án hoạt động {nghi}</b><br /><span className="text-muted">Mỗi hoạt động 3 phương án, luật lọc, chọn phương án tốt nhất rồi mới soạn.</span></div>}
+        {nghi && <div className="vao mt-3 rounded-lg bg-accent-soft px-3 py-2 text-[13.5px] cho-ai"><b className="text-accent">AI đang nghĩ phương án hoạt động {nghi}</b><br /><span className="text-muted">4 hoạt động cùng lúc, mỗi hoạt động 3 phương án; luật lọc, chọn phương án tốt nhất rồi soạn.</span></div>}
         <ol className="mt-3 flex flex-col">
           {phan.map((p) => {
             const t = tt(p.ma);
@@ -104,7 +117,7 @@ export default function Buoc3Soan({ k, datKhbd, ai }: { k: Khbd; datKhbd: (k: Kh
         </ol>
         {Object.entries(loi).filter(([, v]) => v).map(([p, v]) => <HopBao key={p} kieu="err" className="mt-3"><strong>{v!.thongBao}</strong><br />{v!.cachXuLy}</HopBao>)}
         <div className="mt-4 flex flex-wrap gap-2">
-          {nghi ? <Nut disabled dang>AI đang nghĩ phương án…</Nut> : dangChay ? <Nut onClick={() => { huy.current = true; }}>Dừng sau phần này</Nut>
+          {busy ? <Nut onClick={() => { huy.current = true; }}>Dừng sau đợt này</Nut>
             : conLai.length ? <Nut kieu="chinh" disabled={!ai} onClick={() => chay(conLai)}>{conLai.length === phan.length ? 'Bắt đầu soạn' : `Soạn ${conLai.length} phần còn lại`}</Nut>
               : <div className="vao w-full flex items-center gap-2 rounded-lg bg-ok-bg text-ok-fg border border-ok-line px-3 py-2 text-sm font-medium"><BieuTuong ten="check" className="w-4 h-4 tich-vao" />Đã soạn xong tất cả các phần. Sang bước kiểm tra ở cuối trang.</div>}
         </div>

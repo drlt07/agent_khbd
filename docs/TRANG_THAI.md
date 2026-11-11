@@ -201,3 +201,14 @@ Phản hồi của tác giả: gợi ý phải nằm trong quá trình sinh ho�
 - `chonTuDong` (hàm thuần): bỏ phương án nhạt, thiếu mục, vượt thời lượng, cần thiết bị chưa khai báo; điểm = AI tự chấm + 4 cho mỗi mã đã chọn chưa hoạt động nào tích hợp + 2 nếu hình thức chưa dùng trong bài. Không đụng phương án giáo viên đã chọn.
 - Giao diện bước Soạn nội dung: "AI đang nghĩ phương án hoạt động HĐ II (2/4)"; mỗi hoạt động ghi "AI chọn phương án: …"; nút "Đổi phương án" mở 3 phương án, chọn cái khác thì AI soạn lại hoạt động đó. Dấu vết ghi lí do AI chọn. Giáo viên đổi thì không còn nhãn "AI chọn" và app không tự đổi lại.
 - Kiểm thử: 172 đạt.
+
+## Soạn nhanh hơn: chạy song song – 11/11/2026
+
+Trước: khoảng 12 lần gọi AI nối đuôi nhau cho một bài (4 lần nghĩ phương án + 8 phần). Nay còn khoảng 4 đợt chờ.
+
+- `goiYNganHang`: gợi ý 4 hoạt động cùng lúc. Để cả bộ vẫn đa dạng khi các yêu cầu không biết nhau, mỗi hoạt động được giao 4 nhóm hình thức ưu tiên riêng (`NHOM_UU_TIEN`, chọn 3). Luật cả bộ (≥ 6 nhóm, mã đã chọn có phương án) kiểm sau khi đủ; chưa đạt thì gợi ý lại riêng HD3 với đủ bối cảnh. Một hoạt động lỗi không làm mất các hoạt động khác.
+- Soạn theo đợt (`DOT_SOAN`): [mục tiêu, giai đoạn 1, giai đoạn 3] cùng lúc với việc nghĩ phương án → [HD1, HD2] → [HD3, HD4] → [gắn mã]. `gopPhan`, `gopKeHoach` ghép kết quả từng phần vào bản mới nhất (hàm thuần). Hoạt động soạn song song nhận kế hoạch của các hoạt động khác trong lời nhắc để giữ mạch.
+- `gioiHan`: tối đa 3 yêu cầu cùng lúc với Claude trong claude.ai, 4 với khóa API; yêu cầu thừa xếp hàng.
+- Lời nhắc gợi ý: đã chọn mã thì chỉ gửi các mã đó, không gửi cả thư viện 55 chỉ báo.
+- Đo với AI mẫu (350 ms/lần): soạn cả bài 1,7 giây so với khoảng 4,2 giây nếu nối đuôi. Chưa đo với AI thật.
+- Kiểm thử: 177 đạt.

@@ -22,6 +22,15 @@ export const SO_PHUONG_AN_MOI_HD = 3;
 /** Số nhóm hình thức khác nhau tối thiểu trong cả bộ gợi ý. */
 export const SO_NHOM_CA_BO = 6;
 
+/**
+ * Nhóm hình thức ưu tiên cho từng hoạt động. Các hoạt động được gợi ý CÙNG LÚC nên không biết phương án của nhau;
+ * mỗi hoạt động chọn 3 trong 4 nhóm riêng thì cả bộ vẫn đa dạng (≥ 6 nhóm) mà không phải chờ nhau.
+ */
+export const NHOM_UU_TIEN: Record<Khbd['phuongPhap'], Record<MaHd, (keyof typeof NHOM_HINH_THUC)[]>> = {
+  lhdn: { HD1: ['C', 'D', 'G', 'A'], HD2: ['C', 'G', 'H', 'J'], HD3: ['F', 'A', 'I', 'B'], HD4: ['G', 'E', 'D', 'I'] },
+  cv5512: { HD1: ['C', 'D', 'G', 'A'], HD2: ['B', 'H', 'J', 'D'], HD3: ['G', 'C', 'I', 'J'], HD4: ['F', 'A', 'E', 'I'] },
+};
+
 const maDaChon = (k: Pick<Khbd, 'tichHop'>) => [...k.tichHop.nls, ...k.tichHop.ai];
 
 /* ---------------- Lời nhắc ---------------- */
@@ -39,6 +48,7 @@ export function nhacNganHang(k: Khbd, yeuCau = '', hd: MaHd = 'HD1', daCo: Phuon
     `Thiết bị lớp đang có (chỉ được dùng các thứ này): ${k.dieuKien.thietBi.join('; ') || 'chỉ bảng và phấn'}. Mức học sinh: ${{ yeu: 'yếu', tb: 'trung bình', kha: 'khá' }[k.dieuKien.mucHs]}.${k.dieuKien.ghiChu.trim() ? ` Ghi chú của giáo viên: ${k.dieuKien.ghiChu.trim()}` : ''}`,
     `Các hoạt động của bài (${k.phuongPhap === 'lhdn' ? 'lớp học đảo ngược, học sinh đã tự học lí thuyết ở nhà' : 'dạy học thông thường theo CV 5512'}): ${MA_HD.map((h) => `${h} – ${TEN_HD[k.phuongPhap][h]} (${phut[h]} phút)`).join('; ')}.`,
     `HOẠT ĐỘNG CẦN GỢI Ý LẦN NÀY: ${hd} – ${TEN_HD[k.phuongPhap][hd]} (tối đa ${phut[hd]} phút). Định hướng: ${HUONG_DAN_HD[k.phuongPhap][hd]}`,
+    daCo.length ? '' : `Để cả bài đa dạng, ${hd} chọn 3 trong 4 nhóm hình thức sau (chỉ dùng nhóm khác khi thật sự hợp bài hơn): ${NHOM_UU_TIEN[k.phuongPhap][hd].map((n) => `${n} (${NHOM_HINH_THUC[n]})`).join('; ')}.`,
     daCo.length ? `Đã có phương án cho các hoạt động khác (không lặp cơ chế của chúng):\n${daCo.map((p) => `- ${p.hd} "${p.ten}" (nhóm ${p.nhom})`).join('\n')}\nƯu tiên nhóm hình thức chưa dùng: ${nhomChuaDung.map((n) => `${n} (${NHOM_HINH_THUC[n]})`).join('; ')}.` : '',
     ma.length
       ? [
@@ -48,9 +58,9 @@ export function nhacNganHang(k: Khbd, yeuCau = '', hd: MaHd = 'HD1', daCo: Phuon
         'Với mỗi mã tích hợp, ghi: hành vi số quan sát được của học sinh (thao tác gì, trên công cụ nào, với nội dung bài này), công cụ (trong danh sách thiết bị), minh chứng (sản phẩm), tiêu chí "Đạt khi …". Năng lực AI cần đủ thời gian cho quy trình: học sinh tự làm trước, hỏi AI để kiểm tra/góp ý, đối chiếu, ghi giữ/sửa/loại kèm lí do.',
       ].filter(Boolean).join('\n')
       : 'Giáo viên chưa chọn mã năng lực số/AI. Phương án nào có hành vi số thật của học sinh thì gợi ý tối đa 1 mã phù hợp nhất trong thư viện dưới đây, ghi đủ hành vi số, công cụ, minh chứng, tiêu chí; không có thì để mảng nls rỗng.',
-    'Không gắn mã chỉ vì học sinh làm bài trên một nền tảng số. Chỉ dùng mã trong thư viện, chép đúng mã:',
-    `NĂNG LỰC SỐ (TT 02/2025, bậc THPT):\n${CHI_BAO.map((c) => `${c.ma}: ${c.noiDung}`).join('\n')}`,
-    `NĂNG LỰC AI (QĐ 2422/QĐ-BGDĐT):\n${NANG_LUC_AI.map((n) => `${n.ma}: ${n.ten}`).join('\n')}`,
+    // Đã chọn mã thì chỉ gửi các mã đó (lời nhắc ngắn, AI trả lời nhanh hơn); chưa chọn mới gửi cả thư viện để AI gợi ý
+    ma.length ? 'Không gắn mã chỉ vì học sinh làm bài trên một nền tảng số. Chỉ dùng các mã giáo viên đã chọn ở trên, chép đúng mã.'
+      : `Không gắn mã chỉ vì học sinh làm bài trên một nền tảng số. Chỉ dùng mã trong thư viện, chép đúng mã:\nNĂNG LỰC SỐ (TT 02/2025, bậc THPT):\n${CHI_BAO.map((c) => `${c.ma}: ${c.noiDung}`).join('\n')}\nNĂNG LỰC AI (QĐ 2422/QĐ-BGDĐT):\n${NANG_LUC_AI.map((n) => `${n.ma}: ${n.ten}`).join('\n')}`,
     yeuCau.trim() ? `Yêu cầu thêm của giáo viên: ${yeuCau.trim()}` : '',
     [
       `Đề xuất đúng ${SO_PHUONG_AN_MOI_HD} phương án cho ${hd}, thuộc ${SO_PHUONG_AN_MOI_HD} nhóm hình thức khác nhau. Không đưa phương án chỉ khác tên mà cùng cơ chế. Viết gọn: mỗi mục 1–2 câu.`,
@@ -146,47 +156,74 @@ export interface TuyChonNganHang {
   daCo?: NganHang;
   /** Gọi sau mỗi hoạt động xong, để giao diện hiện ngay phần đã có. */
   moiHd?: (r: { ketQua: NganHang; boQua: string[]; hd: MaHd; thu: number; tong: number }) => void;
-  /** Gọi khi bắt đầu một hoạt động. */
-  batDauHd?: (hd: MaHd, thu: number, tong: number) => void;
+  /** Tiến độ: đã xong mấy hoạt động trên tổng số. */
+  tienDo?: (xong: number, tong: number) => void;
 }
 
+const RONG: NganHang['phanTich'] = { trongTam: '', khoKhan: [] };
+
 /**
- * Gợi ý lần lượt từng hoạt động (mỗi lần 3 phương án) thay vì 12 phương án một lần: câu trả lời ngắn, ít bị ngắt,
- * hoạt động xong hiện ngay. Mỗi hoạt động qua luật riêng, sai thì gợi ý lại ≤ 2 lượt; lần cuối kiểm thêm cả bộ
- * (số nhóm hình thức, mã đã chọn có phương án). Lỗi giữa chừng: phần đã xong vẫn được giữ qua moiHd.
+ * Gợi ý 4 hoạt động CÙNG LÚC (mỗi yêu cầu 3 phương án): nhanh gấp nhiều lần so với gọi nối đuôi, câu trả lời ngắn
+ * nên ít bị ngắt, hoạt động nào xong hiện ngay. Mỗi hoạt động qua luật riêng, sai thì gợi ý lại ≤ 2 lượt.
+ * Xong cả bộ mới kiểm số nhóm hình thức và mã đã chọn; chưa đạt thì gợi ý lại riêng hoạt động vận dụng (HD3)
+ * với đầy đủ bối cảnh. Một hoạt động lỗi không làm mất các hoạt động khác (giữ qua moiHd, sau đó báo lỗi).
  */
 export async function goiYNganHang(k: Khbd, ai: GoiAi, yeuCau = '', tc: TuyChonNganHang = {}): Promise<{ ketQua: NganHang; boQua: string[]; luat: KetQuaLuatNganHang; luot: number }> {
   const he = `Bạn là chuyên gia thiết kế hoạt động dạy học THPT theo Chương trình GDPT 2018 và chuyên gia tích hợp năng lực số (Thông tư 02/2025), năng lực AI (QĐ 2422/QĐ-BGDĐT). Giáo viên đang bí ý tưởng: hãy đưa những phương án đa dạng, cụ thể, dùng được ngay. Viết tiếng Việt. Công thức viết LaTeX trong cặp $…$.\n\n${nguyenTacHoatDong()}`;
-  let phanTich = tc.daCo?.phanTich;
+  let phanTich = tc.daCo?.phanTich.trongTam.trim() ? tc.daCo.phanTich : undefined;
   let ds = tc.daCo ? [...tc.daCo.phuongAn] : [];
   const boQua: string[] = [];
   let luotMax = 0;
-  const canGoi = MA_HD.filter((hd) => !phanTich || !daDuHd(ds, hd));
-  for (const [thu, hd] of canGoi.entries()) {
-    tc.batDauHd?.(hd, thu + 1, canGoi.length);
-    ds = ds.filter((p) => p.hd !== hd);
-    const laCuoi = MA_HD.every((h) => h === hd || daDuHd(ds, h));
-    const nhacGoc = nhacNganHang(k, yeuCau, hd, ds);
+
+  /** Gợi ý một hoạt động, biết các phương án `khac`; laCuoi: xét thêm luật cả bộ. */
+  const mot = async (hd: MaHd, khac: PhuongAnHd[], xinPhanTich: boolean, laCuoi: boolean) => {
+    const nhacGoc = nhacNganHang(k, yeuCau, hd, khac);
     let nhac = nhacGoc;
-    let tot: { phanTich: NganHang['phanTich']; moi: PhuongAnHd[]; bq: string[] } | null = null;
+    let tot: { phanTich?: NganHang['phanTich']; moi: PhuongAnHd[]; bq: string[] } | null = null;
     for (let luot = 0; luot <= 2; luot++) {
-      const r = phanTich
-        ? { phanTich, ...(await ai({ ten: 'nganHang', he, nhac, schema: PhuongAnMotHdOut })) }
-        : await ai({ ten: 'nganHang', he, nhac, schema: NganHangOut });
-      const { ketQua, boQua: bq } = chuanHoaNganHang({ phanTich: r.phanTich, phuongAn: r.phuongAn.map((p) => ({ ...p, hd })) });
-      tot = { phanTich: ketQua.phanTich, moi: ketQua.phuongAn, bq };
+      const r: { phanTich?: NganHang['phanTich']; phuongAn: PhuongAnHd[] } = xinPhanTich
+        ? await ai({ ten: 'nganHang', he, nhac, schema: NganHangOut })
+        : await ai({ ten: 'nganHang', he, nhac, schema: PhuongAnMotHdOut });
+      const { ketQua, boQua: bq } = chuanHoaNganHang({ phanTich: r.phanTich ?? RONG, phuongAn: r.phuongAn.map((p) => ({ ...p, hd })) });
+      tot = { phanTich: r.phanTich, moi: ketQua.phuongAn, bq };
       luotMax = Math.max(luotMax, luot);
-      const thuBo: NganHang = { phanTich: ketQua.phanTich, phuongAn: sapXep([...ds, ...ketQua.phuongAn]) };
+      const thuBo: NganHang = { phanTich: RONG, phuongAn: sapXep([...khac, ...ketQua.phuongAn]) };
       const nghiem = [...kiemTraNganHang(thuBo, k, [hd]).nghiem, ...(laCuoi ? kiemTraNganHang(thuBo, k).nghiem.filter((l) => /^(Mã |Cả bộ)/.test(l)) : [])];
       if (!nghiem.length) break;
       nhac = `${nhacGoc}\n\nLần trước chưa đạt, sửa lại: ${nghiem.join(' ')}`;
     }
-    phanTich = tot!.phanTich;
-    ds = sapXep([...ds, ...tot!.moi]);
-    boQua.push(...tot!.bq);
-    tc.moiHd?.({ ketQua: { phanTich, phuongAn: ds }, boQua: [...boQua], hd, thu: thu + 1, tong: canGoi.length });
+    return tot!;
+  };
+
+  const canGoi = MA_HD.filter((hd) => !daDuHd(ds, hd));
+  ds = ds.filter((p) => !canGoi.includes(p.hd));
+  const tong = canGoi.length;
+  let xong = 0;
+  tc.tienDo?.(0, tong);
+  const kq = await Promise.allSettled(canGoi.map(async (hd, i) => {
+    const r = await mot(hd, [], i === 0 && !phanTich, false);
+    if (r.phanTich) phanTich = r.phanTich;
+    ds = sapXep([...ds, ...r.moi]);
+    boQua.push(...r.bq);
+    xong++;
+    tc.moiHd?.({ ketQua: { phanTich: phanTich ?? RONG, phuongAn: ds }, boQua: [...boQua], hd, thu: xong, tong });
+    tc.tienDo?.(xong, tong);
+  }));
+  const hong = kq.find((r): r is PromiseRejectedResult => r.status === 'rejected');
+  if (hong) throw hong.reason;
+
+  // Luật cả bộ (số nhóm hình thức, mã đã chọn có phương án): chưa đạt thì gợi ý lại hoạt động vận dụng với đủ bối cảnh
+  const caBoLoi = () => kiemTraNganHang({ phanTich: RONG, phuongAn: ds }, k).nghiem.some((l) => /^(Mã |Cả bộ)/.test(l));
+  if (MA_HD.every((hd) => daDuHd(ds, hd)) && caBoLoi()) {
+    const khac = ds.filter((p) => p.hd !== 'HD3');
+    try {
+      const r = await mot('HD3', khac, false, true);
+      ds = sapXep([...khac, ...r.moi]);
+      boQua.push(...r.bq);
+      tc.moiHd?.({ ketQua: { phanTich: phanTich ?? RONG, phuongAn: ds }, boQua: [...boQua], hd: 'HD3', thu: tong, tong });
+    } catch { /* giữ bản đã có; luật bên dưới sẽ báo điểm chưa đạt */ }
   }
-  const ketQua: NganHang = { phanTich: phanTich ?? { trongTam: '', khoKhan: [] }, phuongAn: ds };
+  const ketQua: NganHang = { phanTich: phanTich ?? RONG, phuongAn: ds };
   return { ketQua, boQua, luat: kiemTraNganHang(ketQua, k), luot: luotMax };
 }
 

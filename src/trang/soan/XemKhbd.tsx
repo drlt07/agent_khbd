@@ -13,7 +13,7 @@ const Nhieu = ({ t }: { t: string }) => <>{tachDong(t).map((d, i) => <span key={
 const TEN_MUC = { LT: 'Lý thuyết', CB: 'Cơ bản', NC: 'Nâng cao' } as const;
 
 /** Xem KHBD như văn bản. suaDuoc = true: sửa trực tiếp việc GV/HS, số phút (ghi dấu vết "GV sửa"). */
-export default function XemKhbd({ k, sua, suaDuoc = false, dangSoan = null }: { k: Khbd; sua?: (f: (k: Khbd) => Khbd) => void; suaDuoc?: boolean; dangSoan?: MaPhan | null }) {
+export default function XemKhbd({ k, sua, suaDuoc = false, dangSoan = [] }: { k: Khbd; sua?: (f: (k: Khbd) => Khbd) => void; suaDuoc?: boolean; dangSoan?: MaPhan[] }) {
   const phut = phutTheoHoatDong(k.phanBo);
   const tenHd = TEN_HD[k.phuongPhap];
   const suaBuoc = (hd: MaHd, i: number, truong: 'gv' | 'hs' | 'phut', giaTri: string) => sua?.((x) => ({
@@ -42,7 +42,7 @@ export default function XemKhbd({ k, sua, suaDuoc = false, dangSoan = null }: { 
             {k.clil && <Nho ten="5. Tiếng Anh (CLIL)"><Dong>Key words: {k.clil.keyWords.map((w) => `${w.en} (${w.vi})`).join(', ')}.</Dong></Nho>}
             <Nho ten={k.phuongPhap === 'cv5512' ? '3. Về phẩm chất' : 'Phẩm chất'}>{k.mucTieu.phamChat.map((t) => <Dong key={t}>{t}</Dong>)}</Nho>
           </div>
-        ) : <ChuaSoan dang={dangSoan === 'mucTieu'} />}
+        ) : <ChuaSoan dang={dangSoan.includes('mucTieu')} />}
       </Muc>
 
       <Muc ten="II. Thiết bị dạy học và học liệu">
@@ -52,7 +52,7 @@ export default function XemKhbd({ k, sua, suaDuoc = false, dangSoan = null }: { 
             {cb.hocLieu.map((t) => <Dong key={t}><ChuCT t={t} /></Dong>)}
             {!cb.thietBi.length && !cb.hocLieu.length && <Dong><span className="text-muted">Không yêu cầu chuẩn bị riêng.</span></Dong>}
           </Nho>
-        )) : <ChuaSoan dang={dangSoan === 'mucTieu'} />}
+        )) : <ChuaSoan dang={dangSoan.includes('mucTieu')} />}
       </Muc>
 
       <Muc ten="III. Tiến trình dạy học">
@@ -64,7 +64,7 @@ export default function XemKhbd({ k, sua, suaDuoc = false, dangSoan = null }: { 
                 <Nho ten="Câu hỏi trọng tâm">{k.giaiDoan1.cauHoi.map((c, i) => <Dong key={i}><b>{TEN_MUC[c.muc]}:</b> <Nhieu t={c.cauHoi} /><span className="text-muted">Đáp án: <ChuCT t={c.dapAn} /></span></Dong>)}</Nho>
                 <Nho ten="Công việc của giáo viên">{k.giaiDoan1.congViecGv.map((t) => <Dong key={t}>{t}</Dong>)}</Nho>
               </div>
-            ) : <ChuaSoan dang={dangSoan === 'giaiDoan1'} />}
+            ) : <ChuaSoan dang={dangSoan.includes('giaiDoan1')} />}
           </GiaiDoan>
         )}
         <GiaiDoan so={2} ten={k.phuongPhap === 'lhdn' ? 'Giai đoạn 2: Hoạt động trên lớp' : 'Các hoạt động'}>
@@ -124,13 +124,13 @@ export default function XemKhbd({ k, sua, suaDuoc = false, dangSoan = null }: { 
                     <p className="mt-2 rounded-lg bg-ai-soft px-3 py-2 text-[14.5px]"><b>CLIL:</b> {k.clil.keyWords.map((w) => `${w.en} – ${w.vi}`).join('; ')}. {k.clil.nhiemVu} <b>Tiêu chí:</b> {k.clil.tieuChi}</p>
                   )}
                 </div>
-              ) : <ChuaSoan dang={dangSoan === h.ma} />}
+              ) : <ChuaSoan dang={dangSoan.includes(h.ma)} />}
             </section>
           ))}
         </GiaiDoan>
         {k.phuongPhap === 'lhdn' && (
           <GiaiDoan so={3} ten="Giai đoạn 3: Kiểm soát, đánh giá và điều chỉnh sau giờ học">
-            {k.giaiDoan3 ? <ul className="vao mt-1 flex flex-col gap-1">{k.giaiDoan3.viec.map((t) => <Dong key={t}>{t}</Dong>)}</ul> : <ChuaSoan dang={dangSoan === 'giaiDoan3'} />}
+            {k.giaiDoan3 ? <ul className="vao mt-1 flex flex-col gap-1">{k.giaiDoan3.viec.map((t) => <Dong key={t}>{t}</Dong>)}</ul> : <ChuaSoan dang={dangSoan.includes('giaiDoan3')} />}
           </GiaiDoan>
         )}
       </Muc>
