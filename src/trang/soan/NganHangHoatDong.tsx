@@ -4,7 +4,7 @@ import { The, HopBao, Nut, NhanAiLam } from '../../thanh-phan/chung';
 import { BieuTuong } from '../../thanh-phan/bieu-tuong';
 import { LoiAi, type GoiAi } from '../../soan/ai';
 import { NHOM_HINH_THUC, TIEU_CHI_CHAM, tongDiemGoiY } from '../../soan/goi-y';
-import { banDoNls, goiYNganHang, kiemTraNganHang, laNhat, MA_HD } from '../../soan/ngan-hang';
+import { banDoNls, goiYNganHang, kiemTraNganHang, laNhat, MA_HD, nganHangDu } from '../../soan/ngan-hang';
 import { chonPhuongAn } from '../../soan/quy-trinh';
 import { phutTheoHoatDong } from '../../soan/phan-bo';
 import { laMaAi, moTaMa } from '../../thu-vien';
@@ -22,6 +22,7 @@ export default function NganHangHoatDong({ k, sua, ai }: { k: Khbd; sua: (f: (k:
   const [yeuCau, setYeuCau] = useState<string[]>([]);
   const [ghi, setGhi] = useState('');
   const [dang, setDang] = useState(false);
+  const [tienDo, setTienDo] = useState('');
   const [loi, setLoi] = useState('');
   const nh = k.nganHang;
   const cu = !!nh && nh.bai !== k.bai;
@@ -29,14 +30,20 @@ export default function NganHangHoatDong({ k, sua, ai }: { k: Khbd; sua: (f: (k:
   const phut = phutTheoHoatDong(k.phanBo);
   const maChon = [...k.tichHop.nls, ...k.tichHop.ai];
 
-  const xin = async () => {
+  const du = !!nh && !cu && nganHangDu(nh.ketQua);
+  const conThieu = !!nh && !cu && !du;
+  /** tiep: chỉ gợi ý các hoạt động còn thiếu (sau khi bị ngắt giữa chừng). Mỗi hoạt động xong được lưu ngay. */
+  const xin = async (tiep: boolean) => {
     if (!ai) return;
-    setDang(true); setLoi('');
+    setDang(true); setLoi(''); setTienDo('');
     try {
-      const r = await goiYNganHang(k, ai, [...yeuCau, ghi].filter(Boolean).join('; '));
-      sua((x) => ({ ...x, nganHang: { bai: x.bai, ketQua: r.ketQua, boQua: r.boQua } }));
-    } catch (e) { setLoi(e instanceof LoiAi ? `${e.loi.thongBao} ${e.loi.cachXuLy}` : 'Không lấy được gợi ý.'); }
-    finally { setDang(false); }
+      await goiYNganHang(k, ai, [...yeuCau, ghi].filter(Boolean).join('; '), {
+        daCo: tiep ? nh!.ketQua : undefined,
+        batDauHd: (hd, thu, tong) => setTienDo(`${tenNgan(k, hd)} (${thu}/${tong})`),
+        moiHd: (r) => sua((x) => ({ ...x, nganHang: { bai: x.bai, ketQua: r.ketQua, boQua: r.boQua } })),
+      });
+    } catch (e) { setLoi(e instanceof LoiAi ? `${e.loi.thongBao} ${e.loi.cachXuLy}` : `Không lấy được gợi ý. (${String((e as Error)?.message ?? e).slice(0, 120)})`); }
+    finally { setDang(false); setTienDo(''); }
   };
   const themMa = (ma: string) => sua((x) => {
     const loai = laMaAi(ma) ? 'ai' : 'nls';
@@ -58,11 +65,13 @@ export default function NganHangHoatDong({ k, sua, ai }: { k: Khbd; sua: (f: (k:
       </div>
       <div className="mt-3 flex flex-col sm:flex-row gap-2">
         <input value={ghi} onChange={(e) => setGhi(e.target.value)} placeholder="Mong muốn khác (không bắt buộc), vd: lớp 45 HS, có tiết ở phòng máy" aria-label="Mong muốn khác cho gợi ý hoạt động" className={o} />
-        <Nut kieu={nh && !cu ? 'phu' : 'chinh'} onClick={xin} dang={dang} disabled={!ai || dang || !k.bai.trim()} className="shrink-0">{dang ? 'AI đang nghĩ hoạt động…' : nh && !cu ? 'Gợi ý lại' : 'AI gợi ý hoạt động'}</Nut>
+        {conThieu && !dang && <Nut kieu="chinh" onClick={() => xin(true)} disabled={!ai} className="shrink-0">Gợi ý tiếp phần còn lại</Nut>}
+        <Nut kieu={nh && !cu ? 'phu' : 'chinh'} onClick={() => xin(false)} dang={dang} disabled={!ai || dang || !k.bai.trim()} className="shrink-0">{dang ? `AI đang gợi ý ${tienDo}…` : nh && !cu ? 'Gợi ý lại từ đầu' : 'AI gợi ý hoạt động'}</Nut>
       </div>
+      {dang && <p className="text-[13px] text-muted mt-2">AI gợi ý lần lượt từng hoạt động; hoạt động nào xong hiện ngay bên dưới.</p>}
       {!ai && <p className="text-sm text-warn-fg mt-2">Cần khóa AI để gợi ý. <a href="#khoa-ai" className="underline">Thêm khóa</a></p>}
       {!k.yccdDaXacNhan && <p className="text-[13px] text-muted mt-2">Mẹo: xác nhận yêu cầu cần đạt trước thì gợi ý bám bài sát hơn.</p>}
-      {loi && <HopBao kieu="err" className="mt-3">{loi}</HopBao>}
+      {loi && <HopBao kieu="err" className="mt-3">{loi}{conThieu && ' Phần đã gợi ý được giữ lại; bấm “Gợi ý tiếp phần còn lại”.'}</HopBao>}
       {cu && <HopBao kieu="warn" className="mt-3">Gợi ý dưới đây là cho bài “{nh!.bai}”. Bấm “AI gợi ý hoạt động” để có gợi ý cho bài “{k.bai}”.</HopBao>}
 
       {nh && luat && (
@@ -74,7 +83,7 @@ export default function NganHangHoatDong({ k, sua, ai }: { k: Khbd; sua: (f: (k:
 
           <BanDoNls k={k} />
 
-          {luat.nghiem.length > 0 && <HopBao kieu="warn">Còn điểm chưa đạt, thầy/cô xem kĩ trước khi chọn: {luat.nghiem.join(' ')}</HopBao>}
+          {du && luat.nghiem.length > 0 && <HopBao kieu="warn">Còn điểm chưa đạt, thầy/cô xem kĩ trước khi chọn: {luat.nghiem.join(' ')}</HopBao>}
           {luat.nhac.map((l) => <p key={l} className="text-sm text-warn-fg">! {l}</p>)}
           {nh.boQua.length > 0 && <p className="text-[13px] text-muted">Luật đã loại mã ngoài thư viện: {nh.boQua.join('; ')}.</p>}
 
@@ -82,6 +91,12 @@ export default function NganHangHoatDong({ k, sua, ai }: { k: Khbd; sua: (f: (k:
             const ds = nh.ketQua.phuongAn.map((p, i) => ({ p, i })).filter((x) => x.p.hd === hd)
               .sort((a, b) => Number(laNhat(luat.theoPhuongAn[a.i])) - Number(laNhat(luat.theoPhuongAn[b.i])) || tongDiemGoiY(b.p) - tongDiemGoiY(a.p));
             const daChon = k.keHoachHd?.[hd];
+            if (!ds.length) return (
+              <section key={hd} aria-label={TEN_HD[k.phuongPhap][hd]}>
+                <h3 className="text-[15.5px] tieu-de">{TEN_HD[k.phuongPhap][hd]}</h3>
+                <p className={`text-[13.5px] text-muted mt-1 ${dang ? 'cho-ai' : ''}`}>{dang ? 'Đang chờ AI gợi ý…' : 'Chưa có gợi ý cho hoạt động này.'}</p>
+              </section>
+            );
             return (
               <section key={hd} aria-label={TEN_HD[k.phuongPhap][hd]}>
                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">

@@ -184,3 +184,11 @@ Phản hồi của tác giả: gợi ý chưa đủ đa dạng và đến muộn
 - Bản nháp lưu gợi ý (theo tên bài; đổi bài thì báo gợi ý cũ) và phương án đã chọn; dữ liệu hỏng khuôn bị bỏ; đổi phương pháp/số tiết thì xóa.
 - AI mẫu: 12 phương án cho Hàm số bậc hai, tích hợp 5.3.5.1 và NLc, vừa thời lượng cả hai phương pháp.
 - Kiểm thử: `tests/ngan-hang.test.ts` (14); tổng 165 đạt.
+
+## Sửa lỗi "Claude đang lỗi hoặc quá tải" ở bản demo claude.ai – 11/11/2026
+
+- Nguyên nhân chính: "Hoạt động gợi ý cho bài" bắt Claude viết 12 phương án trong một câu trả lời; câu trả lời quá dài dễ bị ngắt giữa chừng. App lại gộp mọi mã lỗi lạ thành một câu chung nên không biết lỗi gì.
+- `goiYNganHang` gọi lần lượt từng hoạt động (mỗi lần 3 phương án, có tiến độ "HĐ II (2/4)"). Hoạt động xong được lưu ngay; bị ngắt thì phần đã có được giữ và có nút "Gợi ý tiếp phần còn lại". Luật từng hoạt động chạy sau mỗi lần gọi; lần cuối kiểm thêm cả bộ (số nhóm hình thức, mã đã chọn có phương án).
+- `loiTuSample`: đủ mọi mã lỗi của quyền "sample" kèm cách xử lý tiếng Việt, luôn ghi "(mã lỗi: …)"; mã lạ hiểu là gián đoạn kết nối. Gọi Claude ở chế độ nhận dần (onText).
+- Rút gọn câu trả lời: "Gợi ý hoạt động" từng hoạt động còn 4–6 phương án; ý tưởng cả bài và gợi ý viết mỗi mục 1–2 câu.
+- Kiểm thử: 169 đạt (thêm gọi từng hoạt động, gợi ý lại riêng hoạt động lỗi, gợi ý tiếp sau khi bị ngắt, mã lỗi).

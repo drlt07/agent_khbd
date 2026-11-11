@@ -42,6 +42,7 @@ export function nhacYTuong(k: Khbd, yeuCau = ''): string {
       'Mỗi ý tưởng: một cốt truyện hoặc nhiệm vụ lớn gắn thực tế Việt Nam, vừa sức học sinh; câu hỏi lớn được trả lời ở cuối bài; 4 hoạt động nối thành một mạch, hoạt động sau dùng kết quả của hoạt động trước.',
       `Trong mỗi ý tưởng, 4 hoạt động thuộc ít nhất ${SO_NHOM_TOI_THIEU} nhóm hình thức khác nhau; mỗi hoạt động nêu điểm tư duy khó nhất. Không dùng cách tổ chức nhạt (thảo luận rồi đại diện trình bày, hỏi – đáp, làm bài SGK).`,
       'Kiến thức phải đúng chương trình; cốt truyện phục vụ kiến thức, không lấn át kiến thức.',
+      'Viết gọn: mỗi mục 1–2 câu.',
     ].join('\n'),
   ].filter(Boolean).join('\n\n');
 }

@@ -52,7 +52,7 @@ export const GoiYOut = z.object({
     danhGia: z.string().describe('Dấu hiệu chứng minh học sinh hiểu'),
     chotKienThuc: z.string(),
     duPhong: z.string().describe('Phương án khi không có công nghệ hoặc mất Internet'),
-  })).describe('5–8 hoạt động đa dạng cơ chế'),
+  })).describe('4–6 hoạt động đa dạng cơ chế'),
   uuTien: z.object({
     deTrienKhai: z.number().describe('Số thứ tự (bắt đầu từ 1) của hoạt động dễ triển khai nhất'),
     sangTao: z.number().describe('Số thứ tự hoạt động sáng tạo, ấn tượng nhất'),
@@ -125,7 +125,7 @@ export function nhacGoiY(k: Khbd, hd?: MaHd, yeuCau = '', cu?: HoatDongCu): stri
     cu ? '' : boiCanhBai(k, hd),
     yeuCau.trim() ? `Yêu cầu thêm của giáo viên: ${yeuCau.trim()}` : '',
     'Mỗi hoạt động nêu rõ điểm tư duy khó nhất và tự chấm 4 tiêu chí (mục 8); bỏ phương án nhạt (mục 7) hoặc có tiêu chí dưới 3.',
-    'Trả về: Phần A – phân tích bài học; Phần B và C – 5 đến 8 hoạt động (mỗi hoạt động đủ các mục triển khai); Phần D – 3 đề xuất ưu tiên (dễ triển khai nhất, sáng tạo nhất, khai thác AI hoặc mô phỏng tốt nhất) kèm lí do ngắn.',
+    'Trả về: Phần A – phân tích bài học; Phần B và C – 4 đến 6 hoạt động (mỗi hoạt động đủ các mục triển khai, mỗi mục viết gọn 1–2 câu); Phần D – 3 đề xuất ưu tiên (dễ triển khai nhất, sáng tạo nhất, khai thác AI hoặc mô phỏng tốt nhất) kèm lí do ngắn.',
   ].filter(Boolean).join('\n\n');
 }
 
@@ -136,7 +136,7 @@ export interface KetQuaLuatGoiY { nghiem: string[]; nhac: string[]; theoHoatDong
 export function kiemTraGoiY(g: GoiY, k: Pick<Khbd, 'dieuKien'>, phutToiDa?: number): KetQuaLuatGoiY {
   const nghiem: string[] = [], nhac: string[] = [];
   const n = g.hoatDong.length;
-  if (n < 3) nghiem.push(`Chỉ có ${n} hoạt động; cần 5–8.`);
+  if (n < 3) nghiem.push(`Chỉ có ${n} hoạt động; cần 4–6.`);
   const nhom = new Map<string, number>();
   g.hoatDong.forEach((h) => nhom.set(h.nhom, (nhom.get(h.nhom) ?? 0) + 1));
   if (n >= 4 && nhom.size < Math.min(4, n)) nghiem.push(`Chưa đa dạng: ${n} hoạt động chỉ thuộc ${nhom.size} nhóm hình thức.`);

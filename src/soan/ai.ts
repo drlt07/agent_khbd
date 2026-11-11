@@ -97,17 +97,34 @@ export const taoAi = (cfg: CauHinhKhoa): GoiAi => (cfg.ncc === 'claude' ? aiClau
 /* ---------------- Claude trong tài khoản claude.ai (chỉ bản demo) ---------------- */
 
 /** Hàm `sample` do trang demo trên claude.ai cấp (quyền "sample"); dùng lượt Claude của chính người xem. */
-export interface HamSample { json: (input: string, opts?: { modelTier?: 'default' | 'complex' | 'quick'; cache?: boolean }) => Promise<unknown> }
+export interface HamSample { json: (input: string, opts?: { modelTier?: 'default' | 'complex' | 'quick'; cache?: boolean; onText?: (u: { text: string }) => void }) => Promise<unknown> }
 
-const LOI_SAMPLE: Record<string, { thongBao: string; cachXuLy: string }> = {
-  not_granted: { thongBao: 'Thầy/cô chưa cho phép trang dùng Claude.', cachXuLy: 'Tải lại trang, bấm soạn lại và chọn Cho phép khi claude.ai hỏi.' },
+/** Mã lỗi của quyền "sample" (claude.ai) → thông báo cho giáo viên. Mã lạ coi như upstream_error, luôn ghi kèm mã để dễ báo lỗi. */
+export const LOI_SAMPLE: Record<string, { thongBao: string; cachXuLy: string }> = {
+  not_granted: { thongBao: 'Thầy/cô chưa cho phép trang dùng Claude.', cachXuLy: 'Tải lại trang, bấm lại và chọn Cho phép khi claude.ai hỏi (hoặc mở menu Quyền của trang).' },
   sampling_disabled: { thongBao: 'Tài khoản claude.ai này không dùng được Claude cho trang.', cachXuLy: 'Dùng khóa API và chạy app trên máy.' },
-  rate_limited: { thongBao: 'Đã chạm giới hạn lượt dùng của tài khoản claude.ai.', cachXuLy: 'Chờ một lúc rồi bấm “Soạn lại phần này”.' },
+  capability_disabled: { thongBao: 'Ở chế độ xem này trang không gọi được Claude.', cachXuLy: 'Mở trang trực tiếp trên claude.ai bằng trình duyệt (Chrome, Edge) rồi thử lại.' },
+  capability_removed: { thongBao: 'Ứng dụng claude.ai đang dùng là bản cũ, chưa hỗ trợ tính năng này.', cachXuLy: 'Cập nhật ứng dụng hoặc mở trang bằng trình duyệt.' },
+  not_declared: { thongBao: 'Trang chưa được cấp quyền gọi Claude.', cachXuLy: 'Báo người làm app đăng lại trang.' },
+  rate_limited: { thongBao: 'Đã chạm giới hạn lượt dùng của tài khoản claude.ai.', cachXuLy: 'Chờ một lúc rồi bấm lại. Đóng các tab khác đang mở trang này.' },
   session_expired: { thongBao: 'Phiên đăng nhập claude.ai đã hết.', cachXuLy: 'Đăng nhập lại claude.ai rồi thử lại.' },
   refused: { thongBao: 'Claude từ chối trả lời yêu cầu này.', cachXuLy: 'Diễn đạt lại tên bài hoặc ghi chú, bỏ nội dung nhạy cảm.' },
   prompt_too_large: { thongBao: 'Yêu cầu quá dài.', cachXuLy: 'Bớt ghi chú hoặc giảm số tiết rồi thử lại.' },
-  cancelled: { thongBao: 'Đã dừng.', cachXuLy: 'Bấm soạn lại khi cần.' },
+  empty_completion: { thongBao: 'Claude không trả nội dung nào.', cachXuLy: 'Bấm lại; nếu vẫn vậy, bớt yêu cầu thêm hoặc chọn ít mã năng lực hơn.' },
+  invalid_request: { thongBao: 'Yêu cầu gửi tới Claude không hợp lệ.', cachXuLy: 'Đây là lỗi của app: chụp màn hình thông báo này gửi người làm app.' },
+  transform_error: { thongBao: 'Yêu cầu gửi tới Claude không hợp lệ.', cachXuLy: 'Đây là lỗi của app: chụp màn hình thông báo này gửi người làm app.' },
+  upstream_error: { thongBao: 'Kết nối tới Claude bị gián đoạn giữa chừng.', cachXuLy: 'Thường do mạng chập chờn hoặc Claude đang bận. Chờ khoảng một phút rồi bấm lại.' },
+  cancelled: { thongBao: 'Đã dừng.', cachXuLy: 'Bấm lại khi cần.' },
 };
+
+/** Lỗi từ quyền "sample" → LoiAi có ghi mã lỗi gốc. Hàm thuần. */
+export function loiTuSample(e: unknown): LoiAi {
+  const code = String((e as { code?: string })?.code ?? '');
+  if (code === 'invalid_json') return saiKhuon('Claude không trả JSON hoặc câu trả lời bị cắt giữa chừng');
+  const m = LOI_SAMPLE[code] ?? LOI_SAMPLE.upstream_error;
+  const chiTiet = code || String((e as Error)?.message ?? e).slice(0, 80) || 'không rõ';
+  return new LoiAi({ ma: 'khong_ro', thongBao: m.thongBao, cachXuLy: `${m.cachXuLy} (mã lỗi: ${chiTiet})` });
+}
 
 export function aiSample(sample: HamSample): GoiAi {
   return async <T,>(y: YeuCauAi<T>): Promise<T> => {
@@ -115,12 +132,10 @@ export function aiSample(sample: HamSample): GoiAi {
     const input = `${y.he}\n\n---\n\n${y.nhac}\n\nChỉ trả về một đối tượng JSON đúng khuôn sau (JSON Schema), không viết gì thêm:\n${khuon}`;
     let du: unknown;
     try {
-      du = await sample.json(input, { modelTier: 'default', cache: false });
+      // Nhận câu trả lời dần (streaming) để câu trả lời dài không bị ngắt vì chờ lâu
+      du = await sample.json(input, { modelTier: 'default', cache: false, onText: () => {} });
     } catch (e) {
-      const code = (e as { code?: string })?.code ?? '';
-      if (code === 'invalid_json') throw saiKhuon('Claude không trả JSON');
-      const m = LOI_SAMPLE[code];
-      throw new LoiAi({ ma: 'khong_ro', thongBao: m?.thongBao ?? 'Claude đang lỗi hoặc quá tải.', cachXuLy: m?.cachXuLy ?? 'Chờ một lát rồi bấm “Soạn lại phần này”.' });
+      throw loiTuSample(e);
     }
     return kiemKhuon(y.schema, du);
   };

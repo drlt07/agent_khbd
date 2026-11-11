@@ -332,6 +332,9 @@ export const aiMau: GoiAi = async (y) => {
   const du = laCv5512 && TRA_LOI[y.ten] ? choCv5512(y.ten, TRA_LOI[y.ten]) : TRA_LOI[y.ten];
   if (!du) throw new Error(`Chưa có nội dung mẫu cho phần ${y.ten}`);
   const kq = structuredClone(du) as Record<string, any>;
+  // "Hoạt động gợi ý cho bài" gọi từng hoạt động: chỉ trả phương án của hoạt động được hỏi
+  const hdHoi = y.ten === 'nganHang' ? y.nhac.match(/HOẠT ĐỘNG CẦN GỢI Ý LẦN NÀY: (HD\d)/)?.[1] : undefined;
+  if (hdHoi) kq.phuongAn = kq.phuongAn.filter((p: { hd: string }) => p.hd === hdHoi);
   // Lớp học đảo ngược: thời lượng hoạt động đổi (số tiết, phân bổ) thì chia lại số phút các bước cho khớp
   const tong = Number(y.nhac.match(/Thời lượng: (\d+) phút/)?.[1]);
   if (!laCv5512 && /^HD\d$/.test(y.ten) && Array.isArray(kq.buoc) && tong > 0) {
