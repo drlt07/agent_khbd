@@ -56,7 +56,7 @@ export default function NganHangHoatDong({ k, sua, ai }: { k: Khbd; sua: (f: (k:
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
           <div className="flex items-center gap-2"><h2 className="text-base">Hoạt động gợi ý cho bài</h2><NhanAiLam ai="ai" /><NhanAiLam ai="gv" /></div>
-          <p className="text-sm text-muted mt-0.5">Mỗi hoạt động 3 phương án khác hình thức, kèm cách tích hợp năng lực số. Thầy/cô chọn phương án cho từng hoạt động thì AI soạn bám theo; không chọn thì AI tự thiết kế.</p>
+          <p className="text-sm text-muted mt-0.5">Mỗi hoạt động 3 phương án khác hình thức, kèm cách tích hợp năng lực số. Thầy/cô chọn phương án cho từng hoạt động thì AI soạn bám theo. Bỏ qua bước này cũng được: khi soạn, AI tự nghĩ 3 phương án và chọn phương án tốt nhất, thầy/cô đổi sau.</p>
         </div>
       </div>
 
@@ -102,7 +102,7 @@ export default function NganHangHoatDong({ k, sua, ai }: { k: Khbd; sua: (f: (k:
                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                   <h3 className="text-[15.5px] tieu-de">{TEN_HD[k.phuongPhap][hd]}</h3>
                   <span className="text-[13px] text-muted so">{phut[hd]} phút</span>
-                  {daChon && <span className="text-[13px] text-ok-fg">✓ Đã chọn: {daChon.ten}</span>}
+                  {daChon && <span className="text-[13px] text-ok-fg">✓ {k.keHoachAi?.includes(hd) ? 'AI chọn' : 'Đã chọn'}: {daChon.ten}</span>}
                 </div>
                 <div className="mt-2 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                   {ds.map(({ p, i }, viTri) => (
@@ -119,8 +119,8 @@ export default function NganHangHoatDong({ k, sua, ai }: { k: Khbd; sua: (f: (k:
   );
 }
 
-function TheP({ p, viTri, loi, maChon, dangChon, chon, themMa, nhanChon }: {
-  p: PhuongAnHd; viTri: number; loi: string[]; maChon: string[]; dangChon: boolean; chon: () => void; themMa: (ma: string) => void; nhanChon: string;
+export function TheP({ p, viTri, loi, maChon, dangChon, chon, themMa, nhanChon, nhanDangChon }: {
+  p: PhuongAnHd; viTri: number; loi: string[]; maChon: string[]; dangChon: boolean; chon: () => void; themMa?: (ma: string) => void; nhanChon: string; nhanDangChon?: string;
 }) {
   const nhat = laNhat(loi);
   return (
@@ -146,7 +146,8 @@ function TheP({ p, viTri, loi, maChon, dangChon, chon, themMa, nhanChon }: {
                 <div className="flex flex-wrap items-center gap-1.5">
                   <span className={`ma ${da ? '' : 'opacity-70'}`} title={moTaMa(n.ma)}>{n.ma}</span>
                   {da ? <span className="text-[12px] text-ok-fg">đã chọn</span>
-                    : <button onClick={() => themMa(n.ma)} className="text-[12px] text-accent hover:underline">+ Thêm mã này vào tích hợp</button>}
+                    : themMa ? <button onClick={() => themMa(n.ma)} className="text-[12px] text-accent hover:underline">+ Thêm mã này vào tích hợp</button>
+                      : <span className="text-[12px] text-muted">chưa chọn ở bước 1</span>}
                 </div>
                 <p className="mt-0.5"><ChuCT t={n.hanhVi} /> <span className="text-muted">({n.congCu})</span></p>
                 <p className="text-muted mt-0.5">Minh chứng: {n.minhChung}. {n.tieuChi}</p>
@@ -159,7 +160,7 @@ function TheP({ p, viTri, loi, maChon, dangChon, chon, themMa, nhanChon }: {
       {loi.map((l) => <p key={l} className="text-[13px] text-warn-fg mt-1">! {l}</p>)}
       <p className="text-[12.5px] text-muted mt-1.5 so" title="AI tự chấm, thang 1–5; chỉ để tham khảo và sắp xếp">AI tự chấm: {(Object.keys(TIEU_CHI_CHAM) as (keyof typeof TIEU_CHI_CHAM)[]).map((c) => `${TIEU_CHI_CHAM[c]} ${p.tuCham[c]}`).join(' · ')}</p>
       <div className="mt-auto pt-3">
-        <Nut kieu={dangChon ? 'phu' : 'chinh'} onClick={chon} aria-pressed={dangChon}>{dangChon ? <><BieuTuong ten="check" className="w-4 h-4" />Đã chọn · Bỏ chọn</> : nhanChon}</Nut>
+        <Nut kieu={dangChon ? 'phu' : 'chinh'} onClick={chon} aria-pressed={dangChon}>{dangChon ? <><BieuTuong ten="check" className="w-4 h-4" />{nhanDangChon ?? 'Đã chọn · Bỏ chọn'}</> : nhanChon}</Nut>
       </div>
     </div>
   );

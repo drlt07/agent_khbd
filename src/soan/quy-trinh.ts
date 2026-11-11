@@ -9,7 +9,7 @@ import type { GoiAi } from './ai';
 import { heThong, nhacGiaiDoan1, nhacGiaiDoan3, nhacHoatDong, nhacMucTieu, nhacTichHop, nhacYccd } from './prompt';
 import { chamDiem, DIEM_DAT, kiemTraBuoc, kiemTraCauHoi, kiemTraVanBan, vanBanHoatDong, boChuNguHs } from './luat';
 import { phutTheoHoatDong } from './phan-bo';
-import { huongDanTuPhuongAn, keHoachTichHop } from './ngan-hang';
+import { chonTuDong, goiYNganHang, huongDanTuPhuongAn, keHoachTichHop, nganHangDu, type TuyChonNganHang } from './ngan-hang';
 
 export const SO_LUOT_SOAN_LAI = 2;
 export type MaPhan = 'mucTieu' | 'giaiDoan1' | MaHd | 'tichHop' | 'giaiDoan3';
@@ -140,7 +140,29 @@ export const nguyenVan = moTaMa;
 export function chonPhuongAn(k: Khbd, hd: MaHd, p: PhuongAnHd | undefined): Khbd {
   const keHoachHd = { ...k.keHoachHd };
   if (p) keHoachHd[hd] = p; else delete keHoachHd[hd];
-  return { ...k, keHoachHd, dauVet: [...k.dauVet, vet(2, `Kế hoạch ${TEN_HD[k.phuongPhap][hd]}`, 'gv_sua', p ? `Giáo viên chọn phương án: ${p.ten}` : 'Giáo viên bỏ phương án đã chọn')] };
+  return { ...k, keHoachHd, keHoachAi: (k.keHoachAi ?? []).filter((h) => h !== hd), dauVet: [...k.dauVet, vet(2, `Kế hoạch ${TEN_HD[k.phuongPhap][hd]}`, 'gv_sua', p ? `Giáo viên chọn phương án: ${p.ten}` : 'Giáo viên bỏ phương án đã chọn')] };
+}
+
+/**
+ * Trước khi soạn hoạt động: hoạt động nào giáo viên chưa chọn phương án thì AI nghĩ 3 phương án (nếu chưa có),
+ * luật lọc, app chọn phương án tốt nhất và ghi dấu vết. Không đụng phương án giáo viên đã chọn, không gọi AI nếu đã đủ.
+ */
+export async function chuanBiKeHoach(k: Khbd, ai: GoiAi, hds: MaHd[], tc: Pick<TuyChonNganHang, 'batDauHd'> = {}): Promise<Khbd> {
+  const can = hds.filter((hd) => !k.keHoachHd?.[hd] && !k.nguon?.huongDan?.[hd]);
+  if (!can.length) return k;
+  let nganHang = k.nganHang?.bai === k.bai ? k.nganHang : undefined;
+  if (!nganHang || !nganHangDu(nganHang.ketQua)) {
+    const r = await goiYNganHang(k, ai, '', { daCo: nganHang?.ketQua, batDauHd: tc.batDauHd });
+    nganHang = { bai: k.bai, ketQua: r.ketQua, boQua: [...(nganHang?.boQua ?? []), ...r.boQua] };
+  }
+  const chon = chonTuDong(nganHang.ketQua, k, can);
+  const keHoachHd = { ...k.keHoachHd };
+  const dauVet = [...k.dauVet];
+  for (const c of chon) {
+    keHoachHd[c.hd] = c.phuongAn;
+    dauVet.push(vet(2, `Kế hoạch ${TEN_HD[k.phuongPhap][c.hd]}`, 'dat', `AI chọn phương án "${c.phuongAn.ten}" trong 3 phương án (${c.lyDo}); giáo viên đổi được`));
+  }
+  return { ...k, nganHang, keHoachHd, keHoachAi: [...new Set([...(k.keHoachAi ?? []), ...chon.map((c) => c.hd)])], dauVet };
 }
 
 export function chonYTuong(k: Khbd, y: Khbd['yTuong']): Khbd {

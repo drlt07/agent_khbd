@@ -12,7 +12,7 @@
 import { z } from 'zod/v4';
 import { CHI_BAO, NANG_LUC_AI, TEN_MON, laMaAi, maTichHopHopLe, moTaMa } from '../thu-vien';
 import type { GoiAi } from './ai';
-import { coTrongDanhSach, kepTuCham, laChungChung, nguyenTacHoatDong, NHOM_HINH_THUC, tieuChiThap } from './goi-y';
+import { coTrongDanhSach, kepTuCham, laChungChung, nguyenTacHoatDong, NHOM_HINH_THUC, tieuChiThap, tongDiemGoiY } from './goi-y';
 import { phutTheoHoatDong } from './phan-bo';
 import { HUONG_DAN_HD } from './prompt';
 import { NganHangOut, PhuongAnHdOut, TEN_HD, type Khbd, type MaHd, type NganHang, type PhuongAnHd } from './kieu';
@@ -192,6 +192,42 @@ export async function goiYNganHang(k: Khbd, ai: GoiAi, yeuCau = '', tc: TuyChonN
 
 /** Gợi ý đã đủ cả 4 hoạt động chưa (thiếu thì giao diện cho "Gợi ý tiếp"). */
 export const nganHangDu = (nh: NganHang) => MA_HD.every((hd) => daDuHd(nh.phuongAn, hd));
+
+/* ---------------- AI tự chọn phương án khi giáo viên chưa chọn ---------------- */
+
+export interface LuaChonTuDong { hd: MaHd; phuongAn: PhuongAnHd; lyDo: string }
+
+/**
+ * Chọn phương án tốt nhất cho các hoạt động giáo viên CHƯA chọn. Hàm thuần, không đụng phương án giáo viên đã chọn.
+ * Loại phương án nhạt, thiếu mục, vượt thời lượng, cần thiết bị chưa khai báo (hết phương án thì mới dùng lại).
+ * Điểm = AI tự chấm (≤ 20) + 4 cho mỗi mã đã chọn mà chưa hoạt động nào tích hợp + 2 nếu hình thức chưa dùng trong bài.
+ */
+export function chonTuDong(nh: NganHang, k: Pick<Khbd, 'dieuKien' | 'phanBo' | 'phuongPhap' | 'tichHop' | 'keHoachHd'>, hds: MaHd[] = MA_HD): LuaChonTuDong[] {
+  const luat = kiemTraNganHang(nh, k);
+  const ma = maDaChon(k);
+  const chon: Partial<Record<MaHd, PhuongAnHd>> = { ...k.keHoachHd };
+  const kq: LuaChonTuDong[] = [];
+  for (const hd of MA_HD.filter((h) => hds.includes(h) && !chon[h])) {
+    const tatCa = nh.phuongAn.map((p, i) => ({ p, loi: luat.theoPhuongAn[i] })).filter((x) => x.p.hd === hd);
+    if (!tatCa.length) continue;
+    const sach = tatCa.filter((x) => !laNhat(x.loi) && !laThieu(x.loi) && !x.loi.some((l) => l.startsWith('Cần thiết bị')));
+    const ungVien = sach.length ? sach : tatCa;
+    const daPhu = new Set(Object.values(chon).flatMap((p) => p!.nls.map((n) => n.ma)));
+    const nhomDaDung = new Set(Object.values(chon).map((p) => p!.nhom));
+    const cham = (p: PhuongAnHd) => {
+      const maMoi = [...new Set(p.nls.map((n) => n.ma))].filter((m) => ma.includes(m) && !daPhu.has(m));
+      return { diem: tongDiemGoiY(p) + 4 * maMoi.length + (nhomDaDung.has(p.nhom) ? 0 : 2), maMoi };
+    };
+    const tot = ungVien.map((x) => ({ p: x.p, ...cham(x.p) })).sort((a, b) => b.diem - a.diem)[0];
+    chon[hd] = tot.p;
+    kq.push({ hd, phuongAn: tot.p, lyDo: [
+      `AI tự chấm ${tongDiemGoiY(tot.p)}/20`,
+      tot.maMoi.length ? `tích hợp được mã ${tot.maMoi.join(', ')}` : '',
+      nhomDaDung.has(tot.p.nhom) ? '' : 'hình thức khác các hoạt động còn lại',
+    ].filter(Boolean).join('; ') });
+  }
+  return kq;
+}
 
 /* ---------------- Bản đồ năng lực số ---------------- */
 

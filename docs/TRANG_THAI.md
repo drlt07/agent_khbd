@@ -192,3 +192,12 @@ Phản hồi của tác giả: gợi ý chưa đủ đa dạng và đến muộn
 - `loiTuSample`: đủ mọi mã lỗi của quyền "sample" kèm cách xử lý tiếng Việt, luôn ghi "(mã lỗi: …)"; mã lạ hiểu là gián đoạn kết nối. Gọi Claude ở chế độ nhận dần (onText).
 - Rút gọn câu trả lời: "Gợi ý hoạt động" từng hoạt động còn 4–6 phương án; ý tưởng cả bài và gợi ý viết mỗi mục 1–2 câu.
 - Kiểm thử: 169 đạt (thêm gọi từng hoạt động, gợi ý lại riêng hoạt động lỗi, gợi ý tiếp sau khi bị ngắt, mã lỗi).
+
+## AI tự nghĩ và chọn phương án ngay trong lúc soạn – 11/11/2026
+
+Phản hồi của tác giả: gợi ý phải nằm trong quá trình sinh hoạt động, giáo viên không phải tự nghĩ hay bấm thêm nút.
+
+- `chuanBiKeHoach` (`src/soan/quy-trinh.ts`): khi bấm soạn, hoạt động nào giáo viên chưa chọn phương án thì AI nghĩ 3 phương án (dùng lại bộ gợi ý ở bước 2 nếu có), luật lọc, app chọn phương án tốt nhất rồi mới soạn theo. Lỗi ở bước nghĩ phương án thì vẫn soạn như cũ và báo rõ.
+- `chonTuDong` (hàm thuần): bỏ phương án nhạt, thiếu mục, vượt thời lượng, cần thiết bị chưa khai báo; điểm = AI tự chấm + 4 cho mỗi mã đã chọn chưa hoạt động nào tích hợp + 2 nếu hình thức chưa dùng trong bài. Không đụng phương án giáo viên đã chọn.
+- Giao diện bước Soạn nội dung: "AI đang nghĩ phương án hoạt động HĐ II (2/4)"; mỗi hoạt động ghi "AI chọn phương án: …"; nút "Đổi phương án" mở 3 phương án, chọn cái khác thì AI soạn lại hoạt động đó. Dấu vết ghi lí do AI chọn. Giáo viên đổi thì không còn nhãn "AI chọn" và app không tự đổi lại.
+- Kiểm thử: 172 đạt.

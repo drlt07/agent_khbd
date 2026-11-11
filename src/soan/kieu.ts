@@ -244,6 +244,8 @@ export interface Khbd {
   nganHang?: { bai: string; ketQua: NganHang; boQua: string[] };
   /** Phương án giáo viên chọn cho từng hoạt động; AI soạn hoạt động bám theo. */
   keHoachHd?: Partial<Record<MaHd, PhuongAnHd>>;
+  /** Hoạt động mà phương án do AI tự chọn khi soạn (giáo viên chưa chọn); giáo viên đổi được bất cứ lúc nào. */
+  keHoachAi?: MaHd[];
 }
 
 export const TEN_HD: Record<PhuongPhap, Record<MaHd, string>> = {

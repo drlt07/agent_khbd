@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { PhuongAnMotHdOut, banDoNls, chuanHoaNganHang, goiYNganHang, huongDanTuPhuongAn, kiemTraNganHang, keHoachTichHop, nganHangDu, nhacNganHang } from '../src/soan/ngan-hang';
+import { PhuongAnMotHdOut, banDoNls, chonTuDong, chuanHoaNganHang, goiYNganHang, huongDanTuPhuongAn, kiemTraNganHang, keHoachTichHop, nganHangDu, nhacNganHang } from '../src/soan/ngan-hang';
 import { aiSample, LoiAi, loiTuSample } from '../src/soan/ai';
-import { chonPhuongAn, soanPhan } from '../src/soan/quy-trinh';
+import { chonPhuongAn, chuanBiKeHoach, soanPhan } from '../src/soan/quy-trinh';
 import { phanBoMacDinh } from '../src/soan/phan-bo';
 import { aiMau, khbdMau } from '../src/soan/mau';
 import { chuanHoaKhbd, xoaNoiDung } from '../src/trang/soan/trang-thai';
@@ -207,5 +207,41 @@ describe('Lỗi khi gọi Claude trong claude.ai (bản demo)', () => {
     const ai = aiSample({ json: async (_i, o) => { opts = o; throw { code: 'upstream_error' }; } });
     await expect(ai({ ten: 'x', he: 'h', nhac: 'n', schema: PhuongAnMotHdOut })).rejects.toBeInstanceOf(LoiAi);
     expect(typeof opts.onText).toBe('function');
+  });
+});
+
+describe('AI tự chọn phương án khi giáo viên chưa chọn', () => {
+  it('chọn phương án điểm cao, ưu tiên phủ mã đã chọn và hình thức chưa dùng; bỏ phương án nhạt, cần thiết bị lạ', () => {
+    const nh = tot();
+    nh.phuongAn[0] = { ...nh.phuongAn[0], tuCham: { tuDuy: 5, hapDan: 5, khaThi: 5, bamBai: 5 }, yTuong: 'GV đặt câu hỏi, HS trả lời' }; // điểm cao nhưng nhạt
+    nh.phuongAn[4] = { ...nh.phuongAn[4], tuCham: { tuDuy: 5, hapDan: 5, khaThi: 5, bamBai: 5 }, congCu: 'Kahoot' }; // cần thiết bị lạ
+    const c = chonTuDong(nh, k);
+    expect(c.map((x) => x.hd)).toEqual(['HD1', 'HD2', 'HD3', 'HD4']);
+    expect(c[0].phuongAn.ten).not.toBe('Đoán va chạm');
+    expect(c[1].phuongAn.ten).toBe('Phòng thí nghiệm ảo'); // phủ mã 5.3.5.1
+    expect(c[1].lyDo).toContain('tích hợp được mã 5.3.5.1');
+    expect(c[2].phuongAn.ten).not.toBe('Mô phỏng tốc độ'); // mã đã phủ, nhóm H đã dùng → chọn hình thức khác
+    expect(new Set(c.map((x) => x.phuongAn.nhom)).size).toBe(4);
+  });
+  it('không đụng phương án giáo viên đã chọn', () => {
+    const nh = tot();
+    const c = chonTuDong(nh, { ...k, keHoachHd: { HD2: nh.phuongAn[5] } });
+    expect(c.map((x) => x.hd)).toEqual(['HD1', 'HD3', 'HD4']);
+    expect(c.find((x) => x.hd === 'HD3')!.phuongAn.ten).toBe('Mô phỏng tốc độ'); // HD2 của GV không có mã → HD3 phải phủ
+  });
+  it('trước khi soạn: chưa có gợi ý thì AI nghĩ phương án rồi tự chọn, ghi dấu vết; đã đủ thì không gọi AI', async () => {
+    const dem: string[] = [];
+    const ai: GoiAi = async (y) => { const hd = y.nhac.match(/LẦN NÀY: (HD\d)/)![1]; dem.push(hd); const nh = tot(); return y.schema.parse({ ...nh, phuongAn: nh.phuongAn.filter((p) => p.hd === hd) }); };
+    const k2 = await chuanBiKeHoach(k, ai, ['HD1', 'HD2', 'HD3', 'HD4']);
+    expect(dem).toEqual(['HD1', 'HD2', 'HD3', 'HD4']);
+    expect(Object.keys(k2.keHoachHd!)).toEqual(['HD1', 'HD2', 'HD3', 'HD4']);
+    expect(k2.keHoachAi).toEqual(['HD1', 'HD2', 'HD3', 'HD4']);
+    expect(k2.dauVet.at(-1)?.lyDo).toContain('AI chọn phương án');
+    const k3 = await chuanBiKeHoach(k2, async () => { throw new Error('không được gọi'); }, ['HD1', 'HD2']);
+    expect(k3).toBe(k2);
+    // giáo viên đổi phương án → không còn là "AI chọn"; soạn lại không tự đổi về
+    const k4 = chonPhuongAn(k2, 'HD2', k2.nganHang!.ketQua.phuongAn[5]);
+    expect(k4.keHoachAi).toEqual(['HD1', 'HD3', 'HD4']);
+    expect((await chuanBiKeHoach(k4, ai, ['HD2'])).keHoachHd!.HD2!.ten).toBe('Thí nghiệm xe lăn');
   });
 });
