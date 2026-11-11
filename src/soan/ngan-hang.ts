@@ -12,7 +12,7 @@
 import { z } from 'zod/v4';
 import { CHI_BAO, NANG_LUC_AI, TEN_MON, laMaAi, maTichHopHopLe, moTaMa } from '../thu-vien';
 import type { GoiAi } from './ai';
-import { coTrongDanhSach, kepTuCham, laChungChung, nguyenTacHoatDong, NHOM_HINH_THUC, tieuChiThap, tongDiemGoiY } from './goi-y';
+import { coBatAi, coDungAi, coTrongDanhSach, ganVoiBai, HAP_DAN_HINH_THANH, kepTuCham, laChungChung, laNhatHoacKhongHop, LOI_AI, LOI_TEN, nguyenTacHoatDong, NHOM_HINH_THUC, TEN_VA_AI, tieuChiThap, tongDiemGoiY, tuKhoaBai } from './goi-y';
 import { phutTheoHoatDong } from './phan-bo';
 import { HUONG_DAN_HD } from './prompt';
 import { NganHangOut, PhuongAnHdOut, TEN_HD, type Khbd, type MaHd, type NganHang, type PhuongAnHd } from './kieu';
@@ -31,6 +31,14 @@ export const NHOM_UU_TIEN: Record<Khbd['phuongPhap'], Record<MaHd, (keyof typeof
   cv5512: { HD1: ['C', 'D', 'G', 'A'], HD2: ['B', 'H', 'J', 'D'], HD3: ['G', 'C', 'I', 'J'], HD4: ['F', 'A', 'E', 'I'] },
 };
 
+/** Nhóm ưu tiên của hoạt động; giáo viên không bật năng lực AI thì thay nhóm I bằng nhóm khác chưa có. */
+export function nhomUuTien(k: Pick<Khbd, 'phuongPhap' | 'tichHop'>, hd: MaHd): (keyof typeof NHOM_HINH_THUC)[] {
+  const ds = NHOM_UU_TIEN[k.phuongPhap][hd];
+  if (coBatAi(k) || !ds.includes('I')) return ds;
+  const thay = (['B', 'E', 'F', 'A', 'J', 'H', 'G', 'C', 'D'] as const).find((n) => !ds.includes(n))!;
+  return ds.map((n) => (n === 'I' ? thay : n));
+}
+
 const maDaChon = (k: Pick<Khbd, 'tichHop'>) => [...k.tichHop.nls, ...k.tichHop.ai];
 
 /* ---------------- Lời nhắc ---------------- */
@@ -48,7 +56,8 @@ export function nhacNganHang(k: Khbd, yeuCau = '', hd: MaHd = 'HD1', daCo: Phuon
     `Thiết bị lớp đang có (chỉ được dùng các thứ này): ${k.dieuKien.thietBi.join('; ') || 'chỉ bảng và phấn'}. Mức học sinh: ${{ yeu: 'yếu', tb: 'trung bình', kha: 'khá' }[k.dieuKien.mucHs]}.${k.dieuKien.ghiChu.trim() ? ` Ghi chú của giáo viên: ${k.dieuKien.ghiChu.trim()}` : ''}`,
     `Các hoạt động của bài (${k.phuongPhap === 'lhdn' ? 'lớp học đảo ngược, học sinh đã tự học lí thuyết ở nhà' : 'dạy học thông thường theo CV 5512'}): ${MA_HD.map((h) => `${h} – ${TEN_HD[k.phuongPhap][h]} (${phut[h]} phút)`).join('; ')}.`,
     `HOẠT ĐỘNG CẦN GỢI Ý LẦN NÀY: ${hd} – ${TEN_HD[k.phuongPhap][hd]} (tối đa ${phut[hd]} phút). Định hướng: ${HUONG_DAN_HD[k.phuongPhap][hd]}`,
-    daCo.length ? '' : `Để cả bài đa dạng, ${hd} chọn 3 trong 4 nhóm hình thức sau (chỉ dùng nhóm khác khi thật sự hợp bài hơn): ${NHOM_UU_TIEN[k.phuongPhap][hd].map((n) => `${n} (${NHOM_HINH_THUC[n]})`).join('; ')}.`,
+    daCo.length ? '' : `Để cả bài đa dạng, ${hd} chọn 3 trong 4 nhóm hình thức sau (chỉ dùng nhóm khác khi thật sự hợp bài hơn): ${nhomUuTien(k, hd).map((n) => `${n} (${NHOM_HINH_THUC[n]})`).join('; ')}.`,
+    TEN_VA_AI(k),
     daCo.length ? `Đã có phương án cho các hoạt động khác (không lặp cơ chế của chúng):\n${daCo.map((p) => `- ${p.hd} "${p.ten}" (nhóm ${p.nhom})`).join('\n')}\nƯu tiên nhóm hình thức chưa dùng: ${nhomChuaDung.map((n) => `${n} (${NHOM_HINH_THUC[n]})`).join('; ')}.` : '',
     ma.length
       ? [
@@ -79,11 +88,15 @@ export interface KetQuaLuatNganHang {
   theoPhuongAn: string[][];
 }
 
-export const laNhat = (loi: string[]) => loi.some((l) => l.startsWith('Nhạt'));
+export const laNhat = laNhatHoacKhongHop;
+/** Hoạt động hình thành kiến thức (phải sinh động): CV 5512 Hoạt động 2. */
+export const laHinhThanh = (k: Pick<Khbd, 'phuongPhap'>, hd: MaHd) => k.phuongPhap === 'cv5512' && hd === 'HD2';
 const laThieu = (loi: string[]) => loi.some((l) => l.startsWith('Thiếu') || l.startsWith('Dài'));
 
 /** phamVi: chỉ kiểm các hoạt động này (khi gợi ý từng hoạt động); bỏ trống = kiểm cả bộ, gồm số nhóm hình thức và độ phủ mã. */
-export function kiemTraNganHang(nh: NganHang, k: Pick<Khbd, 'dieuKien' | 'phanBo' | 'phuongPhap' | 'tichHop'>, phamVi?: MaHd[]): KetQuaLuatNganHang {
+export function kiemTraNganHang(nh: NganHang, k: Pick<Khbd, 'dieuKien' | 'phanBo' | 'phuongPhap' | 'tichHop'> & Partial<Pick<Khbd, 'bai' | 'yccd'>>, phamVi?: MaHd[]): KetQuaLuatNganHang {
+  const tk = tuKhoaBai([k.bai ?? '', ...(k.yccd ?? []).map((y) => y.noiDung), nh.phanTich.trongTam, ...nh.phanTich.khoKhan]);
+  const batAi = coBatAi(k);
   const nghiem: string[] = [], nhac: string[] = [];
   const caBo = !phamVi;
   const trongPhamVi = (hd: MaHd) => !phamVi || phamVi.includes(hd);
@@ -102,6 +115,9 @@ export function kiemTraNganHang(nh: NganHang, k: Pick<Khbd, 'dieuKien' | 'phanBo
     const thap = tieuChiThap(p.tuCham);
     if (thap.length) loi.push(`Nhạt: AI tự chấm thấp ở ${thap.join(', ')}.`);
     if (laChungChung(`${p.yTuong}\n${p.hocSinhLam}`)) loi.push('Nhạt: cách tổ chức chung chung (thảo luận rồi trình bày, hỏi – đáp, làm bài SGK).');
+    if (laHinhThanh(k, p.hd) && p.tuCham.hapDan < HAP_DAN_HINH_THANH) loi.push(`Nhạt: hoạt động hình thành kiến thức chưa đủ sinh động (Hấp dẫn ${p.tuCham.hapDan}/5, cần từ ${HAP_DAN_HINH_THANH}).`);
+    if (!ganVoiBai(p.ten, tk)) loi.push(LOI_TEN);
+    if (!batAi && coDungAi(p.nhom, p.congCu, p.yTuong, p.hocSinhLam, ...p.nls.map((n) => n.congCu))) loi.push(LOI_AI);
     const canThem = [p.congCu, ...p.nls.map((n) => n.congCu)].filter((c) => c.trim() && !coTrongDanhSach(c, k.dieuKien.thietBi));
     if (canThem.length) loi.push(`Cần thiết bị chưa khai báo: ${[...new Set(canThem)].join(', ')}.`);
     return loi;
@@ -239,7 +255,7 @@ export interface LuaChonTuDong { hd: MaHd; phuongAn: PhuongAnHd; lyDo: string }
  * Loại phương án nhạt, thiếu mục, vượt thời lượng, cần thiết bị chưa khai báo (hết phương án thì mới dùng lại).
  * Điểm = AI tự chấm (≤ 20) + 4 cho mỗi mã đã chọn mà chưa hoạt động nào tích hợp + 2 nếu hình thức chưa dùng trong bài.
  */
-export function chonTuDong(nh: NganHang, k: Pick<Khbd, 'dieuKien' | 'phanBo' | 'phuongPhap' | 'tichHop' | 'keHoachHd'>, hds: MaHd[] = MA_HD): LuaChonTuDong[] {
+export function chonTuDong(nh: NganHang, k: Pick<Khbd, 'dieuKien' | 'phanBo' | 'phuongPhap' | 'tichHop' | 'keHoachHd'> & Partial<Pick<Khbd, 'bai' | 'yccd'>>, hds: MaHd[] = MA_HD): LuaChonTuDong[] {
   const luat = kiemTraNganHang(nh, k);
   const ma = maDaChon(k);
   const chon: Partial<Record<MaHd, PhuongAnHd>> = { ...k.keHoachHd };

@@ -224,3 +224,15 @@ Trước: khoảng 12 lần gọi AI nối đuôi nhau cho một bài (4 lần n
 - `src/soan/muc-luc-sgk.ts`: nạp lười, kiểm khuôn zod; tìm sách theo môn – lớp – bộ sách (không phân biệt hoa thường, dấu, tên rút gọn).
 - Bước chọn bài: chọn môn, lớp, bộ sách là có ngay danh sách bài ("Mục lục SGK"). PPCT tổ/giáo viên tải lên vẫn được ưu tiên; "Sửa trong Excel" cho file mẫu đã điền sẵn tên bài để ghi số tiết. Ô bộ sách lấy theo dữ liệu (Ngoại ngữ: các bộ Tiếng Anh).
 - Kiểm thử `tests/muc-luc-sgk.test.ts` (bắt được lỗi gán nhầm sách Hoạt động trải nghiệm thành Hóa học); tổng 182 đạt.
+
+## Tên hoạt động gắn với bài, hình thành kiến thức sinh động, AI theo lựa chọn của giáo viên – 11/11/2026
+
+Góp ý của tác giả: hoạt động hình thành kiến thức phải sinh động; tên hoạt động phải liên quan đến bài; AI là mục bật/tắt nên không bật thì không có hoạt động dùng AI.
+
+- Luật code (áp cho "Hoạt động gợi ý cho bài", "Gợi ý thêm" từng hoạt động, "Ý tưởng cả bài"; vi phạm → AI gợi ý lại, phương án bị đẩy xuống cuối và không được tự chọn):
+  - `ganVoiBai`/`tuKhoaBai` (`src/soan/goi-y.ts`): tên phải chứa cặp âm tiết hoặc từ ngoại (parabol, Newton…) có trong tên bài, YCCĐ, trọng tâm; bỏ cặp chung chung ("học sinh", "vận dụng"…). Không có từ khóa thì không kiểm.
+  - Hình thành kiến thức (CV 5512 Hoạt động 2; gợi ý thời điểm "Hình thành kiến thức"): AI tự chấm Hấp dẫn phải từ 4/5.
+  - `coBatAi`/`coDungAi`: chưa chọn mã NLa–NLd hoặc miền 6 thì phương án có học sinh dùng AI/chatbot (nhóm I, nhắc ChatGPT, Gemini, "AI" viết hoa…) bị đánh "Không hợp"; nhóm I trong danh sách ưu tiên được thay bằng nhóm khác.
+- Luật prompt `rules/hoat-dong.md` phiên bản 3 (mục 9) và `TEN_VA_AI` trong mọi lời nhắc gợi ý.
+- Dữ liệu mẫu đặt lại tên gắn với bài (vd "Phá án đỉnh parabol", "Phòng thí nghiệm động năng ảo").
+- Kiểm thử `tests/ten-va-ai.test.ts`; tổng 190 đạt.

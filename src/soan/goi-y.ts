@@ -6,7 +6,7 @@
  */
 import { z } from 'zod/v4';
 import LUAT_HOAT_DONG from '../../rules/hoat-dong.md?raw';
-import { TEN_MON, moTaMa } from '../thu-vien';
+import { TEN_MON, boDau, moTaMa } from '../thu-vien';
 import type { GoiAi } from './ai';
 import { phutTheoHoatDong } from './phan-bo';
 import { TEN_HD, TuChamOut, type Khbd, type MaHd } from './kieu';
@@ -86,6 +86,49 @@ const CHUNG_CHUNG: RegExp[] = [
 ];
 export const laChungChung = (s: string) => { const t = s.toLowerCase(); return CHUNG_CHUNG.some((r) => r.test(t)); };
 
+/* ---------------- Tên gắn với bài, AI theo lựa chọn của giáo viên ---------------- */
+
+/** Cặp âm tiết chung chung, không cho biết bài nào (không tính là gắn với bài). */
+const CAP_CHUNG = new Set(['hoc sinh', 'neu duoc', 'giai thich', 'van dung', 'thuc te', 'bai toan', 'noi dung', 'kien thuc', 'mot so', 'duoc cac', 'cac em', 'trong bai', 'xac dinh', 'nhan biet', 'trinh bay', 'phan tich', 'danh gia', 'so sanh', 'tim hieu', 'thuc hanh', 'hoat dong', 'bai tap', 'cuoi chuong', 'on tap', 'cua mot', 'duoc mot', 'cua cac', 'va cac', 'cho cac', 'duoc su', 'su dung', 'giai quyet', 'van de', 'tinh huong', 'thuong gap', 'nham dau', 'de nham', 'loi sai']);
+const amTiet = (s: string) => boDau(s.replace(/\$[^$]*\$/g, ' ')).replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean);
+/** Từ "ngoại" (parabol, vector, Newton, Python…): không phải âm tiết tiếng Việt nên đủ đặc trưng cho bài. */
+const laTuNgoai = (t: string) => t.length >= 4 && !/^\d+$/.test(t) && (/[fjwz]/.test(t) || !/(ch|nh|ng|[aeiouycmnpt])$/.test(t));
+
+export interface TuKhoaBai { doi: Set<string>; don: Set<string> }
+/** Từ khóa của bài: cặp âm tiết (bỏ cặp chung chung) và từ ngoại, lấy từ tên bài, YCCĐ, trọng tâm. Hàm thuần. */
+export function tuKhoaBai(nguon: string[]): TuKhoaBai {
+  const doi = new Set<string>(), don = new Set<string>();
+  for (const t of nguon) {
+    const a = amTiet(t.replace(/^\s*bài\s*\d+\s*[.:]?/i, ''));
+    a.forEach((x, i) => {
+      if (laTuNgoai(x)) don.add(x);
+      const c = i + 1 < a.length ? `${x} ${a[i + 1]}` : '';
+      if (c && !CAP_CHUNG.has(c) && !/\d/.test(c)) doi.add(c);
+    });
+  }
+  return { doi, don };
+}
+/** Tên hoạt động có chứa khái niệm, nhân vật, tác phẩm… của bài không. Không có từ khóa thì không kiểm. */
+export function ganVoiBai(ten: string, tk: TuKhoaBai): boolean {
+  if (!tk.doi.size && !tk.don.size) return true;
+  const a = amTiet(ten);
+  return a.some((x, i) => tk.don.has(x) || (i + 1 < a.length && tk.doi.has(`${x} ${a[i + 1]}`)));
+}
+export const LOI_TEN = 'Nhạt: tên chưa gắn với nội dung bài (cần có khái niệm, nhân vật, tác phẩm, hiện tượng của bài).';
+
+/** Giáo viên có bật năng lực AI không (mã NLa–NLd, hoặc miền 6 "AI" của TT 02/2025). */
+export const coBatAi = (k: Pick<Khbd, 'tichHop'>) => k.tichHop.ai.length > 0 || k.tichHop.nls.some((m) => m.startsWith('6.'));
+/** Hoạt động có cho học sinh dùng AI không (nhóm I, nhắc tới chatbot/AI). */
+export const coDungAi = (nhom: string, ...vanBan: string[]) =>
+  // "AI" viết hoa mới tính (chữ "ai" thường là đại từ tiếng Việt)
+  nhom === 'I' || vanBan.some((t) => /\bAI\b/.test(t) || /chatbot|chat\s?gpt|gemini|claude|copilot|trí tuệ nhân tạo/i.test(t));
+export const LOI_AI = 'Không hợp: học sinh dùng AI nhưng giáo viên chưa bật năng lực AI.';
+/** Hoạt động hình thành kiến thức phải sinh động: AI tự chấm Hấp dẫn từ mức này. */
+export const HAP_DAN_HINH_THANH = 4;
+
+/** Phương án nhạt hoặc không hợp (bị đẩy xuống cuối, không được tự chọn). */
+export const laNhatHoacKhongHop = (loi: string[]) => loi.some((l) => l.startsWith('Nhạt') || l.startsWith('Không hợp'));
+
 /** Công cụ có trong danh sách (khớp lỏng: "GeoGebra trên điện thoại" khớp "GeoGebra"). */
 export const coTrongDanhSach = (congCu: string, ds: string[]) => {
   const cc = congCu.trim().toLowerCase();
@@ -98,6 +141,13 @@ export const nguyenTacHoatDong = () => LUAT_HOAT_DONG.replace(/<!--.*?-->\s*/s, 
 
 /** Hoạt động trong giáo án cũ mà giáo viên muốn đổi mới (lối "Sửa KHBD cũ"). */
 export interface HoatDongCu { ten: string; phut: number; noiDung: string }
+
+/** Dặn tên gắn với bài, hình thành kiến thức sinh động, AI theo lựa chọn của giáo viên (dùng chung cho mọi lời nhắc gợi ý). */
+export const TEN_VA_AI = (k: Pick<Khbd, 'tichHop'>) => [
+  'Tên hoạt động: sinh động, dễ nhớ nhưng PHẢI chứa khái niệm, nhân vật, tác phẩm hoặc hiện tượng chính của bài (vd "Thám tử parabol", "Phiên tòa xử Xuân Tóc Đỏ", "Phòng thí nghiệm động năng"); không đặt tên dùng được cho mọi bài ("Vé ra sân", "Thử thách 1").',
+  'Hoạt động hình thành kiến thức: hình thức sinh động (trò chơi, nhập vai, điều tra, thí nghiệm, trạm, mảnh ghép, thiết kế…), học sinh tự phát hiện kiến thức qua việc làm; không nghe giảng rồi trả lời câu hỏi.',
+  coBatAi(k) ? 'Giáo viên đã bật năng lực AI: chỉ dùng AI ở hoạt động thật sự cần, học sinh tự làm trước rồi mới hỏi AI.' : 'Giáo viên KHÔNG bật năng lực AI: không thiết kế hoạt động học sinh dùng AI, chatbot (không dùng nhóm I).',
+].join('\n');
 
 /** Ý tưởng xuyên suốt đã chọn và các hoạt động đã soạn: gợi ý phải hợp mạch và không lặp cơ chế. */
 function boiCanhBai(k: Khbd, hd?: MaHd): string {
@@ -124,6 +174,7 @@ export function nhacGoiY(k: Khbd, hd?: MaHd, yeuCau = '', cu?: HoatDongCu): stri
       : hd ? `Giáo viên đang tìm phương án cho "${TEN_HD[k.phuongPhap][hd]}" (khoảng ${phut} phút). Ưu tiên các hoạt động hợp thời điểm này, nhưng vẫn đa dạng nhóm hình thức.` : '',
     cu ? '' : boiCanhBai(k, hd),
     yeuCau.trim() ? `Yêu cầu thêm của giáo viên: ${yeuCau.trim()}` : '',
+    TEN_VA_AI(k),
     'Mỗi hoạt động nêu rõ điểm tư duy khó nhất và tự chấm 4 tiêu chí (mục 8); bỏ phương án nhạt (mục 7) hoặc có tiêu chí dưới 3.',
     'Trả về: Phần A – phân tích bài học; Phần B và C – 4 đến 6 hoạt động (mỗi hoạt động đủ các mục triển khai, mỗi mục viết gọn 1–2 câu); Phần D – 3 đề xuất ưu tiên (dễ triển khai nhất, sáng tạo nhất, khai thác AI hoặc mô phỏng tốt nhất) kèm lí do ngắn.',
   ].filter(Boolean).join('\n\n');
@@ -133,7 +184,9 @@ export function nhacGoiY(k: Khbd, hd?: MaHd, yeuCau = '', cu?: HoatDongCu): stri
 
 export interface KetQuaLuatGoiY { nghiem: string[]; nhac: string[]; theoHoatDong: string[][] }
 
-export function kiemTraGoiY(g: GoiY, k: Pick<Khbd, 'dieuKien'>, phutToiDa?: number): KetQuaLuatGoiY {
+export function kiemTraGoiY(g: GoiY, k: Pick<Khbd, 'dieuKien'> & Partial<Pick<Khbd, 'bai' | 'yccd' | 'tichHop'>>, phutToiDa?: number): KetQuaLuatGoiY {
+  const tk = tuKhoaBai([k.bai ?? '', ...(k.yccd ?? []).map((y) => y.noiDung), g.phanTich.trongTam, ...g.phanTich.khoKhan]);
+  const batAi = k.tichHop ? coBatAi({ tichHop: k.tichHop }) : true;
   const nghiem: string[] = [], nhac: string[] = [];
   const n = g.hoatDong.length;
   if (n < 3) nghiem.push(`Chỉ có ${n} hoạt động; cần 4–6.`);
@@ -154,6 +207,9 @@ export function kiemTraGoiY(g: GoiY, k: Pick<Khbd, 'dieuKien'>, phutToiDa?: numb
     const thap = tieuChiThap(h.tuCham);
     if (thap.length) loi.push(`Nhạt: AI tự chấm thấp ở ${thap.join(', ')}.`);
     if (laChungChung(`${h.yTuong}\n${h.kichBan.map((b) => b.buoc).join('\n')}`)) loi.push('Nhạt: cách tổ chức chung chung (thảo luận rồi trình bày, hỏi – đáp, làm bài SGK).');
+    if (h.thoiDiem === 'hinh_thanh' && h.tuCham.hapDan < HAP_DAN_HINH_THANH) loi.push(`Nhạt: hoạt động hình thành kiến thức chưa đủ sinh động (Hấp dẫn ${h.tuCham.hapDan}/5, cần từ ${HAP_DAN_HINH_THANH}).`);
+    if (!ganVoiBai(h.ten, tk)) loi.push(LOI_TEN);
+    if (!batAi && coDungAi(h.nhom, h.congNghe, h.yTuong, ...h.kichBan.map((b) => b.buoc))) loi.push(LOI_AI);
     if (h.thoiLuong > 15) loi.push(`Dài ${h.thoiLuong} phút (ưu tiên 5–15).`);
     if (phutToiDa && h.thoiLuong > phutToiDa) loi.push(`Dài hơn thời lượng hoạt động (${phutToiDa} phút).`);
     const tongKichBan = h.kichBan.reduce((s, b) => s + b.phut, 0);
@@ -161,7 +217,7 @@ export function kiemTraGoiY(g: GoiY, k: Pick<Khbd, 'dieuKien'>, phutToiDa?: numb
     return loi;
   });
   if (theoHoatDong.some((l) => l.some((x) => /Thiếu/.test(x)))) nghiem.push('Có hoạt động thiếu mục bắt buộc (dự phòng, câu hỏi mẫu, đánh giá, chốt kiến thức, điểm tư duy).');
-  const soHay = theoHoatDong.filter((l) => !l.some((x) => x.startsWith('Nhạt'))).length;
+  const soHay = theoHoatDong.filter((l) => !laNhatHoacKhongHop(l)).length;
   if (n >= 3 && soHay < 3) nghiem.push(`Chỉ có ${soHay} phương án không nhạt; cần ít nhất 3. Thay phương án nhạt bằng phương án có vấn đề thật, điểm tư duy rõ.`);
   const sttHopLe = (i: number) => Number.isInteger(i) && i >= 1 && i <= n;
   if (![g.uuTien.deTrienKhai, g.uuTien.sangTao, g.uuTien.aiMoPhong].every(sttHopLe)) nhac.push('Phần D chỉ đến hoạt động không có trong danh sách.');

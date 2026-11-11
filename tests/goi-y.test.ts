@@ -9,7 +9,7 @@ import type { GoiAi } from '../src/soan/ai';
 const o4 = <T,>(b: T[]) => ({ chuyenGiao: b[0], thucHien: b[1], baoCao: b[2], ketLuan: b[3] });
 
 const hd = (ten: string, nhom: HoatDongGoiY['nhom'], p: Partial<HoatDongGoiY> = {}): HoatDongGoiY => ({
-  ten, nhom, yTuong: 'ý tưởng', congNghe: '', canKiemTra: false, thoiLuong: 10, mucChuanBi: 'thap', thoiDiem: 'hinh_thanh',
+  ten: `${ten} động năng`, nhom, yTuong: 'ý tưởng', congNghe: '', canKiemTra: false, thoiLuong: 10, mucChuanBi: 'thap', thoiDiem: 'hinh_thanh',
   mucTieu: 'm', diemTuDuy: 'Dự đoán rồi kiểm chứng', tuCham: { tuDuy: 4, hapDan: 4, khaThi: 4, bamBai: 4 }, chuanBi: ['Máy chiếu'], kichBan: [{ buoc: 'b1', phut: 4 }, { buoc: 'b2', phut: 6 }], vaiTro: 'GV/HS', cauHoiMau: 'Câu hỏi mẫu', sanPham: 'sp', danhGia: 'đg', chotKienThuc: 'chốt', duPhong: 'Dùng phiếu in', ...p,
 });
 const goiY = (ds: HoatDongGoiY[]): GoiY => ({ phanTich: { trongTam: 't', khoKhan: ['k'], kieuHoatDong: 'x', coHoiAi: 'y' }, hoatDong: ds, uuTien: { deTrienKhai: 1, sangTao: 2, aiMoPhong: 3, lyDo: 'l' } });
@@ -81,7 +81,7 @@ describe('Nhờ AI gợi ý hoạt động – lọc phương án nhạt', () =>
   });
   it('ít hơn 3 phương án không nhạt → AI phải soạn lại', () => {
     const thap = { tuDuy: 1, hapDan: 2, khaThi: 5, bamBai: 3 };
-    const r = kiemTraGoiY(goiY([hd('a', 'B', { tuCham: thap }), hd('b', 'C', { tuCham: thap }), hd('c', 'D', { tuCham: thap }), hd('d', 'G'), hd('e', 'I')]), k);
+    const r = kiemTraGoiY(goiY([hd('a', 'B', { tuCham: thap }), hd('b', 'C', { tuCham: thap }), hd('c', 'D', { tuCham: thap }), hd('d', 'G'), hd('e', 'B')]), k);
     expect(r.nghiem.join(' ')).toContain('Chỉ có 2 phương án không nhạt');
   });
   it('thiếu điểm tư duy là thiếu mục bắt buộc', () => {

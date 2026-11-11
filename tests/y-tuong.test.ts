@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { chuanHoaYTuong, deXuatYTuong, kiemTraYTuong, nhacYTuong, type YTuong } from '../src/soan/y-tuong';
-import { chonYTuong, soanPhan } from '../src/soan/quy-trinh';
+import { chonYTuong, rutYccd, soanPhan } from '../src/soan/quy-trinh';
 import { phanBoMacDinh } from '../src/soan/phan-bo';
 import { aiMau, khbdMau } from '../src/soan/mau';
 import { chuanHoaKhbd, xoaNoiDung } from '../src/trang/soan/trang-thai';
@@ -14,7 +14,7 @@ const k: Khbd = {
 };
 
 type Hd = YTuongBai['hoatDong'][number];
-const hd = (h: Hd['hd'], nhom: Hd['nhom'], p: Partial<Hd> = {}): Hd => ({ hd: h, ten: `Hoạt động ${h}`, nhom, viec: `Học sinh dự đoán rồi kiểm chứng ở ${h}`, diemTuDuy: 'Giải thích vì sao động năng tăng gấp bốn', ketNoi: 'Dùng kết quả hoạt động trước', congNghe: '', ...p });
+const hd = (h: Hd['hd'], nhom: Hd['nhom'], p: Partial<Hd> = {}): Hd => ({ hd: h, ten: `Hoạt động ${h} động năng`, nhom, viec: `Học sinh dự đoán rồi kiểm chứng ở ${h}`, diemTuDuy: 'Giải thích vì sao động năng tăng gấp bốn', ketNoi: 'Dùng kết quả hoạt động trước', congNghe: '', ...p });
 const kb = (ten: string, ds: Hd[] = [hd('HD1', 'D'), hd('HD2', 'C'), hd('HD3', 'B', { congNghe: 'PhET' }), hd('HD4', 'G')]): YTuongBai => ({
   ten, cotTruyen: 'Đội kĩ sư an toàn giao thông điều tra vì sao xe chạy nhanh gây tai nạn nặng.', vaiHocSinh: 'Kĩ sư', cauHoiLon: 'Vì sao giới hạn tốc độ quan trọng?', hoatDong: ds, sanPhamCuoi: 'Báo cáo', diemHay: 'Gần gũi', ruiRo: 'Mất mạng thì dùng phiếu in',
 });
@@ -86,7 +86,8 @@ describe('Ý tưởng cả bài – quy trình', () => {
     expect(k2.dauVet.at(-1)?.lyDo).toContain('bỏ ý tưởng');
   });
   it('AI mẫu: 3 ý tưởng cho bài Hàm số bậc hai đều qua luật', async () => {
-    const km = { ...k, ...khbdMau() } as Khbd;
+    const km0 = { ...k, ...khbdMau() } as Khbd;
+    const km = { ...km0, yccd: await rutYccd(km0, aiMau) };
     const r = await deXuatYTuong(km, aiMau);
     expect(r.yTuong.kichBan).toHaveLength(3);
     expect(r.luat.nghiem).toEqual([]);

@@ -1,4 +1,4 @@
-<!-- phien_ban: 2 · 2026-11-10 · Thêm điểm tư duy, dấu hiệu hoạt động hay/nhạt, ví dụ đối chiếu · Hướng dẫn thiết kế, gợi ý hoạt động do tác giả cung cấp -->
+<!-- phien_ban: 3 · 2026-11-11 · Tên gắn với bài, hình thành kiến thức sinh động, AI theo lựa chọn của giáo viên · Thêm điểm tư duy, dấu hiệu hoạt động hay/nhạt, ví dụ đối chiếu · Hướng dẫn thiết kế, gợi ý hoạt động do tác giả cung cấp -->
 NGUYÊN TẮC THIẾT KẾ HOẠT ĐỘNG
 
 1. TÔN TRỌNG ĐẶC TRƯNG MÔN HỌC
@@ -68,6 +68,11 @@ Ví dụ đối chiếu:
 - khaThi: chuẩn bị đơn giản, đúng thời lượng, đúng thiết bị lớp có.
 - bamBai: mức gắn với kiến thức trọng tâm và yêu cầu cần đạt.
 Phương án có mục nào dưới 3 thì bỏ, thay bằng phương án khác.
+
+9. TÊN HOẠT ĐỘNG, HÌNH THÀNH KIẾN THỨC, DÙNG AI
+- Tên hoạt động sinh động, dễ nhớ nhưng phải chứa khái niệm, nhân vật, tác phẩm hoặc hiện tượng chính của bài (vd "Thám tử parabol", "Phiên tòa xử Xuân Tóc Đỏ", "Phòng thí nghiệm động năng"). Không đặt tên dùng được cho mọi bài ("Vé ra sân", "Thử thách 1").
+- Hoạt động hình thành kiến thức phải có hình thức sinh động (trò chơi, nhập vai, điều tra, thí nghiệm, trạm, mảnh ghép, thiết kế…): học sinh tự phát hiện kiến thức qua việc làm, không nghe giảng rồi trả lời câu hỏi.
+- Chỉ thiết kế hoạt động học sinh dùng AI khi giáo viên bật năng lực AI. Không bật thì dùng hình thức khác.
 
 QUY TRÌNH TƯ DUY THIẾT KẾ
 Bước 1: Xác định kiến thức cốt lõi và khó khăn thường gặp của học sinh.

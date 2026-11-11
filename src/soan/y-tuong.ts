@@ -7,7 +7,7 @@
 import { z } from 'zod/v4';
 import { TEN_MON, moTaMa } from '../thu-vien';
 import type { GoiAi } from './ai';
-import { coTrongDanhSach, laChungChung, nguyenTacHoatDong, NHOM_HINH_THUC } from './goi-y';
+import { coBatAi, coDungAi, coTrongDanhSach, ganVoiBai, laChungChung, LOI_AI, nguyenTacHoatDong, NHOM_HINH_THUC, TEN_VA_AI, tuKhoaBai } from './goi-y';
 import { phutTheoHoatDong } from './phan-bo';
 import { TEN_HD, YTuongBaiOut, type Khbd, type MaHd, type YTuongBai } from './kieu';
 
@@ -43,6 +43,7 @@ export function nhacYTuong(k: Khbd, yeuCau = ''): string {
       `Trong mỗi ý tưởng, 4 hoạt động thuộc ít nhất ${SO_NHOM_TOI_THIEU} nhóm hình thức khác nhau; mỗi hoạt động nêu điểm tư duy khó nhất. Không dùng cách tổ chức nhạt (thảo luận rồi đại diện trình bày, hỏi – đáp, làm bài SGK).`,
       'Kiến thức phải đúng chương trình; cốt truyện phục vụ kiến thức, không lấn át kiến thức.',
       'Viết gọn: mỗi mục 1–2 câu.',
+      TEN_VA_AI(k),
     ].join('\n'),
   ].filter(Boolean).join('\n\n');
 }
@@ -51,7 +52,9 @@ export function nhacYTuong(k: Khbd, yeuCau = ''): string {
 
 export interface KetQuaLuatYTuong { nghiem: string[]; nhac: string[]; theoKichBan: string[][] }
 
-export function kiemTraYTuong(y: YTuong, k: Pick<Khbd, 'dieuKien'>): KetQuaLuatYTuong {
+export function kiemTraYTuong(y: YTuong, k: Pick<Khbd, 'dieuKien'> & Partial<Pick<Khbd, 'bai' | 'yccd' | 'tichHop'>>): KetQuaLuatYTuong {
+  const tk = tuKhoaBai([k.bai ?? '', ...(k.yccd ?? []).map((x) => x.noiDung)]);
+  const batAi = k.tichHop ? coBatAi({ tichHop: k.tichHop }) : true;
   const nghiem: string[] = [], nhac: string[] = [];
   if (y.kichBan.length < 2) nghiem.push(`Chỉ có ${y.kichBan.length} ý tưởng; cần 3.`);
   const ten = new Set<string>();
@@ -68,6 +71,8 @@ export function kiemTraYTuong(y: YTuong, k: Pick<Khbd, 'dieuKien'>): KetQuaLuatY
     for (const h of kb.hoatDong) {
       if (!h.viec.trim() || !h.diemTuDuy.trim()) loi.push(`${h.hd}: thiếu việc của học sinh hoặc điểm tư duy.`);
       if (laChungChung(h.viec)) loi.push(`${h.hd}: cách tổ chức chung chung.`);
+      if (!ganVoiBai(h.ten, tk)) loi.push(`${h.hd}: tên "${h.ten}" chưa gắn với nội dung bài.`);
+      if (!batAi && coDungAi(h.nhom, h.viec, h.congNghe)) loi.push(`${h.hd}: ${LOI_AI.replace('Không hợp: ', '')}`);
       if (!coTrongDanhSach(h.congNghe, k.dieuKien.thietBi)) loi.push(`${h.hd}: dùng "${h.congNghe}" không có trong thiết bị lớp đã khai báo.`);
     }
     return loi;

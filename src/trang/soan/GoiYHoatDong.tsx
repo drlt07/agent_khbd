@@ -3,7 +3,7 @@ import { ChuCT } from '../../thanh-phan/cong-thuc';
 import { The, HopBao, Nut, NhanAiLam } from '../../thanh-phan/chung';
 import { BieuTuong } from '../../thanh-phan/bieu-tuong';
 import { LoiAi, type GoiAi } from '../../soan/ai';
-import { goiYHoatDong, huongDanTuGoiY, MUC_CHUAN_BI, NHOM_HINH_THUC, THOI_DIEM, TIEU_CHI_CHAM, tongDiemGoiY, type GoiY, type HoatDongCu, type HoatDongGoiY, type KetQuaLuatGoiY } from '../../soan/goi-y';
+import { goiYHoatDong, huongDanTuGoiY, MUC_CHUAN_BI, NHOM_HINH_THUC, THOI_DIEM, TIEU_CHI_CHAM, tongDiemGoiY, laNhatHoacKhongHop, type GoiY, type HoatDongCu, type HoatDongGoiY, type KetQuaLuatGoiY } from '../../soan/goi-y';
 import { TEN_HD, type Khbd, type MaHd } from '../../soan/kieu';
 
 const YEU_CAU_NHANH = ['Cách tổ chức khác', 'Lớp yếu', 'Chỉ có 1 máy tính và máy chiếu', 'Không cần Internet', 'Thêm năng lực số', 'Rút ngắn thời gian'];
@@ -41,7 +41,7 @@ export default function GoiYHoatDong({ k, hd, cu, ai, dong, dung }: {
     return [u?.deTrienKhai === i + 1 && 'Dễ triển khai nhất', u?.sangTao === i + 1 && 'Sáng tạo nhất', u?.aiMoPhong === i + 1 && 'Khai thác AI/mô phỏng tốt nhất'].filter(Boolean) as string[];
   };
 
-  const laNhat = (i: number) => (kq?.luat.theoHoatDong[i] ?? []).some((l) => l.startsWith('Nhạt'));
+  const laNhat = (i: number) => laNhatHoacKhongHop(kq?.luat.theoHoatDong[i] ?? []);
   /** Phương án không nhạt lên trước, điểm tự chấm cao lên trước; giữ số thứ tự gốc để khớp Phần D. */
   const thuTu = kq ? kq.goiY.hoatDong.map((h, i) => ({ h, i })).sort((a, b) => Number(laNhat(a.i)) - Number(laNhat(b.i)) || tongDiemGoiY(b.h) - tongDiemGoiY(a.h)) : [];
 

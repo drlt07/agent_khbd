@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { PhuongAnMotHdOut, banDoNls, chonTuDong, chuanHoaNganHang, goiYNganHang, huongDanTuPhuongAn, kiemTraNganHang, keHoachTichHop, nganHangDu, nhacNganHang } from '../src/soan/ngan-hang';
 import { aiSample, LoiAi, loiTuSample } from '../src/soan/ai';
-import { chonPhuongAn, chuanBiKeHoach, DOT_SOAN, gopKeHoach, gopPhan, soanPhan } from '../src/soan/quy-trinh';
+import { chonPhuongAn, chuanBiKeHoach, DOT_SOAN, gopKeHoach, gopPhan, rutYccd, soanPhan } from '../src/soan/quy-trinh';
 import { gioiHan } from '../src/soan/ai';
 import { phanBoMacDinh } from '../src/soan/phan-bo';
 import { aiMau, khbdMau } from '../src/soan/mau';
@@ -16,7 +16,7 @@ const k: Khbd = {
 };
 // CV 5512 1 tiết: HD1 5', HD2 20', HD3 12', HD4 8'
 const pa = (hd: PhuongAnHd['hd'], ten: string, nhom: PhuongAnHd['nhom'], p: Partial<PhuongAnHd> = {}): PhuongAnHd => ({
-  hd, ten, nhom, yTuong: 'Dự đoán rồi kiểm chứng bằng mô phỏng', hocSinhLam: 'Học sinh dự đoán động năng khi vận tốc tăng gấp đôi', diemTuDuy: 'Nhận ra quan hệ bình phương', sanPham: 'Thẻ dự đoán',
+  hd, ten: `${ten} động năng`, nhom, yTuong: 'Dự đoán rồi kiểm chứng bằng mô phỏng', hocSinhLam: 'Học sinh dự đoán động năng khi vận tốc tăng gấp đôi', diemTuDuy: 'Nhận ra quan hệ bình phương', sanPham: 'Thẻ dự đoán',
   congCu: '', thoiLuong: 5, duPhong: 'Phiếu in', nls: [], tuCham: { tuDuy: 4, hapDan: 4, khaThi: 4, bamBai: 4 }, ...p,
 });
 const NLS = { ma: '5.3.5.1', hanhVi: 'thay đổi khối lượng, vận tốc trên PhET, ghi số liệu và rút ra quan hệ', congCu: 'PhET', minhChung: 'Bảng số liệu', tieuChi: 'Đạt khi bảng có ít nhất 4 lần đo và kết luận đúng' };
@@ -84,7 +84,7 @@ describe('Hoạt động gợi ý cho bài – luật', () => {
     expect(n).toContain('HOẠT ĐỘNG CẦN GỢI Ý LẦN NÀY: HD1 – Hoạt động 1: Mở đầu (tối đa 5 phút)');
     const n2 = nhacNganHang(k, '', 'HD3', tot().phuongAn.filter((p) => p.hd === 'HD1'));
     expect(n2).toContain('HOẠT ĐỘNG CẦN GỢI Ý LẦN NÀY: HD3');
-    expect(n2).toContain('"Đoán va chạm" (nhóm D)');
+    expect(n2).toContain('"Đoán va chạm động năng" (nhóm D)');
     expect(n2).toContain('Mã CHƯA có phương án nào tích hợp: 5.3.5.1');
     expect(n2).not.toMatch(/\n0\n/);
     expect(n).toContain('Lớp yếu');
@@ -143,7 +143,8 @@ describe('Hoạt động gợi ý cho bài – quy trình', () => {
   });
   it('AI mẫu (Hàm số bậc hai) đạt luật ở cả hai phương pháp, phủ cả 5.3.5.1 và NLc', async () => {
     for (const phuongPhap of ['lhdn', 'cv5512'] as const) {
-      const km = { ...k, ...khbdMau(), phuongPhap, phanBo: phanBoMacDinh(phuongPhap, 1) } as Khbd;
+      const km0 = { ...k, ...khbdMau(), phuongPhap, phanBo: phanBoMacDinh(phuongPhap, 1) } as Khbd;
+      const km = { ...km0, yccd: await rutYccd(km0, aiMau) }; // YCCĐ đúng của bài mẫu (tên hoạt động phải gắn với bài)
       const r = await goiYNganHang(km, aiMau);
       expect(r.luat.nghiem).toEqual([]);
       expect(r.luot).toBe(0);
@@ -155,12 +156,12 @@ describe('Hoạt động gợi ý cho bài – quy trình', () => {
     const ai: GoiAi = async (y) => { nhac = y.nhac; return y.schema.parse({ mucTieu: 'm', noiDung: 'n', sanPham: 's', anToan: '', cauHoi: [], buoc: { chuyenGiao: { phut: 3, gv: 'Giáo viên mở mô phỏng PhET và giao phiếu', hs: 'Học sinh nhận phiếu, phân công' }, thucHien: { phut: 9, gv: 'Giáo viên theo dõi các nhóm', hs: 'Học sinh đổi vận tốc, ghi số liệu' }, baoCao: { phut: 5, gv: 'Giáo viên mời hai nhóm báo cáo', hs: 'Học sinh trình bày bảng số liệu' }, ketLuan: { phut: 3, gv: 'Giáo viên chốt biểu thức động năng', hs: 'Học sinh ghi vở' } } }); };
     const nh = tot();
     const k2 = chonPhuongAn({ ...k, nganHang: { bai: k.bai, ketQua: nh, boQua: [] } }, 'HD2', nh.phuongAn[3]);
-    expect(k2.dauVet.at(-1)).toMatchObject({ ketQua: 'gv_sua', lyDo: 'Giáo viên chọn phương án: Phòng thí nghiệm ảo' });
+    expect(k2.dauVet.at(-1)).toMatchObject({ ketQua: 'gv_sua', lyDo: 'Giáo viên chọn phương án: Phòng thí nghiệm ảo động năng' });
     const k3 = await soanPhan(k2, 'HD2', ai);
     expect(nhac).toContain('PHƯƠNG ÁN GIÁO VIÊN ĐÃ CHỌN');
-    expect(nhac).toContain('"Phòng thí nghiệm ảo"');
+    expect(nhac).toContain('"Phòng thí nghiệm ảo động năng"');
     expect(nhac).toContain('5.3.5.1: thay đổi khối lượng, vận tốc trên PhET');
-    expect(k3.dauVet.at(-1)?.lyDo).toContain('Phòng thí nghiệm ảo');
+    expect(k3.dauVet.at(-1)?.lyDo).toContain('Phòng thí nghiệm ảo động năng');
   });
   it('chỉ đưa vào lời nhắc mã giáo viên đã chọn (luật 3)', () => {
     const p = pa('HD2', 'X', 'H', { nls: [NLS, { ...NLS, ma: '1.1.5.2', hanhVi: 'tìm kiếm tài liệu' }] });
@@ -171,7 +172,7 @@ describe('Hoạt động gợi ý cho bài – quy trình', () => {
   it('bước gắn mã nhận kế hoạch tích hợp theo phương án đã chọn', async () => {
     const nh = tot();
     const k2 = chonPhuongAn(k, 'HD3', nh.phuongAn[8]);
-    expect(keHoachTichHop(k2)).toContain('5.3.5.1 ở HD3 ("Mô phỏng tốc độ")');
+    expect(keHoachTichHop(k2)).toContain('5.3.5.1 ở HD3 ("Mô phỏng tốc độ động năng")');
     let nhac = '';
     const ai: GoiAi = async (y) => { nhac = y.nhac; return y.schema.parse({ ma: [{ ma: '5.3.5.1', hoatDong: 'HD3', bieuHien: 'thay đổi vận tốc trên PhET, ghi số liệu, rút ra quan hệ bình phương', congCu: 'PhET', minhChung: 'Bảng số liệu', tieuChi: 'Đạt khi bảng có ít nhất 4 lần đo và kết luận đúng' }], clil: null }); };
     await soanPhan(k2, 'tichHop', ai);
@@ -185,11 +186,11 @@ describe('Bản đồ năng lực số', () => {
     const k1 = { ...k, tichHop: { ...k.tichHop, ai: ['NLc'] }, nganHang: { bai: k.bai, ketQua: nh, boQua: [] } };
     let bd = banDoNls(k1);
     expect(bd[0]).toMatchObject({ ma: '5.3.5.1', daChon: [] });
-    expect(bd[0].coSan.map((c) => c.ten)).toEqual(['Phòng thí nghiệm ảo', 'Mô phỏng tốc độ']);
+    expect(bd[0].coSan.map((c) => c.ten)).toEqual(['Phòng thí nghiệm ảo động năng', 'Mô phỏng tốc độ động năng']);
     expect(bd[1]).toMatchObject({ ma: 'NLc', daChon: [], coSan: [] });
     bd = banDoNls(chonPhuongAn(k1, 'HD3', nh.phuongAn[8]));
-    expect(bd[0].daChon).toEqual([{ hd: 'HD3', ten: 'Mô phỏng tốc độ', hanhVi: NLS.hanhVi }]);
-    expect(bd[0].coSan.map((c) => c.ten)).toEqual(['Phòng thí nghiệm ảo']);
+    expect(bd[0].daChon).toEqual([{ hd: 'HD3', ten: 'Mô phỏng tốc độ động năng', hanhVi: NLS.hanhVi }]);
+    expect(bd[0].coSan.map((c) => c.ten)).toEqual(['Phòng thí nghiệm ảo động năng']);
   });
 });
 
@@ -230,17 +231,17 @@ describe('AI tự chọn phương án khi giáo viên chưa chọn', () => {
     nh.phuongAn[4] = { ...nh.phuongAn[4], tuCham: { tuDuy: 5, hapDan: 5, khaThi: 5, bamBai: 5 }, congCu: 'Kahoot' }; // cần thiết bị lạ
     const c = chonTuDong(nh, k);
     expect(c.map((x) => x.hd)).toEqual(['HD1', 'HD2', 'HD3', 'HD4']);
-    expect(c[0].phuongAn.ten).not.toBe('Đoán va chạm');
-    expect(c[1].phuongAn.ten).toBe('Phòng thí nghiệm ảo'); // phủ mã 5.3.5.1
+    expect(c[0].phuongAn.ten).not.toBe('Đoán va chạm động năng');
+    expect(c[1].phuongAn.ten).toBe('Phòng thí nghiệm ảo động năng'); // phủ mã 5.3.5.1
     expect(c[1].lyDo).toContain('tích hợp được mã 5.3.5.1');
-    expect(c[2].phuongAn.ten).not.toBe('Mô phỏng tốc độ'); // mã đã phủ, nhóm H đã dùng → chọn hình thức khác
+    expect(c[2].phuongAn.ten).not.toBe('Mô phỏng tốc độ động năng'); // mã đã phủ, nhóm H đã dùng → chọn hình thức khác
     expect(new Set(c.map((x) => x.phuongAn.nhom)).size).toBe(4);
   });
   it('không đụng phương án giáo viên đã chọn', () => {
     const nh = tot();
     const c = chonTuDong(nh, { ...k, keHoachHd: { HD2: nh.phuongAn[5] } });
     expect(c.map((x) => x.hd)).toEqual(['HD1', 'HD3', 'HD4']);
-    expect(c.find((x) => x.hd === 'HD3')!.phuongAn.ten).toBe('Mô phỏng tốc độ'); // HD2 của GV không có mã → HD3 phải phủ
+    expect(c.find((x) => x.hd === 'HD3')!.phuongAn.ten).toBe('Mô phỏng tốc độ động năng'); // HD2 của GV không có mã → HD3 phải phủ
   });
   it('trước khi soạn: chưa có gợi ý thì AI nghĩ phương án rồi tự chọn, ghi dấu vết; đã đủ thì không gọi AI', async () => {
     const dem: string[] = [];
@@ -255,7 +256,7 @@ describe('AI tự chọn phương án khi giáo viên chưa chọn', () => {
     // giáo viên đổi phương án → không còn là "AI chọn"; soạn lại không tự đổi về
     const k4 = chonPhuongAn(k2, 'HD2', k2.nganHang!.ketQua.phuongAn[5]);
     expect(k4.keHoachAi).toEqual(['HD1', 'HD3', 'HD4']);
-    expect((await chuanBiKeHoach(k4, ai, ['HD2'])).keHoachHd!.HD2!.ten).toBe('Thí nghiệm xe lăn');
+    expect((await chuanBiKeHoach(k4, ai, ['HD2'])).keHoachHd!.HD2!.ten).toBe('Thí nghiệm xe lăn động năng');
   });
 });
 
@@ -282,8 +283,8 @@ describe('Soạn song song', () => {
     const moi = { ...k, nganHang: { bai: k.bai, ketQua: nh, boQua: [] }, keHoachHd: { HD1: nh.phuongAn[0], HD2: nh.phuongAn[3] }, keHoachAi: ['HD1', 'HD2'] as ('HD1' | 'HD2')[] };
     const hienTai = chonPhuongAn(k, 'HD2', nh.phuongAn[5]);
     const r = gopKeHoach(hienTai, k, moi);
-    expect(r.keHoachHd!.HD2!.ten).toBe('Thí nghiệm xe lăn');
-    expect(r.keHoachHd!.HD1!.ten).toBe('Đoán va chạm');
+    expect(r.keHoachHd!.HD2!.ten).toBe('Thí nghiệm xe lăn động năng');
+    expect(r.keHoachHd!.HD1!.ten).toBe('Đoán va chạm động năng');
     expect(r.keHoachAi).toEqual(['HD1']);
   });
   it('giới hạn số yêu cầu AI chạy cùng lúc, yêu cầu thừa xếp hàng', async () => {
