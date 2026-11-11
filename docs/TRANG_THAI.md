@@ -212,3 +212,8 @@ Trước: khoảng 12 lần gọi AI nối đuôi nhau cho một bài (4 lần n
 - Lời nhắc gợi ý: đã chọn mã thì chỉ gửi các mã đó, không gửi cả thư viện 55 chỉ báo.
 - Đo với AI mẫu (350 ms/lần): soạn cả bài 1,7 giây so với khoảng 4,2 giây nếu nối đuôi. Chưa đo với AI thật.
 - Kiểm thử: 177 đạt.
+
+## Mô hình Gemini mặc định: gemini-3.6-flash – 11/11/2026
+
+- `MO_HINH_MAC_DINH.gemini` đổi từ `gemini-2.5-flash` sang `gemini-3.6-flash` (giáo viên đang dùng mô hình này; trước phải gõ tay vào ô "Mô hình"). Giáo viên vẫn đổi được ở ô "Mô hình".
+- Lưu ý: khóa Gemini miễn phí với mô hình này theo các trang bên ngoài đo được chỉ khoảng 5 lần gọi/phút, 20 lần/ngày (Google không công bố bảng chính thức); một bài cần ≥ 14 lần gọi. Chưa làm: tự chờ khi bị giới hạn, chế độ tiết kiệm lượt.

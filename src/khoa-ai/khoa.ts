@@ -11,7 +11,7 @@ export const TEN_NCC: Record<NhaCungCap, string> = { claude: 'Claude', gemini: '
 /** Mô hình mặc định khi ô "Mô hình" để trống. Đổi tại đây khi nhà cung cấp ra mô hình mới. */
 export const MO_HINH_MAC_DINH: Record<NhaCungCap, string> = {
   claude: 'claude-opus-5-5',
-  gemini: 'gemini-2.5-flash',
+  gemini: 'gemini-3.6-flash',
 };
 
 const DANG_KHOA: Record<NhaCungCap, RegExp> = {
