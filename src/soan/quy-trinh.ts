@@ -9,10 +9,11 @@ import type { GoiAi } from './ai';
 import { heThong, nhacGiaiDoan1, nhacGiaiDoan3, nhacHoatDong, nhacMucTieu, nhacTichHop, nhacYccd } from './prompt';
 import { chamDiem, DIEM_DAT, kiemTraBuoc, kiemTraCauHoi, kiemTraVanBan, vanBanHoatDong, boChuNguHs } from './luat';
 import { phutTheoHoatDong } from './phan-bo';
+import { soanPhieu, VI_TRI_PHIEU } from './phieu';
 import { chonTuDong, goiYNganHang, huongDanTuPhuongAn, keHoachTichHop, nganHangDu, type TuyChonNganHang } from './ngan-hang';
 
 export const SO_LUOT_SOAN_LAI = 2;
-export type MaPhan = 'mucTieu' | 'giaiDoan1' | MaHd | 'tichHop' | 'giaiDoan3';
+export type MaPhan = 'mucTieu' | 'giaiDoan1' | MaHd | 'tichHop' | 'giaiDoan3' | 'phieu';
 export interface PhanSoan { ma: MaPhan; ten: string; buoc: number }
 
 export function danhSachPhan(k: Khbd): PhanSoan[] {
@@ -21,6 +22,7 @@ export function danhSachPhan(k: Khbd): PhanSoan[] {
   (['HD1', 'HD2', 'HD3', 'HD4'] as MaHd[]).forEach((h) => ds.push({ ma: h, ten: TEN_HD[k.phuongPhap][h], buoc: 4 }));
   if (k.tichHop.nls.length || k.tichHop.ai.length || k.tichHop.tiengAnh === 'clil') ds.push({ ma: 'tichHop', ten: 'Năng lực số, AI, tiếng Anh', buoc: 5 });
   if (k.phuongPhap === 'lhdn') ds.push({ ma: 'giaiDoan3', ten: 'Giai đoạn 3 – Sau giờ học', buoc: 4 });
+  ds.push({ ma: 'phieu', ten: 'Phụ lục: phiếu học tập', buoc: 5 });
   return ds;
 }
 
@@ -29,6 +31,7 @@ export function phanCuaLoi(k: Khbd, viTri: string): MaPhan | null {
   if (viTri === 'Mục tiêu' || viTri.startsWith('Năng lực đặc thù') || viTri === 'Thiết bị' || viTri === 'Thiết bị dạy học') return 'mucTieu';
   if (viTri === 'Giai đoạn 1' && k.phuongPhap === 'lhdn') return 'giaiDoan1';
   if (viTri === 'Giai đoạn 3' && k.phuongPhap === 'lhdn') return 'giaiDoan3';
+  if (viTri === VI_TRI_PHIEU) return 'phieu';
   const hd = k.hoatDong.find((h) => viTri === h.ten || viTri.startsWith(`${h.ten},`));
   return hd ? hd.ma : null;
 }
@@ -63,6 +66,11 @@ export async function soanPhan(k: Khbd, phan: MaPhan, ai: GoiAi, huongDan = '', 
     return { ...k, giaiDoan3: r, dauVet };
   }
   if (phan === 'tichHop') return soanTichHop(k, ai);
+  if (phan === 'phieu') {
+    const phieu = await soanPhieu(k, ai, he);
+    dauVet.push(vet(5, VI_TRI_PHIEU, phieu.length ? 'dat' : 'dat', phieu.length ? `Soạn ${phieu.length} phiếu: số ${phieu.map((p) => p.so).join(', ')}` : 'KHBD không nhắc phiếu học tập nào'));
+    return { ...k, phieu, dauVet };
+  }
 
   // Hoạt động: luật 4.2 – 4.3 (nghiêm) → soạn lại tối đa 2 lượt
   const hd = phan;
@@ -170,7 +178,7 @@ export async function chuanBiKeHoach(k: Khbd, ai: GoiAi, hds: MaHd[], tc: Pick<T
  * Đợt 1 chạy cùng lúc với việc nghĩ phương án hoạt động. HD3, HD4 cần HD1, HD2 (giải tình huống mở đầu,
  * không trùng câu luyện tập); phần gắn mã cần đủ 4 hoạt động.
  */
-export const DOT_SOAN: MaPhan[][] = [['mucTieu', 'giaiDoan1', 'giaiDoan3'], ['HD1', 'HD2'], ['HD3', 'HD4'], ['tichHop']];
+export const DOT_SOAN: MaPhan[][] = [['mucTieu', 'giaiDoan1', 'giaiDoan3'], ['HD1', 'HD2'], ['HD3', 'HD4'], ['tichHop', 'phieu']];
 
 /** Ghép kết quả của MỘT phần (soạn trên ảnh chụp `goc`, ra `moi`) vào bản hiện tại, không ghi đè phần khác soạn song song. Hàm thuần. */
 export function gopPhan(hienTai: Khbd, goc: Khbd, moi: Khbd, phan: MaPhan): Khbd {
@@ -179,6 +187,7 @@ export function gopPhan(hienTai: Khbd, goc: Khbd, moi: Khbd, phan: MaPhan): Khbd
   if (phan === 'giaiDoan1') return { ...hienTai, giaiDoan1: moi.giaiDoan1, dauVet };
   if (phan === 'giaiDoan3') return { ...hienTai, giaiDoan3: moi.giaiDoan3, dauVet };
   if (phan === 'tichHop') return { ...hienTai, maTichHop: moi.maTichHop, maBo: moi.maBo, clil: moi.clil, dauVet };
+  if (phan === 'phieu') return { ...hienTai, phieu: moi.phieu, dauVet };
   return { ...hienTai, hoatDong: hienTai.hoatDong.map((h) => (h.ma === phan ? moi.hoatDong.find((x) => x.ma === phan) ?? h : h)), dauVet };
 }
 

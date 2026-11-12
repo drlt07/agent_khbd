@@ -5,6 +5,7 @@ import { TEN_HD, type Khbd, type MaHd } from '../../soan/kieu';
 import { phanBoMacDinh } from '../../soan/phan-bo';
 import { NganHangCoBoQua } from '../../soan/ngan-hang';
 import { layPpdh, MA_LHDN } from '../../soan/phuong-phap';
+import { PhieuOut } from '../../soan/phieu';
 import { PhuongAnHdOut } from '../../soan/kieu';
 
 const KHOA = 'khbd.ban-nhap';
@@ -31,7 +32,7 @@ export const dungHoatDong = (pp: Khbd['phuongPhap']) => (['HD1', 'HD2', 'HD3', '
 /** Xóa mọi nội dung đã soạn (khi đổi thông tin nền của bài). */
 export const xoaNoiDung = (k: Khbd): Khbd => ({
   ...k, mucTieu: undefined, giaiDoan1: undefined, giaiDoan3: undefined, clil: undefined,
-  hoatDong: dungHoatDong(k.phuongPhap), maTichHop: [], maBo: [], yTuong: undefined, nganHang: undefined, keHoachHd: undefined, keHoachAi: undefined,
+  hoatDong: dungHoatDong(k.phuongPhap), maTichHop: [], maBo: [], yTuong: undefined, nganHang: undefined, keHoachHd: undefined, keHoachAi: undefined, phieu: undefined,
 });
 
 export const coNoiDung = (k: Khbd) => !!(k.mucTieu || k.giaiDoan1 || k.hoatDong.some((h) => h.noiDung) || k.maTichHop.length);
@@ -87,6 +88,7 @@ export function chuanHoaKhbd(tho: unknown): Khbd | null {
     ppdh: k.ppdh === undefined ? (pp === 'lhdn' ? [MA_LHDN] : []) : mang<string>(k.ppdh).filter((m) => !!layPpdh(m)),
     goiYPpdh: mang<any>(k.goiYPpdh).filter((g) => g && layPpdh(g.ma) && typeof g.lyDo === 'string').map((g) => ({ ma: g.ma, lyDo: g.lyDo, apDung: String(g.apDung ?? '') })),
     donVi: undefined, khoKhan: undefined,
+    phieu: k.phieu === undefined ? undefined : PhieuOut.shape.phieu.safeParse(k.phieu).success ? k.phieu : undefined,
     keHoachAi: mang<string>(k.keHoachAi).filter((h) => /^HD[1-4]$/.test(h)) as MaHd[],
     yTuong: k.yTuong && typeof k.yTuong === 'object' && typeof k.yTuong.ten === 'string' && Array.isArray(k.yTuong.hoatDong) ? k.yTuong : undefined,
   };

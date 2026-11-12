@@ -272,7 +272,7 @@ describe('Soạn song song', () => {
   });
   it('các đợt soạn: hoạt động 3, 4 sau hoạt động 1, 2; gắn mã sau cùng; đủ mọi phần', () => {
     const phang = DOT_SOAN.flat();
-    expect([...phang].sort()).toEqual(['HD1', 'HD2', 'HD3', 'HD4', 'giaiDoan1', 'giaiDoan3', 'mucTieu', 'tichHop']);
+    expect([...phang].sort()).toEqual(['HD1', 'HD2', 'HD3', 'HD4', 'giaiDoan1', 'giaiDoan3', 'mucTieu', 'phieu', 'tichHop']);
     const dot = (p: string) => DOT_SOAN.findIndex((d) => d.includes(p as never));
     expect(dot('HD3')).toBeGreaterThan(dot('HD1'));
     expect(dot('HD4')).toBeGreaterThan(dot('HD2'));

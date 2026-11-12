@@ -15,6 +15,7 @@ import type { MaHd } from '../../soan/kieu';
 type TrangThai = 'cho' | 'dang' | 'xong' | 'loi';
 const daCo = (k: Khbd, p: MaPhan) => (p === 'mucTieu' ? !!k.mucTieu : p === 'giaiDoan1' ? !!k.giaiDoan1 : p === 'giaiDoan3' ? !!k.giaiDoan3
   : p === 'tichHop' ? k.maTichHop.length + k.maBo.length > 0 || !!k.clil
+  : p === 'phieu' ? k.phieu !== undefined
     : !!k.hoatDong.find((h) => h.ma === p)?.noiDung);
 
 export default function Buoc3Soan({ k, datKhbd, ai }: { k: Khbd; datKhbd: (k: Khbd) => void; ai: GoiAi | null }) {

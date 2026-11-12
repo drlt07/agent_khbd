@@ -253,6 +253,8 @@ export interface Khbd {
   /** Bước 3: phương pháp dạy học giáo viên chọn (mã trong data/phuong_phap_day_hoc.json), và gợi ý của AI. */
   ppdh?: string[];
   goiYPpdh?: { ma: string; lyDo: string; apDung: string }[];
+  /** Phụ lục phiếu học tập (src/soan/phieu.ts): mỗi phiếu KHBD nhắc tới một phần tử. undefined = chưa soạn. */
+  phieu?: { so: number; ten: string; hoatDong: 'GD1' | MaHd; huongDan: string; noiDung: string[]; bang: { cot: string[]; soDong: number } | null }[];
   /** Ý tưởng xuyên suốt giáo viên đã chọn; mọi hoạt động soạn bám theo. */
   yTuong?: YTuongBai;
   /** "Hoạt động gợi ý cho bài" ở bước Lập kế hoạch: kết quả AI (theo tên bài lúc gợi ý) và mã bị luật loại. */

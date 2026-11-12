@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { tenPpdh } from '../../soan/phuong-phap';
+import { soPhieu } from '../../soan/phieu';
 import { moTaMa, vanBanGoc, TEN_MON } from '../../thu-vien';
 import { phutTheoHoatDong } from '../../soan/phan-bo';
 import { TEN_HD, type Khbd, type MaHd } from '../../soan/kieu';
@@ -136,6 +137,24 @@ export default function XemKhbd({ k, sua, suaDuoc = false, dangSoan = [] }: { k:
           </GiaiDoan>
         )}
       </Muc>
+
+      {(k.phieu?.length || (k.hoatDong.every((h) => h.noiDung) && soPhieu(k).length > 0)) ? (
+        <Muc ten="Phụ lục: Phiếu học tập">
+          {k.phieu?.length ? k.phieu.map((p) => (
+            <Nho key={p.so} ten={`Phiếu học tập số ${p.so}: ${p.ten}`}>
+              <Dong><span className="text-muted">{p.hoatDong === 'GD1' ? 'Giai đoạn 1' : TEN_HD[k.phuongPhap][p.hoatDong]}</span></Dong>
+              {p.huongDan && <Dong><b>Hướng dẫn:</b> <ChuCT t={p.huongDan} /></Dong>}
+              {p.noiDung.map((t, i) => <Dong key={i}><b>{i + 1}.</b> <ChuCT t={t} /></Dong>)}
+              {p.bang && p.bang.cot.length > 0 && (
+                <div className="overflow-x-auto mt-1"><table className="w-full text-[14px] border border-line">
+                  <thead><tr>{p.bang.cot.map((c) => <th key={c} className="border border-line bg-surface-2 px-2 py-1 text-left font-semibold">{c}</th>)}</tr></thead>
+                  <tbody>{Array.from({ length: p.bang.soDong }, (_, r) => <tr key={r}>{p.bang!.cot.map((c) => <td key={c} className="border border-line px-2 py-3" />)}</tr>)}</tbody>
+                </table></div>
+              )}
+            </Nho>
+          )) : <ChuaSoan dang={dangSoan.includes('phieu')} />}
+        </Muc>
+      ) : null}
 
       {k.maTichHop.length > 0 && (
         <Muc ten="Phụ lục: Căn cứ">

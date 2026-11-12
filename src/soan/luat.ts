@@ -3,6 +3,7 @@
  * Luật không tự đổi mã, phương án, bố cục giáo viên đã chọn; chỉ tự sửa lỗi trình bày an toàn và liệt kê chỗ đã sửa.
  */
 import { canQuyTrinhAi, maTichHopHopLe } from '../thu-vien';
+import { kiemTraPhieu } from './phieu';
 import { kiemTraPhanBo, phutTheoHoatDong } from './phan-bo';
 import type { Buoc, CauHoi, Khbd, MaHd, MaTichHop } from './kieu';
 import { loiCongThucTrong } from './cong-thuc';
@@ -182,6 +183,8 @@ export function kiemTraKhbd(k: Khbd): LoiLuat[] {
     if (!hs.thietBi.length && !hs.hocLieu.length) loi.push({ luat: '0.5', muc: 'nhac', viTri: 'Thiết bị dạy học', thongBao: 'Chưa ghi phần học sinh chuẩn bị.' });
   } else loi.push({ luat: '0.9', muc: 'nghiem', viTri: 'Mục tiêu', thongBao: 'Chưa soạn mục tiêu.' });
 
+  // Phiếu học tập được nhắc phải có ở phụ lục (chỉ kiểm khi đã soạn xong các hoạt động)
+  if (k.hoatDong.every((h) => h.noiDung)) loi.push(...kiemTraPhieu(k));
   const phut = phutTheoHoatDong(k.phanBo);
   for (const h of k.hoatDong) {
     if (!h.noiDung) { loi.push({ luat: '0.9', muc: 'nghiem', viTri: h.ten, thongBao: 'Chưa soạn hoạt động này.' }); continue; }

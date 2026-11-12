@@ -180,6 +180,19 @@ export function dungTaiLieu(k: Khbd, o: { dauVet?: boolean; anh?: Map<string, Ui
     con.push(bang(['Năng lực', 'Hoạt động', 'Minh chứng', 'Tiêu chí'], dong, [1500, 2500, 2500, 2500]));
   }
 
+  // Phụ lục phiếu học tập: mỗi phiếu KHBD nhắc tới, in ra dùng được ngay
+  if (k.phieu?.length) {
+    con.push(muc('PHỤ LỤC: PHIẾU HỌC TẬP'));
+    for (const p of k.phieu) {
+      con.push(doan([chu(`PHIẾU HỌC TẬP SỐ ${p.so}: ${p.ten.toUpperCase()}`, { dam: true })], { truoc: 200 }));
+      con.push(doan([chu(`(${p.hoatDong === 'GD1' ? 'Giai đoạn 1' : tenHd[p.hoatDong]})`, { nghieng: true })]));
+      con.push(doan([chu('Họ và tên/Nhóm: ………………………………… Lớp: ………', {})], { canh: AlignmentType.LEFT }));
+      if (p.huongDan.trim()) con.push(...nhanGiaTri('Hướng dẫn:', p.huongDan));
+      p.noiDung.forEach((t, i) => con.push(...nhanGiaTri(`${i + 1}.`, t)));
+      if (p.bang?.cot.length) con.push(bang(p.bang.cot, Array.from({ length: p.bang.soDong }, () => p.bang!.cot.map(() => ' ')), p.bang.cot.map(() => Math.floor(9000 / p.bang!.cot.length))));
+    }
+  }
+
   // Phụ lục Căn cứ (SPEC 6.10): dữ liệu lấy từ thư viện mã, không do AI viết
   if (k.maTichHop.length) {
     con.push(muc('PHỤ LỤC: CĂN CỨ'));

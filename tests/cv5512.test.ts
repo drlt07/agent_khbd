@@ -40,7 +40,7 @@ describe('Dạy học thông thường theo CV 5512', () => {
       if (y.ten === 'tichHop') return y.schema.parse({ ma: [{ ma: '5.3.5.1', hoatDong: 'HD2', bieuHien: 'nhập hàm số vào GeoGebra, vẽ parabol và đối chiếu tọa độ đỉnh', congCu: 'GeoGebra', minhChung: 'Ảnh đồ thị trên phiếu', tieuChi: 'Đạt khi đỉnh trùng kết quả tính tay' }], clil: null });
       return aiMau(y);
     };
-    expect(danhSachPhan(k).map((p) => p.ma)).toEqual(['mucTieu', 'HD1', 'HD2', 'HD3', 'HD4', 'tichHop']);
+    expect(danhSachPhan(k).map((p) => p.ma)).toEqual(['mucTieu', 'HD1', 'HD2', 'HD3', 'HD4', 'tichHop', 'phieu']);
     for (const p of danhSachPhan(k)) k = await soanPhan(k, p.ma, ai);
     expect(kiemTraKhbd(k).filter((l) => l.muc === 'nghiem')).toEqual([]);
     const ra = (await mammoth.extractRawText({ buffer: await Packer.toBuffer(dungTaiLieu(k)) })).value;

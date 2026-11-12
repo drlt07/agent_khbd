@@ -55,7 +55,7 @@ export default function SoanBai() {
     (k.ppdh ?? []).length > 0 && kiemTraPhanBo(k.phanBo, k.soTiet, k.phuongPhap).nghiem.length === 0,
     true,
     true,
-    danhSachPhan(k).every((p) => (p.ma === 'mucTieu' ? !!k.mucTieu : p.ma === 'giaiDoan1' ? !!k.giaiDoan1 : p.ma === 'giaiDoan3' ? !!k.giaiDoan3 : p.ma === 'tichHop' ? true : !!k.hoatDong.find((h) => h.ma === p.ma)?.noiDung)),
+    danhSachPhan(k).every((p) => (p.ma === 'mucTieu' ? !!k.mucTieu : p.ma === 'giaiDoan1' ? !!k.giaiDoan1 : p.ma === 'giaiDoan3' ? !!k.giaiDoan3 : p.ma === 'tichHop' || p.ma === 'phieu' ? true : !!k.hoatDong.find((h) => h.ma === p.ma)?.noiDung)),
     !chanXuat(kiemTraKhbd(k)),
   ];
   const denDuoc = (i: number) => choPhep.slice(0, i + 1).every(Boolean);

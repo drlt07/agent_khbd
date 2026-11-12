@@ -180,6 +180,41 @@ const NLC_CHATBOT = { ma: 'NLc', congCu: 'Chatbot AI (Gemini/ChatGPT)', minhChun
   ],
 };
 
+/** Phụ lục phiếu học tập dựng sẵn (lớp học đảo ngược): phiếu số 1 luyện tập theo mức, số 2 quỹ đạo quả bóng. */
+(TRA_LOI as Record<string, unknown>).phieu = { phieu: [
+  { so: 1, ten: 'Luyện tập hàm số bậc hai theo mức', hoatDong: 'HD2', huongDan: 'Làm cá nhân phần của nhóm mình trong 7 phút; đánh dấu câu chưa chắc. Sửa bằng bút màu khác khi chữa bài.',
+    noiDung: [
+      'Nhóm Cần hỗ trợ – Câu 1. Hàm số nào sau đây là hàm số bậc hai? A. $y = 3x - 1$; B. $y = -2x^2 + x$; C. $y = \\frac{1}{x^2}$; D. $y = \\sqrt{x^2 + 1}$',
+      'Nhóm Cần hỗ trợ – Câu 2. Cho $y = -x^2 + 4x - 1$. Xác định các hệ số $a, b, c$ và cho biết parabol có bề lõm hướng lên hay xuống.',
+      'Nhóm Cần củng cố – Câu 3. Tìm tọa độ đỉnh và trục đối xứng của parabol $y = 2x^2 - 8x + 5$.',
+      'Nhóm Cần củng cố – Câu 4. Parabol $y = x^2 - 6x + 7$ có giá trị nhỏ nhất bằng bao nhiêu? Đạt tại $x$ bằng mấy?',
+      'Nhóm Nắm tốt – Câu 5. Xác định parabol $y = ax^2 + bx + c$ đi qua ba điểm $A(0; 3)$, $B(1; 0)$, $C(3; 0)$.',
+      'Nhóm Nắm tốt – Câu 6. Tìm $m$ để parabol $y = x^2 - 2x + m$ có đỉnh nằm trên trục hoành.',
+      'Câu sửa lại (làm sau khi chữa): viết lại một câu em làm sai, ghi rõ chỗ sai và cách sửa.',
+    ], bang: null },
+  { so: 2, ten: 'Quỹ đạo quả bóng – tìm độ cao lớn nhất', hoatDong: 'HD3', huongDan: 'Làm theo nhóm trong 15 phút. Tự giải trước; chỉ hỏi chatbot để kiểm tra một bước và ghi lại quyết định giữ/sửa/loại.',
+    noiDung: [
+      'Độ cao $h$ (mét) của quả bóng tại các thời điểm $t = 0, 1, 2$ (giây) lần lượt là 1 m, 6 m, 9 m. Lập hàm số $h(t) = at^2 + bt + c$ mô tả độ cao.',
+      'Tìm thời điểm bóng lên cao nhất và độ cao lớn nhất. So sánh với dự đoán của nhóm ở đầu giờ.',
+      'Vẽ đồ thị trên GeoGebra, chụp ảnh dán vào ô bên dưới; đọc tọa độ đỉnh trên đồ thị và đối chiếu với kết quả tính tay.',
+      'Gắn nhãn tiếng Anh cho đỉnh (vertex), trục đối xứng (axis of symmetry), giá trị lớn nhất (maximum value) trên ảnh đồ thị.',
+    ], bang: { cot: ['Bước giải hỏi chatbot', 'Câu lệnh đã dùng', 'Phản hồi của AI (tóm tắt)', 'Giữ / Sửa / Loại – lí do'], soDong: 2 } },
+] };
+const PHIEU_5512 = { phieu: [
+  { so: 1, ten: 'Khám phá parabol bằng thanh trượt', hoatDong: 'HD2', huongDan: 'Làm theo nhóm trong 10 phút trên GeoGebra: tạo thanh trượt $a, b, c$ cho hàm $y = ax^2 + bx + c$ và ghi kết quả vào bảng.',
+    noiDung: ['Cho $a$ lần lượt nhận giá trị dương, âm. Bề lõm parabol thay đổi thế nào?', 'Đọc tọa độ đỉnh trên đồ thị, tính $-\\frac{b}{2a}$ và so sánh với hoành độ đỉnh.', 'Từ bảng, phát biểu quy luật về chiều mở và công thức đỉnh.'],
+    bang: { cot: ['Giá trị $a, b, c$', 'Bề lõm (lên/xuống)', 'Tọa độ đỉnh đọc trên đồ thị', 'Giá trị $-\\frac{b}{2a}$'], soDong: 4 } },
+  { so: 2, ten: 'Luyện tập hàm số bậc hai', hoatDong: 'HD3', huongDan: 'Làm cá nhân trong 8 phút, sau đó đối chiếu với bạn cùng bàn.',
+    noiDung: [
+      'Câu 1. Hàm số nào sau đây là hàm số bậc hai? A. $y = 3x - 1$; B. $y = -2x^2 + x$; C. $y = \\frac{1}{x^2}$; D. $y = \\sqrt{x^2 + 1}$',
+      'Câu 2. Parabol $y = -x^2 + 2x + 3$ có bề lõm hướng lên hay xuống? Vì sao?',
+      'Câu 3. Tìm tọa độ đỉnh của parabol $y = 2x^2 - 8x + 5$.',
+      'Câu 4. Viết phương trình trục đối xứng của parabol $y = x^2 - 6x + 7$.',
+      'Câu 5. Tìm giá trị lớn nhất của hàm số $y = -x^2 + 4x + 1$.',
+      'Câu 6. Xác định parabol $y = ax^2 + bx + c$ đi qua $A(0; 3)$, $B(1; 0)$, $C(3; 0)$.',
+    ], bang: null },
+] };
+
 /** Bước 3 "Phương pháp" dựng sẵn cho bài mẫu. */
 (TRA_LOI as Record<string, unknown>).goiYPpdh = {
   phuongPhap: [
@@ -311,6 +346,7 @@ const TRA_LOI_5512: Record<string, unknown> = {
 /** CV 5512: GeoGebra ở Hình thành kiến thức (HĐ2), chatbot AI và CLIL ở Vận dụng (HĐ4); học liệu HS không có phần tự học. */
 const O_5512 = ['chuyenGiao', 'thucHien', 'baoCao', 'ketLuan'] as const;
 function choCv5512(ten: string, du: unknown): unknown {
+  if (ten === 'phieu') return structuredClone(PHIEU_5512);
   if (TRA_LOI_5512[ten]) {
     const h = structuredClone(TRA_LOI_5512[ten]) as Record<string, any>;
     return { ...h, buoc: Object.fromEntries(O_5512.map((o, i) => [o, { phut: h.buoc[i].phut, gv: h.buoc[i].gv, hs: h.buoc[i].hs }])) };

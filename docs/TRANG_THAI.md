@@ -258,3 +258,12 @@ Góp ý của tác giả: biết bài dạy gì trước, rồi mới chọn d�
 - Quyết định của tác giả: bỏ "Đơn vị kiến thức" và "Khó khăn thường gặp" ở bước 2 (CV 5512 Phụ lục IV không có hai mục này); bước 2 giữ phần AI gợi ý YCCĐ như cũ (`rutYccd`). Đã gỡ khỏi giao diện, lời nhắc AI, dữ liệu mẫu; bản nháp cũ có hai mục này được bỏ qua.
 - Bản demo claude.ai: một số trình xem trả hàm "sample" dạng cũ (không có `.json`), app báo "e.json is not a function". `chuanHoaSample` nhận cả hai dạng; dạng cũ thì app tự tách JSON từ câu trả lời. Có kiểm thử.
 - Kiểm thử: 201 đạt; đã chạy lại cả 8 bước với bài mẫu trên trình duyệt.
+
+## Phụ lục phiếu học tập – 12/11/2026
+
+Góp ý của tác giả: KHBD nhắc phiếu học tập nào thì phụ lục cuối bài phải có phiếu đó.
+
+- `src/soan/phieu.ts`: tìm mọi chỗ nhắc "Phiếu học tập số N"/"PHT số N" (mục II, các giai đoạn, hoạt động, tích hợp); AI soạn phụ lục sau khi xong các hoạt động (phần "Phụ lục: phiếu học tập", chạy cùng đợt gắn mã). Mỗi phiếu: tên, hoạt động dùng, hướng dẫn, câu hỏi/nhiệm vụ viết đầy đủ (dùng lại đúng câu hỏi đã soạn trong hoạt động), bảng để học sinh điền nếu cần; không ghi đáp án. Không nhắc phiếu nào thì không gọi AI.
+- Luật code `kiemTraPhieu` (trong `kiemTraKhbd`): phiếu được nhắc mà thiếu, hoặc phiếu rỗng → lỗi phải sửa, chặn tải về, bấm "Soạn lại" ngay ở bước Kiểm tra; phiếu thừa → nhắc. AI thiếu phiếu thì soạn lại ≤ 2 lượt.
+- File Word: mục "PHỤ LỤC: PHIẾU HỌC TẬP" (tiêu đề phiếu, dòng họ tên/nhóm, hướng dẫn, câu hỏi, bảng trống); bản xem có mục tương ứng.
+- Bài mẫu có phiếu số 1, số 2 cho cả hai khung KHBD. Kiểm thử `tests/phieu.test.ts`; tổng 208 đạt.
