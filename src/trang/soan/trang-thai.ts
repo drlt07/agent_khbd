@@ -86,8 +86,7 @@ export function chuanHoaKhbd(tho: unknown): Khbd | null {
       ? Object.fromEntries(Object.entries(k.keHoachHd).filter(([hd, p]) => /^HD[1-4]$/.test(hd) && PhuongAnHdOut.safeParse(p).success)) : undefined,
     ppdh: k.ppdh === undefined ? (pp === 'lhdn' ? [MA_LHDN] : []) : mang<string>(k.ppdh).filter((m) => !!layPpdh(m)),
     goiYPpdh: mang<any>(k.goiYPpdh).filter((g) => g && layPpdh(g.ma) && typeof g.lyDo === 'string').map((g) => ({ ma: g.ma, lyDo: g.lyDo, apDung: String(g.apDung ?? '') })),
-    donVi: mang<any>(k.donVi).filter((d) => d && typeof d.ten === 'string').map((d) => ({ ten: d.ten, yc: mang<string>(d.yc) })),
-    khoKhan: mang<string>(k.khoKhan).filter((t) => typeof t === 'string'),
+    donVi: undefined, khoKhan: undefined,
     keHoachAi: mang<string>(k.keHoachAi).filter((h) => /^HD[1-4]$/.test(h)) as MaHd[],
     yTuong: k.yTuong && typeof k.yTuong === 'object' && typeof k.yTuong.ten === 'string' && Array.isArray(k.yTuong.hoatDong) ? k.yTuong : undefined,
   };

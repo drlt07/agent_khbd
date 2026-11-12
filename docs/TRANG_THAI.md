@@ -252,3 +252,9 @@ Góp ý của tác giả: biết bài dạy gì trước, rồi mới chọn d�
 - Bản nháp cũ (5 bước) được đổi số bước tự động; trường mặc định LHĐN chọn sẵn phương pháp này.
 - Chưa làm: tách Hoạt động 2 thành các hoạt động con 2.1, 2.2… theo đơn vị kiến thức (hiện một hoạt động hình thành lần lượt các đơn vị).
 - Kiểm thử `tests/trinh-tu.test.ts`; tổng 199 đạt. Đã chạy cả 8 bước với bài mẫu trên trình duyệt.
+
+## Bước 2 chỉ còn YCCĐ; sửa lỗi "e.json is not a function" ở bản demo – 12/11/2026
+
+- Quyết định của tác giả: bỏ "Đơn vị kiến thức" và "Khó khăn thường gặp" ở bước 2 (CV 5512 Phụ lục IV không có hai mục này); bước 2 giữ phần AI gợi ý YCCĐ như cũ (`rutYccd`). Đã gỡ khỏi giao diện, lời nhắc AI, dữ liệu mẫu; bản nháp cũ có hai mục này được bỏ qua.
+- Bản demo claude.ai: một số trình xem trả hàm "sample" dạng cũ (không có `.json`), app báo "e.json is not a function". `chuanHoaSample` nhận cả hai dạng; dạng cũ thì app tự tách JSON từ câu trả lời. Có kiểm thử.
+- Kiểm thử: 201 đạt; đã chạy lại cả 8 bước với bài mẫu trên trình duyệt.

@@ -152,9 +152,31 @@ export function aiSample(sample: HamSample): GoiAi {
   };
 }
 
+/**
+ * Chuẩn hóa thứ trình xem claude.ai trả về cho quyền "sample". Bản mới: hàm có `.json`; bản cũ: hàm chỉ trả {text}
+ * (hoặc đối tượng có hàm `sample`). Bản cũ thì app tự tách JSON từ câu trả lời. Hàm thuần, có kiểm thử.
+ */
+export function chuanHoaSample(s: unknown): HamSample | null {
+  if (!s) return null;
+  const o = s as { json?: unknown; sample?: unknown };
+  if (typeof o.json === 'function') return s as HamSample;
+  const fn = (typeof s === 'function' ? s : typeof o.sample === 'function' ? (o.sample as (...a: unknown[]) => unknown).bind(s) : null) as
+    | (((input: string, opts?: object) => Promise<unknown>) & { json?: HamSample['json'] }) | null;
+  if (!fn) return null;
+  if (typeof fn.json === 'function') return { json: fn.json.bind(fn) };
+  return {
+    json: async (input, opts) => {
+      const { onText: _bo, ...conLai } = opts ?? {};
+      const r = await fn(input, conLai);
+      const text = typeof r === 'string' ? r : String((r as { text?: string })?.text ?? '');
+      try { return tachJson(text); } catch { throw { code: 'invalid_json', text }; }
+    },
+  };
+}
+
 /** Lấy hàm sample nếu trang đang mở trong claude.ai; null nếu không có. */
 export async function laySample(): Promise<HamSample | null> {
   const claude = (globalThis as unknown as { claude?: { use?: (n: string) => Promise<unknown> } }).claude;
   if (!claude?.use) return null;
-  try { return ((await claude.use('sample')) as HamSample | null) ?? null; } catch { return null; }
+  try { return chuanHoaSample(await claude.use('sample')); } catch { return null; }
 }

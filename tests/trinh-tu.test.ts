@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { chuanHoaNoiDung, doiPpdh, goiYPpdh, locGoiYPpdh, MA_LHDN, nhacPpdh, PPDH, rutNoiDung } from '../src/soan/phuong-phap';
+import { doiPpdh, goiYPpdh, locGoiYPpdh, MA_LHDN, nhacPpdh, PPDH } from '../src/soan/phuong-phap';
+import { chuanHoaSample, aiSample, LoiAi } from '../src/soan/ai';
+import { rutYccd } from '../src/soan/quy-trinh';
+import { z } from 'zod/v4';
 import { heThong, nhacHoatDong } from '../src/soan/prompt';
 import { nhacNganHang } from '../src/soan/ngan-hang';
 import { aiMau, khbdMau } from '../src/soan/mau';
@@ -12,7 +15,7 @@ const k: Khbd = {
   id: 't', mon: 'TOAN', lop: 10, boSach: 'Kết nối tri thức với cuộc sống', bai: 'Hàm số bậc hai', soTiet: 1, phuongPhap: 'cv5512', tichHop: { nls: [], ai: [], tiengAnh: 'khong' },
   dieuKien: { thietBi: ['Máy chiếu'], mucHs: 'tb', ghiChu: '' }, yccd: [{ ma: 'YC1', noiDung: 'Vẽ được đồ thị hàm số bậc hai.' }], yccdDaXacNhan: true,
   phanBo: phanBoMacDinh('cv5512', 1), hoatDong: (['HD1', 'HD2', 'HD3', 'HD4'] as const).map((ma) => ({ ma, ten: TEN_HD.cv5512[ma], phut: 0 })), maTichHop: [], maBo: [], dauVet: [], capNhat: '',
-  donVi: [{ ten: 'Đỉnh và trục đối xứng của parabol', yc: ['YC1'] }, { ten: 'Chiều mở theo dấu của a', yc: ['YC1'] }], khoKhan: ['Nhầm dấu khi tính đỉnh'], ppdh: ['kham_pha'],
+  ppdh: ['kham_pha'],
 };
 
 describe('Trình tự 8 bước', () => {
@@ -21,21 +24,10 @@ describe('Trình tự 8 bước', () => {
   });
 });
 
-describe('Bước 2: nội dung bài', () => {
-  it('đánh mã YCCĐ, gắn đơn vị với mã hợp lệ, báo YCCĐ chưa có đơn vị', () => {
-    const r = chuanHoaNoiDung({ yccd: ['1. Nêu được A.', 'Vẽ được B.', 'Vận dụng được C.'], donVi: [{ ten: 'Đơn vị A', yc: [1, 1, 9] }, { ten: ' ', yc: [2] }, { ten: 'Đơn vị B', yc: [2.2] }], khoKhan: ['k1', ' '] });
-    expect(r.yccd.map((y) => `${y.ma}:${y.noiDung}`)).toEqual(['YC1:Nêu được A.', 'YC2:Vẽ được B.', 'YC3:Vận dụng được C.']);
-    expect(r.donVi).toEqual([{ ten: 'Đơn vị A', yc: ['YC1'] }, { ten: 'Đơn vị B', yc: ['YC2'] }]);
-    expect(r.canhBao).toEqual(['YC3 chưa có đơn vị kiến thức nào.']);
-    expect(r.khoKhan).toEqual(['k1']);
-  });
-  it('AI mẫu trả đủ YCCĐ, đơn vị, khó khăn; lời nhắc nêu căn cứ chương trình', async () => {
-    let nhac = '';
-    const r = await rutNoiDung({ ...k, ...khbdMau() } as Khbd, async (y) => { nhac = y.nhac; return aiMau(y); });
-    expect(nhac).toContain('Thông tư 32/2018/TT-BGDĐT');
-    expect(r.yccd).toHaveLength(3);
-    expect(r.donVi.map((d) => d.yc)).toEqual([['YC1'], ['YC2'], ['YC3']]);
-    expect(r.canhBao).toEqual([]);
+describe('Bước 2: yêu cầu cần đạt (như cũ)', () => {
+  it('AI đề xuất YCCĐ, đánh mã YC1…', async () => {
+    const yc = await rutYccd({ ...k, ...khbdMau() } as Khbd, aiMau);
+    expect(yc.map((y) => y.ma)).toEqual(['YC1', 'YC2', 'YC3']);
   });
 });
 
@@ -66,7 +58,7 @@ describe('Bước 3: phương pháp dạy học', () => {
   });
   it('lời nhắc gợi ý phương pháp có nội dung bài, danh sách mã và căn cứ; AI mẫu qua luật', async () => {
     const n = nhacPpdh(k);
-    expect(n).toContain('Đỉnh và trục đối xứng của parabol');
+    expect(n).toContain('YC1: Vẽ được đồ thị hàm số bậc hai.');
     expect(n).toContain('giai_quyet_van_de:');
     expect(n).toContain('Công văn 5512');
     const r = await goiYPpdh({ ...k, ...khbdMau() } as Khbd, aiMau);
@@ -75,18 +67,15 @@ describe('Bước 3: phương pháp dạy học', () => {
   });
 });
 
-describe('Nội dung bài và phương pháp đi vào mọi lời nhắc', () => {
-  it('bối cảnh chung, gợi ý hoạt động, soạn hình thành kiến thức theo từng đơn vị', () => {
-    const he = heThong(k);
-    expect(he).toContain('Đơn vị kiến thức');
+describe('Phương pháp đi vào mọi lời nhắc; không còn mục ngoài CV 5512', () => {
+  it('bối cảnh chung và gợi ý hoạt động có phương pháp; không có "đơn vị kiến thức", "khó khăn" của bước 2', () => {
+    const k2 = { ...k, donVi: [{ ten: 'Đơn vị cũ', yc: ['YC1'] }], khoKhan: ['Khó khăn cũ'] } as Khbd;
+    const he = heThong(k2);
     expect(he).toContain('Dạy học khám phá, kiến tạo');
-    expect(he).toContain('Nhầm dấu khi tính đỉnh');
-    const nh = nhacNganHang(k, '', 'HD2');
-    expect(nh).toContain('(1) Đỉnh và trục đối xứng của parabol');
-    expect(nh).toContain('Dạy học khám phá, kiến tạo');
-    const hd2 = nhacHoatDong(k, 'HD2');
-    expect(hd2).toContain('Hình thành lần lượt từng đơn vị kiến thức');
-    expect(hd2).toContain('(2) Chiều mở theo dấu của a');
+    expect(he).not.toContain('Đơn vị cũ');
+    expect(he).not.toContain('Khó khăn cũ');
+    expect(nhacNganHang(k2, '', 'HD2')).toContain('Dạy học khám phá, kiến tạo');
+    expect(nhacHoatDong(k2, 'HD2')).not.toContain('Đơn vị cũ');
   });
 });
 
@@ -94,9 +83,30 @@ describe('Bản nháp và cấu hình trường', () => {
   it('trường mặc định lớp học đảo ngược: chọn sẵn phương pháp này; bản nháp cũ được bổ sung', () => {
     expect(khbdMoi({ mauKhbd: 'lhdn' } as Parameters<typeof khbdMoi>[0]).ppdh).toEqual([MA_LHDN]);
     expect(khbdMoi({ mauKhbd: 'cv5512' } as Parameters<typeof khbdMoi>[0]).ppdh).toEqual([]);
-    const cu = chuanHoaKhbd({ ...k, ppdh: undefined, donVi: undefined, phuongPhap: 'lhdn' })!;
+    const cu = chuanHoaKhbd({ ...k, ppdh: undefined, donVi: [{ ten: 'x', yc: [] }], khoKhan: ['y'], phuongPhap: 'lhdn' })!;
     expect(cu.ppdh).toEqual([MA_LHDN]);
-    expect(cu.donVi).toEqual([]);
+    expect(cu.donVi).toBeUndefined();
+    expect(cu.khoKhan).toBeUndefined();
     expect(chuanHoaKhbd({ ...k, ppdh: ['kham_pha', 'khong_co'] })!.ppdh).toEqual(['kham_pha']);
+  });
+});
+
+describe('Bản demo claude.ai: hàm sample cũ và mới', () => {
+  const Khuon = z.object({ yccd: z.array(z.string()) });
+  it('bản mới (có .json) dùng thẳng', async () => {
+    const s = chuanHoaSample(Object.assign(async () => ({ text: '' }), { json: async () => ({ yccd: ['a'] }) }))!;
+    expect(await aiSample(s)({ ten: 'x', he: 'h', nhac: 'n', schema: Khuon })).toEqual({ yccd: ['a'] });
+  });
+  it('bản cũ (chỉ trả {text}, không có .json): app tự tách JSON – sửa lỗi "e.json is not a function"', async () => {
+    const s = chuanHoaSample(async () => ({ text: 'Đây:\n```json\n{"yccd":["b"]}\n```' }))!;
+    expect(await aiSample(s)({ ten: 'x', he: 'h', nhac: 'n', schema: Khuon })).toEqual({ yccd: ['b'] });
+    const doiTuong = chuanHoaSample({ sample: async () => ({ text: '{"yccd":["c"]}' }) })!;
+    expect(await aiSample(doiTuong)({ ten: 'x', he: 'h', nhac: 'n', schema: Khuon })).toEqual({ yccd: ['c'] });
+  });
+  it('bản cũ trả chữ không có JSON: báo lỗi sai khuôn, không vỡ app', async () => {
+    const s = chuanHoaSample(async () => ({ text: 'Xin lỗi, tôi không làm được.' }))!;
+    await expect(aiSample(s)({ ten: 'x', he: 'h', nhac: 'n', schema: Khuon })).rejects.toBeInstanceOf(LoiAi);
+    expect(chuanHoaSample(null)).toBeNull();
+    expect(chuanHoaSample({})).toBeNull();
   });
 });

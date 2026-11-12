@@ -180,16 +180,7 @@ const NLC_CHATBOT = { ma: 'NLc', congCu: 'Chatbot AI (Gemini/ChatGPT)', minhChun
   ],
 };
 
-/** Bước 2 "Nội dung bài" và bước 3 "Phương pháp" dựng sẵn cho bài mẫu. */
-(TRA_LOI as Record<string, unknown>).noiDung = {
-  yccd: (TRA_LOI.yccd as { yccd: string[] }).yccd,
-  donVi: [
-    { ten: 'Khái niệm hàm số bậc hai, hệ số a, b, c', yc: [1] },
-    { ten: 'Đồ thị hàm số bậc hai: đỉnh, trục đối xứng, chiều mở của parabol', yc: [2] },
-    { ten: 'Ứng dụng: giá trị lớn nhất, nhỏ nhất trong bài toán thực tế', yc: [3] },
-  ],
-  khoKhan: ['Nhầm dấu khi tính hoành độ đỉnh $x = -\\frac{b}{2a}$', 'Không thấy vai trò dấu của $a$ với chiều mở parabol', 'Tính sai tung độ đỉnh do thứ tự phép tính', 'Khó chuyển tình huống thực tế thành hàm số'],
-};
+/** Bước 3 "Phương pháp" dựng sẵn cho bài mẫu. */
 (TRA_LOI as Record<string, unknown>).goiYPpdh = {
   phuongPhap: [
     { ma: 'giai_quyet_van_de', lyDo: 'Bài có tình huống quả bóng bay cao nhất: học sinh phải lập hàm số bậc hai và tìm đỉnh parabol để trả lời (YC3).', apDung: 'Mở đầu nêu tình huống, Vận dụng giải trọn tình huống.' },

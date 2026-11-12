@@ -22,8 +22,6 @@ function boiCanh(k: Khbd): string {
     `Mức học sinh: ${MUC_HS[k.dieuKien.mucHs]}.${k.dieuKien.ghiChu.trim() ? ` Ghi chú của giáo viên: ${k.dieuKien.ghiChu.trim()}` : ''}`,
     `Thiết bị, công cụ giáo viên khai báo (chỉ được dùng các thứ này): ${k.dieuKien.thietBi.join('; ') || 'không có'}.`,
   ];
-  if (k.donVi?.length) dong.push(`Đơn vị kiến thức (theo thứ tự dạy, giáo viên đã xác nhận):\n${k.donVi.map((d, i) => `${i + 1}. ${d.ten}${d.yc.length ? ` (${d.yc.join(', ')})` : ''}`).join('\n')}`);
-  if (k.khoKhan?.length) dong.push(`Khó khăn thường gặp của học sinh: ${k.khoKhan.join('; ')}`);
   const pp = (k.ppdh ?? []).filter((m) => m !== MA_LHDN).map(layPpdh).filter(Boolean);
   if (pp.length) dong.push(`Phương pháp dạy học giáo viên đã chọn (thiết kế hoạt động theo các phương pháp này; tự chọn kĩ thuật dạy học tích cực phù hợp cho từng hoạt động):\n${pp.map((p) => `- ${p!.ten}: ${p!.mo_ta}`).join('\n')}`);
   if (k.yTuong) dong.push(tomTatYTuong(k.yTuong));
@@ -120,7 +118,6 @@ export function nhacHoatDong(k: Khbd, hd: MaHd, huongDan = ''): string {
   return [
     `Soạn ${TEN_HD[k.phuongPhap][hd]}. Thời lượng: ${phut} phút${tiet.length > 1 ? ` (trải qua tiết ${tiet.join(', ')})` : ` (tiết ${tiet[0]})`}.`,
     `Định hướng: ${HUONG_DAN_HD[k.phuongPhap][hd]}`,
-    k.phuongPhap === 'cv5512' && hd === 'HD2' && k.donVi?.length ? `Hình thành lần lượt từng đơn vị kiến thức, mỗi đơn vị có nhiệm vụ học tập riêng để học sinh tự phát hiện kiến thức: ${k.donVi.map((d, i) => `(${i + 1}) ${d.ten}`).join('; ')}.` : '',
     k.phuongPhap === 'cv5512'
       ? `Viết theo mẫu Phụ lục IV Công văn 5512: a) Mục tiêu (gắn mã YCCĐ), b) Nội dung (học sinh làm gì: đọc, quan sát, trả lời câu hỏi, làm bài tập… ghi cụ thể), c) Sản phẩm (kết quả học sinh phải hoàn thành, nêu cụ thể), d) Tổ chức thực hiện gồm ĐÚNG 4 bước, tên bước ghi đúng: "Chuyển giao nhiệm vụ", "Thực hiện nhiệm vụ", "Báo cáo, thảo luận", "Kết luận, nhận định". Mỗi bước ghi việc cụ thể của giáo viên và học sinh; trường phut ghi số phút dự kiến của bước (thời lượng cả hoạt động khoảng ${phut} phút). Không dùng các yếu tố riêng của lớp học đảo ngược (gói tự học, chia nhóm theo mức đạt, exit ticket) trừ khi thật sự hợp với bài.`
       : `Chia ${phut < 10 ? '2–3' : '2–5'} bước, mỗi bước có số phút nguyên ≥ 1; tổng số phút các bước đúng bằng ${phut}. Nếu hoạt động trải qua nhiều tiết, có bước nhắc lại đầu tiết sau và chốt, giao nhiệm vụ cuối tiết trước.`,
