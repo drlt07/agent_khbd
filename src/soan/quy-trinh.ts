@@ -10,6 +10,7 @@ import { heThong, nhacGiaiDoan1, nhacGiaiDoan3, nhacHoatDong, nhacMucTieu, nhacT
 import { chamDiem, DIEM_DAT, kiemTraBuoc, kiemTraCauHoi, kiemTraVanBan, vanBanHoatDong, boChuNguHs } from './luat';
 import { phutTheoHoatDong } from './phan-bo';
 import { soanPhieu, VI_TRI_PHIEU } from './phieu';
+import { LOI_TRICH_DAN, trichDanLa } from './ngu-van';
 import { chonTuDong, goiYNganHang, huongDanTuPhuongAn, keHoachTichHop, nganHangDu, type TuyChonNganHang } from './ngan-hang';
 
 export const SO_LUOT_SOAN_LAI = 2;
@@ -87,7 +88,9 @@ export async function soanPhan(k: Khbd, phan: MaPhan, ai: GoiAi, huongDan = '', 
       ? tuHoatDong5512(await ai({ ten: hd, he, nhac, schema: HoatDong5512Out }))
       : await ai({ ten: hd, he, nhac, schema: HoatDongOut });
     r.buoc = r.buoc.map((b) => ({ ...b, phut: Math.round(b.phut) }));
-    const loi = [...kiemTraBuoc(r.buoc, phut, ten, k.phuongPhap), ...kiemTraCauHoi(r.cauHoi, hd, k.phuongPhap, ten, k.hoatDong.find((x) => x.ma === 'HD2')?.noiDung?.cauHoi), ...kiemTraVanBan(vanBanHoatDong(r), ten)].filter((l) => l.muc === 'nghiem');
+    const la = trichDanLa(k, `${vanBanHoatDong(r)}\n${r.cauHoi.map((c) => `${c.cauHoi}\n${c.dapAn}`).join('\n')}`);
+    const loi = [...kiemTraBuoc(r.buoc, phut, ten, k.phuongPhap), ...kiemTraCauHoi(r.cauHoi, hd, k.phuongPhap, ten, k.hoatDong.find((x) => x.ma === 'HD2')?.noiDung?.cauHoi), ...kiemTraVanBan(vanBanHoatDong(r), ten),
+      ...(la.length ? [{ luat: 'NV', muc: 'nghiem' as const, viTri: ten, thongBao: LOI_TRICH_DAN(la) }] : [])].filter((l) => l.muc === 'nghiem');
     ketQua = r;
     if (!loi.length) { dauVet.push(vet(6, ten, 'dat', huongDan ? `Theo gợi ý GV chọn: ${huongDan.match(/"([^"]+)"/)?.[1] ?? ''}` : k.yTuong ? `Theo ý tưởng xuyên suốt: ${k.yTuong.ten}` : undefined, luot)); break; }
     dauVet.push(vet(6, ten, luot < SO_LUOT_SOAN_LAI ? 'soan_lai' : 'loi', loi.map((l) => l.thongBao).join(' '), luot));

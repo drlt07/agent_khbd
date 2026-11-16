@@ -4,6 +4,7 @@
  */
 import { canQuyTrinhAi, maTichHopHopLe } from '../thu-vien';
 import { kiemTraPhieu } from './phieu';
+import { LOI_TRICH_DAN, trichDanLa } from './ngu-van';
 import { kiemTraPhanBo, phutTheoHoatDong } from './phan-bo';
 import type { Buoc, CauHoi, Khbd, MaHd, MaTichHop } from './kieu';
 import { loiCongThucTrong } from './cong-thuc';
@@ -191,6 +192,8 @@ export function kiemTraKhbd(k: Khbd): LoiLuat[] {
     loi.push(...kiemTraBuoc(h.noiDung.buoc, phut[h.ma], h.ten, k.phuongPhap));
     loi.push(...kiemTraCauHoi(h.noiDung.cauHoi, h.ma, k.phuongPhap, h.ten, k.hoatDong.find((x) => x.ma === 'HD2')?.noiDung?.cauHoi));
     loi.push(...kiemTraVanBan(vanBanHoatDong(h.noiDung), h.ten));
+    const la = trichDanLa(k, `${vanBanHoatDong(h.noiDung)}\n${h.noiDung.cauHoi.map((c) => `${c.cauHoi}\n${c.dapAn}`).join('\n')}`);
+    if (la.length) loi.push({ luat: 'NV', muc: 'nghiem', viTri: h.ten, thongBao: LOI_TRICH_DAN(la) });
   }
   const hinhThuc = k.hoatDong.map((h) => h.noiDung?.buoc[0]?.ten).filter(Boolean);
   if (hinhThuc.length >= 3 && new Set(hinhThuc).size === 1) loi.push({ luat: '2.3', muc: 'nhac', viTri: 'Tiến trình', thongBao: `Cả ${hinhThuc.length} hoạt động mở đầu giống nhau (“${hinhThuc[0]}”); nên đổi cách tổ chức ở một hoạt động.` });

@@ -267,3 +267,14 @@ Góp ý của tác giả: KHBD nhắc phiếu học tập nào thì phụ lục 
 - Luật code `kiemTraPhieu` (trong `kiemTraKhbd`): phiếu được nhắc mà thiếu, hoặc phiếu rỗng → lỗi phải sửa, chặn tải về, bấm "Soạn lại" ngay ở bước Kiểm tra; phiếu thừa → nhắc. AI thiếu phiếu thì soạn lại ≤ 2 lượt.
 - File Word: mục "PHỤ LỤC: PHIẾU HỌC TẬP" (tiêu đề phiếu, dòng họ tên/nhóm, hướng dẫn, câu hỏi, bảng trống); bản xem có mục tương ứng.
 - Bài mẫu có phiếu số 1, số 2 cho cả hai khung KHBD. Kiểm thử `tests/phieu.test.ts`; tổng 208 đạt.
+
+## Sửa KHBD cũ – riêng môn Ngữ văn: không tự sinh kiến thức, bám thể loại – 16/11/2026
+
+Yêu cầu của tác giả: với Ngữ văn, bám sát kiến thức của KHBD tải lên, chỉ sinh hoạt động, bám đặc trưng thể loại, không tự sinh kiến thức.
+
+- Luật prompt `rules/ngu-van.md` (phiên bản 1): A. không tự sinh kiến thức (kiến thức, nhận định, câu trích chỉ lấy từ giáo án; thiếu thì ghi "giáo viên bổ sung theo KHBD"); B. đặc trưng 6 thể loại (truyện, thơ, kịch, kí, văn nghị luận, văn bản thông tin) và hoạt động hợp với từng thể loại; C. viết, nói và nghe. Gắn vào mọi lời nhắc khi môn là Ngữ văn (đọc giáo án, đề xuất chèn, đổi mới hoạt động, ngân hàng, ý tưởng bài, soạn lại cả KHBD).
+- Đọc giáo án: AI xác định thể loại văn bản chính; YCCĐ chỉ chép từ mục tiêu của giáo án. Giáo viên sửa thể loại ở bước 2 (ô "Thể loại văn bản chính", chỉ hiện với Ngữ văn).
+- Luật code `src/soan/ngu-van.ts` (hàm thuần): câu trích trong ngoặc kép (từ 5 âm tiết) phải có trong toàn văn giáo án gốc (so không dấu, bỏ dấu câu). Áp ở: đề xuất chèn (loại), gợi ý đổi mới hoạt động (phương án bị đánh "Không hợp", AI gợi ý lại), soạn từng phần (soạn lại ≤ 2 lượt), bước Kiểm tra (lỗi phải sửa, chặn tải về). Môn khác không áp.
+- Soạn lại cả KHBD từ giáo án Ngữ văn: giữ toàn văn giáo án tới 40 000 ký tự (môn khác 12 000), ghi rõ là "nguồn kiến thức DUY NHẤT".
+- Thư mục `tai-lieu-training/ngu-van/` để chứa tài liệu tham khảo; 2 tài liệu tác giả nhắc chưa nhận được trong phiên.
+- Kiểm thử `tests/ngu-van.test.ts`; tổng 216 đạt. Đã kiểm tra ô thể loại trên trình duyệt.

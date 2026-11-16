@@ -6,6 +6,7 @@ import { TEN_HD, type Khbd, type MaHd } from './kieu';
 import { nguyenTacHoatDong } from './goi-y';
 import { huongDanTuYTuong, tomTatYTuong } from './y-tuong';
 import { layPpdh, MA_LHDN } from './phuong-phap';
+import { phanVan } from './ngu-van';
 
 export const PHIEN_BAN_LUAT = (LUAT_SOAN.match(/phien_ban:\s*([^\s·]+)/)?.[1] ?? '?');
 
@@ -28,12 +29,13 @@ function boiCanh(k: Khbd): string {
   if (k.yccd.length) dong.push(`Yêu cầu cần đạt đã được giáo viên xác nhận:\n${k.yccd.map((y) => `${y.ma}: ${y.noiDung}`).join('\n')}`);
   if (k.nguon) dong.push([
     `KHBD này được soạn lại từ giáo án cũ của giáo viên (${k.nguon.tenTep}). Giữ đúng nội dung kiến thức, yêu cầu cần đạt, ví dụ và bài tập cốt lõi của giáo án cũ; THIẾT KẾ HOẠT ĐỘNG MỚI: cách tổ chức khác, học sinh tích cực hơn, không chép lại câu chữ và cách tổ chức cũ.`,
-    `Giáo án cũ (chỉ để tham khảo kiến thức):\n<<<\n${k.nguon.toanVan}\n>>>`,
-  ].join('\n'));
+    k.mon === 'NGU_VAN' ? 'NGỮ VĂN – KHÔNG TỰ SINH KIẾN THỨC: mục tiêu, yêu cầu cần đạt, nội dung chốt, nhận định về tác phẩm, đáp án và gợi ý trả lời CHỈ lấy từ giáo án cũ dưới đây; câu trích chép đúng từ giáo án. Bạn chỉ thiết kế hoạt động theo đặc trưng thể loại.' : '',
+    `Giáo án cũ (${k.mon === 'NGU_VAN' ? 'nguồn kiến thức DUY NHẤT' : 'chỉ để tham khảo kiến thức'}):\n<<<\n${k.nguon.toanVan}\n>>>`,
+  ].filter(Boolean).join('\n'));
   return dong.join('\n');
 }
 
-export const heThong = (k: Khbd) => `${LUAT_SOAN.replace(/<!--.*?-->\s*/s, '')}\n\nThông tin bài dạy:\n${boiCanh(k)}`;
+export const heThong = (k: Khbd) => `${LUAT_SOAN.replace(/<!--.*?-->\s*/s, '')}${phanVan(k)}\n\nThông tin bài dạy:\n${boiCanh(k)}`;
 
 const maDaChon = (k: Khbd) => [...k.tichHop.nls, ...k.tichHop.ai].map((m) => `${m}${laMaAi(m) ? ' (năng lực AI, QĐ 2422/QĐ-BGDĐT)' : ' (năng lực số, TT 02/2025)'}: ${moTaMa(m)}`);
 

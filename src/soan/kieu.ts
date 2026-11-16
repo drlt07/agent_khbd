@@ -220,6 +220,8 @@ export interface NguonGiaoAnCu {
   hoatDong: { ten: string; phut: number; noiDung: string }[];
   /** Phương án hoạt động mới giáo viên đã chọn ở lối Sửa, theo hoạt động của KHBD mới */
   huongDan?: Partial<Record<MaHd, string>>;
+  /** Ngữ văn: thể loại văn bản chính (mã trong src/soan/ngu-van.ts) để hoạt động bám đặc trưng thể loại */
+  theLoai?: string;
 }
 
 export interface Khbd {

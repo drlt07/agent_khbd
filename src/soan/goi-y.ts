@@ -10,6 +10,7 @@ import { TEN_MON, boDau, moTaMa } from '../thu-vien';
 import type { GoiAi } from './ai';
 import { phutTheoHoatDong } from './phan-bo';
 import { TEN_HD, TuChamOut, type Khbd, type MaHd } from './kieu';
+import { LOI_TRICH_DAN, phanVan, trichDanLa } from './ngu-van';
 
 export const NHOM_HINH_THUC = {
   A: 'Nhập vai và mô phỏng xã hội', B: 'Thí nghiệm và mô phỏng khoa học', C: 'Điều tra, phá án và giải quyết vấn đề',
@@ -170,6 +171,7 @@ export function nhacGoiY(k: Khbd, hd?: MaHd, yeuCau = '', cu?: HoatDongCu): stri
       `Giáo viên muốn đổi mới "${cu.ten}" (khoảng ${cu.phut} phút) trong giáo án cũ của mình. Nội dung hiện có của hoạt động (chỉ đọc để hiểu mục tiêu, kiến thức, cách đang tổ chức; KHÔNG chép lại):`,
       `<<<\n${cu.noiDung}\n>>>`,
       `Đề xuất hoạt động mới thay thế hoặc làm mới hoạt động này: giữ đúng mục tiêu và kiến thức, đổi cách tổ chức cho hấp dẫn, tích cực hơn; thời lượng không vượt ${cu.phut} phút. Phần A nêu ngắn điểm mạnh và điểm cần đổi mới của cách tổ chức hiện tại.`,
+      k.mon === 'NGU_VAN' ? 'Ngữ văn: KHÔNG tự sinh kiến thức. Kiến thức, nhận định, câu trích của phương án chỉ lấy từ nội dung hoạt động cũ và giáo án; chỉ đổi cách tổ chức theo đặc trưng thể loại. Câu hỏi mẫu, chốt kiến thức phải dẫn tới đúng kết luận giáo án đã có.' : '',
     ].join('\n')
       : hd ? `Giáo viên đang tìm phương án cho "${TEN_HD[k.phuongPhap][hd]}" (khoảng ${phut} phút). Ưu tiên các hoạt động hợp thời điểm này, nhưng vẫn đa dạng nhóm hình thức.` : '',
     cu ? '' : boiCanhBai(k, hd),
@@ -184,7 +186,7 @@ export function nhacGoiY(k: Khbd, hd?: MaHd, yeuCau = '', cu?: HoatDongCu): stri
 
 export interface KetQuaLuatGoiY { nghiem: string[]; nhac: string[]; theoHoatDong: string[][] }
 
-export function kiemTraGoiY(g: GoiY, k: Pick<Khbd, 'dieuKien'> & Partial<Pick<Khbd, 'bai' | 'yccd' | 'tichHop'>>, phutToiDa?: number): KetQuaLuatGoiY {
+export function kiemTraGoiY(g: GoiY, k: Pick<Khbd, 'dieuKien'> & Partial<Pick<Khbd, 'bai' | 'yccd' | 'tichHop' | 'mon' | 'nguon'>>, phutToiDa?: number): KetQuaLuatGoiY {
   const tk = tuKhoaBai([k.bai ?? '', ...(k.yccd ?? []).map((y) => y.noiDung), g.phanTich.trongTam, ...g.phanTich.khoKhan]);
   const batAi = k.tichHop ? coBatAi({ tichHop: k.tichHop }) : true;
   const nghiem: string[] = [], nhac: string[] = [];
@@ -210,6 +212,9 @@ export function kiemTraGoiY(g: GoiY, k: Pick<Khbd, 'dieuKien'> & Partial<Pick<Kh
     if (h.thoiDiem === 'hinh_thanh' && h.tuCham.hapDan < HAP_DAN_HINH_THANH) loi.push(`Nhạt: hoạt động hình thành kiến thức chưa đủ sinh động (Hấp dẫn ${h.tuCham.hapDan}/5, cần từ ${HAP_DAN_HINH_THANH}).`);
     if (!ganVoiBai(h.ten, tk)) loi.push(LOI_TEN);
     if (!batAi && coDungAi(h.nhom, h.congNghe, h.yTuong, ...h.kichBan.map((b) => b.buoc))) loi.push(LOI_AI);
+    // Ngữ văn có giáo án gốc: không được tự viết câu trích
+    const la = k.mon ? trichDanLa({ mon: k.mon, nguon: k.nguon }, [h.yTuong, h.mucTieu, h.cauHoiMau, h.sanPham, h.danhGia, h.chotKienThuc, h.diemTuDuy, ...h.kichBan.map((b) => b.buoc)].join('\n')) : [];
+    if (la.length) loi.push(`Không hợp: ${LOI_TRICH_DAN(la)}`);
     if (h.thoiLuong > 15) loi.push(`Dài ${h.thoiLuong} phút (ưu tiên 5–15).`);
     if (phutToiDa && h.thoiLuong > phutToiDa) loi.push(`Dài hơn thời lượng hoạt động (${phutToiDa} phút).`);
     const tongKichBan = h.kichBan.reduce((s, b) => s + b.phut, 0);
@@ -218,6 +223,7 @@ export function kiemTraGoiY(g: GoiY, k: Pick<Khbd, 'dieuKien'> & Partial<Pick<Kh
   });
   if (theoHoatDong.some((l) => l.some((x) => /Thiếu/.test(x)))) nghiem.push('Có hoạt động thiếu mục bắt buộc (dự phòng, câu hỏi mẫu, đánh giá, chốt kiến thức, điểm tư duy).');
   const soHay = theoHoatDong.filter((l) => !laNhatHoacKhongHop(l)).length;
+  if (theoHoatDong.some((l) => l.some((x) => x.includes('trích dẫn không có trong KHBD gốc')))) nghiem.push('Có phương án tự viết câu trích không có trong giáo án (Ngữ văn): chỉ dùng câu trích có trong giáo án.');
   if (n >= 3 && soHay < 3) nghiem.push(`Chỉ có ${soHay} phương án không nhạt; cần ít nhất 3. Thay phương án nhạt bằng phương án có vấn đề thật, điểm tư duy rõ.`);
   const sttHopLe = (i: number) => Number.isInteger(i) && i >= 1 && i <= n;
   if (![g.uuTien.deTrienKhai, g.uuTien.sangTao, g.uuTien.aiMoPhong].every(sttHopLe)) nhac.push('Phần D chỉ đến hoạt động không có trong danh sách.');
@@ -238,7 +244,7 @@ export function chuanHoaGoiY(g: GoiY, k: Pick<Khbd, 'dieuKien'>): GoiY {
 }
 
 export async function goiYHoatDong(k: Khbd, ai: GoiAi, hd?: MaHd, yeuCau = '', cu?: HoatDongCu): Promise<{ goiY: GoiY; luat: KetQuaLuatGoiY; luot: number }> {
-  const he = `Bạn là chuyên gia thiết kế hoạt động dạy học THPT theo Chương trình GDPT 2018. Viết tiếng Việt, cụ thể, dùng được ngay. Công thức, kí hiệu toán, lí, hóa viết LaTeX trong cặp $…$ (vd $y = x^2$, $\\mathrm{H_2O}$).\n\n${nguyenTacHoatDong()}`;
+  const he = `Bạn là chuyên gia thiết kế hoạt động dạy học THPT theo Chương trình GDPT 2018. Viết tiếng Việt, cụ thể, dùng được ngay. Công thức, kí hiệu toán, lí, hóa viết LaTeX trong cặp $…$ (vd $y = x^2$, $\\mathrm{H_2O}$).\n\n${nguyenTacHoatDong()}${phanVan(k)}`;
   const phutToiDa = cu ? cu.phut : hd ? phutTheoHoatDong(k.phanBo)[hd] : undefined;
   let nhac = nhacGoiY(k, hd, yeuCau, cu);
   let cuoi: { goiY: GoiY; luat: KetQuaLuatGoiY; luot: number } | null = null;

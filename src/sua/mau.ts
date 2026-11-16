@@ -34,7 +34,7 @@ export const doanMau = () => tachDoan(HTML);
 
 const TRA_LOI: Record<string, unknown> = {
   phanTich: {
-    mon: 'VAT_LI', lop: 10, bai: 'Động năng và thế năng',
+    mon: 'VAT_LI', lop: 10, bai: 'Động năng và thế năng', theLoai: 'khac',
     yccd: ['Nêu được biểu thức động năng, thế năng trọng trường.', 'Vận dụng được biểu thức để tính năng lượng của vật trong tình huống đơn giản.'],
     hoatDong: [
       { ten: 'Hoạt động 1. Mở đầu', tu: 'D011', den: 'D012', phut: 5 },

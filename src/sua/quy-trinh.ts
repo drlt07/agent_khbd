@@ -10,6 +10,7 @@ import type { GoiAi } from '../soan/ai';
 import { TEN_HD, type DauVet, type Khbd, type MaHd } from '../soan/kieu';
 import { phanBoMacDinh } from '../soan/phan-bo';
 import { huongDanTuGoiY } from '../soan/goi-y';
+import { LOI_TRICH_DAN, MA_THE_LOAI, nhacNguVan, THE_LOAI_VAN, trichDanKhongCo, type TheLoaiVan } from '../soan/ngu-van';
 import type { Doan } from './doc-docx';
 import type { HoatDongCu, HoatDongGoiY } from '../soan/goi-y';
 
@@ -19,7 +20,8 @@ export const PhanTichOut = z.object({
   mon: z.enum(MA_MON),
   lop: z.number().describe('10, 11 hoặc 12'),
   bai: z.string().describe('Tên bài, chép từ giáo án'),
-  yccd: z.array(z.string()).describe('Yêu cầu cần đạt: lấy từ mục tiêu của giáo án nếu có, không có thì rút theo chương trình môn'),
+  yccd: z.array(z.string()).describe('Yêu cầu cần đạt: lấy từ mục tiêu của giáo án nếu có, không có thì rút theo chương trình môn (riêng Ngữ văn: chỉ chép từ giáo án)'),
+  theLoai: z.enum(MA_THE_LOAI).describe('Chỉ môn Ngữ văn: thể loại văn bản chính của bài; môn khác ghi "khac"'),
   hoatDong: z.array(z.object({
     ten: z.string().describe('Tên hoạt động như trong giáo án'),
     tu: z.string().describe('Mã đoạn bắt đầu, ví dụ D012'),
@@ -61,6 +63,8 @@ export interface SuaKhbd {
   tichHop: Khbd['tichHop'];
   dieuKien: Khbd['dieuKien'];
   chen: Chen[];
+  /** Ngữ văn: thể loại văn bản chính (AI xác định, giáo viên sửa được) */
+  theLoai?: TheLoaiVan;
   /** Hoạt động mới giáo viên chọn từ gợi ý của AI; xuất thành khối bổ sung ngay sau hoạt động cũ. */
   hoatDongMoi?: HoatDongMoi[];
   maBo: { ma: string; lyDo: string }[];
@@ -101,18 +105,25 @@ export function taoKhbdTuGiaoAnCu(s: SuaKhbd): Khbd {
     capNhat: new Date().toISOString(),
     nguon: {
       tenTep: s.tenTep,
-      toanVan: s.doan.map((d) => d.text).filter(Boolean).join('\n').slice(0, 12000),
+      // Ngữ văn giữ nhiều hơn: kiến thức chỉ được lấy từ giáo án, và trích dẫn được đối chiếu với toàn văn
+      toanVan: toanVanGiaoAn(s).slice(0, s.mon === 'NGU_VAN' ? 40000 : 12000),
       hoatDong: s.hoatDong.map((h) => hoatDongCu(s, h)),
       huongDan,
+      theLoai: s.mon === 'NGU_VAN' ? s.theLoai : undefined,
     },
   };
 }
+
+/** Toàn văn giáo án (đoạn văn và bảng) để làm nguồn kiến thức, đối chiếu trích dẫn. */
+export const toanVanGiaoAn = (s: Pick<SuaKhbd, 'doan'>) => s.doan.map((d) => (d.loai === 'bang' && d.hang ? d.hang.map((r) => r.join(' | ')).join('\n') : d.text)).filter(Boolean).join('\n');
 
 /** Bối cảnh bài (dạng KHBD) để dùng chung bộ gợi ý hoạt động với lối soạn mới. */
 export const boiCanhGoiY = (k: SuaKhbd): Khbd => ({
   id: k.id, mon: k.mon, lop: k.lop, boSach: '', bai: k.bai, soTiet: 1, phuongPhap: 'cv5512',
   tichHop: k.tichHop, dieuKien: k.dieuKien, yccd: k.yccd, yccdDaXacNhan: k.yccdDaXacNhan,
   phanBo: [], hoatDong: [], maTichHop: [], maBo: [], dauVet: [], capNhat: '',
+  // Ngữ văn: gợi ý hoạt động mới đối chiếu trích dẫn với giáo án và bám thể loại
+  nguon: k.mon === 'NGU_VAN' ? { tenTep: k.tenTep, toanVan: toanVanGiaoAn(k), hoatDong: [], theLoai: k.theLoai } : undefined,
 });
 
 const vet = (buoc: number, phan: string, ketQua: DauVet['ketQua'], lyDo?: string, luot?: number): DauVet => ({ buoc, phan, ketQua, lyDo, luot, thoiDiem: new Date().toISOString() });
@@ -132,12 +143,13 @@ function giaoAn(doan: Doan[]): string {
   return dong.join('\n');
 }
 
-const he = () => `${LUAT_SOAN.replace(/<!--.*?-->\s*/s, '')}
+const he = (k?: Pick<SuaKhbd, 'mon' | 'theLoai'>) => `${LUAT_SOAN.replace(/<!--.*?-->\s*/s, '')}
 
-Nhiệm vụ: NÂNG CẤP giáo án có sẵn của giáo viên, giữ bố cục gốc. Nội dung của giáo viên giữ nguyên văn; bạn chỉ đề xuất phần BỔ SUNG và chỉ ra vị trí chèn bằng mã đoạn (D001…). Không chép lại câu của giáo viên. Mã đoạn là mã nội bộ, không được xuất hiện trong câu văn bổ sung. Ưu tiên cải tiến hoạt động có sẵn thay vì thêm hoạt động mới; giữ thời lượng toàn tiết.`;
+Nhiệm vụ: NÂNG CẤP giáo án có sẵn của giáo viên, giữ bố cục gốc. Nội dung của giáo viên giữ nguyên văn; bạn chỉ đề xuất phần BỔ SUNG và chỉ ra vị trí chèn bằng mã đoạn (D001…). Không chép lại câu của giáo viên. Mã đoạn là mã nội bộ, không được xuất hiện trong câu văn bổ sung. Ưu tiên cải tiến hoạt động có sẵn thay vì thêm hoạt động mới; giữ thời lượng toàn tiết.${k?.mon === 'NGU_VAN' ? `\n\n${nhacNguVan(k.theLoai)}` : ''}`;
 
 export function nhacPhanTich(doan: Doan[]): string {
-  return `Đọc giáo án dưới đây (mỗi dòng là một đoạn, có mã đoạn) và xác định: môn (mã: ${MA_MON.join(', ')}), lớp, tên bài, yêu cầu cần đạt, các hoạt động dạy học (đoạn bắt đầu, đoạn kết thúc, thời lượng), và mã đoạn cuối của phần mục tiêu.\n\nGIÁO ÁN:\n${giaoAn(doan)}`;
+  return `Đọc giáo án dưới đây (mỗi dòng là một đoạn, có mã đoạn) và xác định: môn (mã: ${MA_MON.join(', ')}), lớp, tên bài, yêu cầu cần đạt, các hoạt động dạy học (đoạn bắt đầu, đoạn kết thúc, thời lượng), và mã đoạn cuối của phần mục tiêu.
+Nếu là môn Ngữ văn: yêu cầu cần đạt CHỈ chép từ mục tiêu của giáo án (không tự đặt, không thêm); xác định thể loại văn bản chính (${Object.entries(THE_LOAI_VAN).map(([m, t]) => `${m}: ${t}`).join('; ')}). Môn khác: thể loại ghi "khac".\n\nGIÁO ÁN:\n${giaoAn(doan)}`;
 }
 
 export function nhacDeXuat(k: SuaKhbd, chiCac?: string[]): string {
@@ -156,7 +168,7 @@ export function nhacDeXuat(k: SuaKhbd, chiCac?: string[]): string {
 
 /* ---------------- Luật cho từng đề xuất ---------------- */
 
-export function kiemTraChen(c: Omit<Chen, 'id' | 'dung'>, k: Pick<SuaKhbd, 'doan' | 'tichHop' | 'dieuKien' | 'hoatDong'>): { diem: number; truDiem: string[]; loiLuat: string[] } {
+export function kiemTraChen(c: Omit<Chen, 'id' | 'dung'>, k: Pick<SuaKhbd, 'doan' | 'tichHop' | 'dieuKien' | 'hoatDong'> & Partial<Pick<SuaKhbd, 'mon'>>): { diem: number; truDiem: string[]; loiLuat: string[] } {
   const loiLuat: string[] = [];
   if (!k.doan.some((d) => d.ma === c.chenSau)) loiLuat.push(`Vị trí chèn ${c.chenSau} không có trong giáo án.`);
   const vanBan = c.noiDung.join('\n');
@@ -165,11 +177,13 @@ export function kiemTraChen(c: Omit<Chen, 'id' | 'dung'>, k: Pick<SuaKhbd, 'doan
   if (c.noiDung.some((t) => goc.has(t.trim()))) loiLuat.push('Câu bổ sung chép lại nguyên câu của giáo án.');
   loiLuat.push(...kiemTraVanBan(vanBan, '').filter((l) => l.muc === 'nghiem').map((l) => l.thongBao));
   if (c.loai === 'clil') {
+    if (k.mon === 'NGU_VAN') { const ds = trichDanKhongCo(vanBan, toanVanGiaoAn(k)); if (ds.length) loiLuat.push(LOI_TRICH_DAN(ds)); }
     const tru: string[] = [];
     if (c.keyWords.length < 2) tru.push('Cần ít nhất 2 key words');
     if (!/^đạt khi/i.test(c.tieuChi.trim())) tru.push('Thiếu tiêu chí "Đạt khi …"');
     return { diem: 100 - 50 * tru.length, truDiem: tru, loiLuat };
   }
+  if (k.mon === 'NGU_VAN') { const ds = trichDanKhongCo(vanBan, toanVanGiaoAn(k)); if (ds.length) loiLuat.push(LOI_TRICH_DAN(ds)); }
   if (!maTichHopHopLe(c.ma)) loiLuat.push('Mã không có trong thư viện.');
   else if (![...k.tichHop.nls, ...k.tichHop.ai].includes(c.ma)) loiLuat.push('Mã này giáo viên không chọn.');
   const d = chamDiem({ ...c, hoatDong: 'HD1' }, { dieuKien: k.dieuKien, phanBo: [] }, c.phut);
@@ -183,7 +197,7 @@ export async function phanTich(k: SuaKhbd, ai: GoiAi): Promise<SuaKhbd> {
   const lop = ([10, 11, 12] as const).find((l) => l === Math.round(r.lop)) ?? k.lop;
   const coMa = (m: string) => k.doan.some((d) => d.ma === m);
   return {
-    ...k, mon: r.mon, lop, bai: r.bai.trim() || k.bai,
+    ...k, mon: r.mon, lop, bai: r.bai.trim() || k.bai, theLoai: r.mon === 'NGU_VAN' ? r.theLoai : undefined,
     yccd: r.yccd.map((s) => s.replace(/^\s*(\d+[.)]|[-•–])\s*/, '').trim()).filter(Boolean).slice(0, 6).map((noiDung, i) => ({ ma: `YC${i + 1}`, noiDung })),
     yccdDaXacNhan: false,
     hoatDong: r.hoatDong.filter((h) => coMa(h.tu) && coMa(h.den)),
@@ -208,7 +222,7 @@ export async function deXuat(k: SuaKhbd, ai: GoiAi): Promise<SuaKhbd> {
   };
 
   for (let luot = 0; luot <= 2; luot++) {
-    const r = await ai({ ten: 'deXuat', he: he(), nhac, schema: DeXuatOut });
+    const r = await ai({ ten: 'deXuat', he: he(k), nhac, schema: DeXuatOut });
     const truot: string[] = [];
     r.chen.forEach((c0, i) => {
       const c = toChen(c0, i);

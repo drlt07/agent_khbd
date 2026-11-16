@@ -15,6 +15,7 @@ import { ChonMa } from '../soan/Buoc1ThongTin';
 import DoiMoiHoatDong from './DoiMoiHoatDong';
 import { NHOM_HINH_THUC } from '../../soan/goi-y';
 import { ChuCT } from '../../thanh-phan/cong-thuc';
+import { THE_LOAI_VAN, type TheLoaiVan } from '../../soan/ngu-van';
 
 const KHOA = 'khbd.sua-nhap';
 const BUOC = ['Tải giáo án', 'Xác nhận, chọn tích hợp', 'AI đề xuất, đổi mới', 'Xem trước', 'Tải về'];
@@ -152,6 +153,15 @@ function BuocXacNhan({ k, sua }: { k: SuaKhbd; sua: (f: (x: SuaKhbd) => SuaKhbd)
             <select aria-label="Lớp" value={k.lop} onChange={(e) => sua((x) => ({ ...x, lop: +e.target.value as 10 | 11 | 12 }))} className={o}>{[10, 11, 12].map((l) => <option key={l} value={l}>Lớp {l}</option>)}</select>
             <input aria-label="Tên bài" value={k.bai} onChange={(e) => sua((x) => ({ ...x, bai: e.target.value }))} className={`${o} col-span-2`} />
           </div>
+          {k.mon === 'NGU_VAN' && (
+            <div className="mt-3 rounded-xl border border-accent-line bg-accent-soft/40 p-3 flex flex-col gap-2">
+              <label className="text-sm font-semibold" htmlFor="the-loai">Thể loại văn bản chính</label>
+              <select id="the-loai" value={k.theLoai ?? 'khac'} onChange={(e) => sua((x) => ({ ...x, theLoai: e.target.value as TheLoaiVan }))} className={o}>
+                {Object.entries(THE_LOAI_VAN).map(([m, t]) => <option key={m} value={m}>{t}</option>)}
+              </select>
+              <p className="text-[13px] text-muted">Môn Ngữ văn: AI giữ nguyên kiến thức của giáo án, chỉ thiết kế hoạt động theo đặc trưng thể loại này. Câu trích không có trong giáo án sẽ bị luật loại.</p>
+            </div>
+          )}
           <h3 className="text-[15px] mt-5">Yêu cầu cần đạt</h3>
           <div className="mt-2 flex flex-col gap-2">
             {k.yccd.map((y, i) => (
