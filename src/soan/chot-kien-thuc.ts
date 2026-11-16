@@ -62,3 +62,6 @@ export function nguonChot(k: { mon: string; bai?: string; lop?: number; theLoai?
   const goc = [k.nguon?.toanVan ?? '', k.sgk ?? ''].filter((x) => x.trim());
   return goc.length ? [...goc, triThucTheLoai(k)].filter(Boolean).join('\n') : '';
 }
+
+/** Ý không phải kiến thức (lấy nhầm từ cột Sản phẩm cần đạt): nhận nhiệm vụ, tiêu chí, phiếu, sản phẩm hình thức. Hàm thuần. */
+export const laKhongPhaiKienThuc = (y: string) => /^\s*(hs|học sinh|các nhóm|nhóm)\s+(tiếp nhận|nhận|hoàn thành|nộp|trình bày|ghi|điền|thảo luận)|tiêu chí|bảng kiểm|phiếu học tập|sản phẩm (của|các) nhóm|bài trình bày|poster|thang điểm/i.test(y);

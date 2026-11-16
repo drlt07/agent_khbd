@@ -14,7 +14,7 @@ import { LOI_TRICH_DAN, phanVan, trichDanLa } from './ngu-van';
 import { coBatAi, coDungAi, coLamTruoc, LOI_LAM_TRUOC, phanHafa } from './hafa-vret';
 import { LOI_THE_LOAI, theLoaiCua, yeuToCham } from './the-loai-van';
 import { tachHoatDongCu } from './giu-hoat-dong';
-import { chotNgoaiGiaoAn, LOI_CHOT_NGOAI, MAU_CHOT, nguonChot, tachChotGiaoAn } from './chot-kien-thuc';
+import { chotNgoaiGiaoAn, laKhongPhaiKienThuc, LOI_CHOT_NGOAI, MAU_CHOT, nguonChot, tachChotGiaoAn, yChot } from './chot-kien-thuc';
 import { chiQuenThuoc, CONG_CU_SO, dungDuoc, nhacCongCu, timCongCu } from './cong-cu-so';
 
 export const NHOM_HINH_THUC = {
@@ -219,7 +219,13 @@ export const YEU_CAU_HOAT_DONG = [
 
 /** Ngữ văn có giáo án: ý chốt có sẵn (ưu tiên trong hoạt động cũ, rồi toàn giáo án) làm nguồn bắt buộc cho phần chốt. */
 export function nhacChotGiaoAn(k: Pick<Khbd, 'mon' | 'nguon'> & Partial<Pick<Khbd, 'sgk'>>, cu?: HoatDongCu): string {
-  if (cu?.sanPhamCanDat?.trim()) return `PHẦN CHỐT KIẾN THỨC: app chép nguyên văn cột "Sản phẩm cần đạt" của hoạt động này trong giáo án vào Bước 4 (dưới đây). Bạn KHÔNG viết chốt mới, không ghi chú; ghi chotKienThuc đúng nội dung này; các bước tổ chức phải dẫn học sinh tới đúng nội dung này:\n<<<\n${cu.sanPhamCanDat.trim().slice(0, 3000)}\n>>>`;
+  if (cu?.sanPhamCanDat?.trim()) return [
+    'PHẦN CHỐT KIẾN THỨC – nguồn là cột "Sản phẩm cần đạt" của hoạt động này trong giáo án (dưới đây). ĐỌC và PHÂN LOẠI:',
+    '- KIẾN THỨC: nhận định, đặc điểm, giá trị nội dung – nghệ thuật, tác dụng, kết luận, thông điệp về bài học.',
+    '- KHÔNG PHẢI KIẾN THỨC: "HS nhận nhiệm vụ", phiếu đã điền, tiêu chí, bảng kiểm, sản phẩm hình thức (bài trình bày, poster…), lời dặn.',
+    'chotKienThuc = CHỈ các ý KIẾN THỨC, viết theo khía cạnh ("- Nội dung: …", "- Nghệ thuật: …", hoặc khía cạnh hợp hoạt động), dùng lời của giáo án (được rút gọn, gộp ý), không thêm ý mới, không ghi chú, không nhãn. Các bước tổ chức phải dẫn học sinh tới đúng các ý đó.',
+    `<<<\n${cu.sanPhamCanDat.trim().slice(0, 3000)}\n>>>`,
+  ].join('\n');
   if (k.mon !== 'NGU_VAN' || (!k.nguon?.toanVan && !k.sgk?.trim())) return '';
   const sgk = k.sgk?.trim() ? `KIẾN THỨC SGK GIÁO VIÊN CUNG CẤP (nguồn chốt; chốt dựa vào kiến thức SGK, dùng đúng thuật ngữ, không chép dài):\n<<<\n${k.sgk.trim().slice(0, 8000)}\n>>>` : '';
   const trongHd = cu ? tachChotGiaoAn(cu.noiDung) : [];
@@ -279,16 +285,24 @@ export function maMoiCuaPhuongAn(h: HoatDongGoiY, tichHop: { nls: string[]; ai: 
 }
 
 /** Bước chuyển giao rõ: có thời gian, hình thức tổ chức, nhiệm vụ cụ thể (câu hỏi, yêu cầu, phiếu). Trả về các phần còn thiếu. Hàm thuần. */
-export function thieuChuyenGiao(viec: string): string[] {
+export function thieuChuyenGiao(viec: string, mon?: string): string[] {
   const thieu: string[] = [];
   if (!/\d+\s*(phút|')/i.test(viec)) thieu.push('thời gian');
   if (!/nhóm|cặp|cá nhân|cả lớp|từng (hs|học sinh)|đôi bạn|bàn/i.test(viec)) thieu.push('hình thức (cá nhân/cặp/nhóm)');
-  if (!/[?:“"]|câu hỏi|phiếu|yêu cầu:|nhiệm vụ:|trả lời|điền|chỉ ra|tìm (ra )?\d|nêu|phân tích|xác định/i.test(viec)) thieu.push('nhiệm vụ cụ thể (câu hỏi, yêu cầu, phiếu)');
+  if (!/[?:“"]|câu hỏi|phiếu|yêu cầu:|nhiệm vụ:|trả lời|điền|chỉ ra|nêu|phân tích|xác định/i.test(viec)) thieu.push('nhiệm vụ cụ thể (câu hỏi, yêu cầu, phiếu)');
+  // "tìm 4 chứng cứ" phải nói 4 cái gì
+  const soLuong = viec.match(/(\d+)\s+(chứng cứ|bằng chứng|yếu tố|thủ pháp|ý|điểm|biểu hiện|chi tiết|tiêu chí|dấu hiệu)/i);
+  if (soLuong && Number(soLuong[1]) >= 2) {
+    const sau = viec.slice((soLuong.index ?? 0) + soLuong[0].length, (soLuong.index ?? 0) + soLuong[0].length + 200);
+    if (!/^\s*[:(（–-]/.test(sau) || (sau.match(/[,;]/g)?.length ?? 0) < Number(soLuong[1]) - 2) thieu.push(`tên ${soLuong[1]} ${soLuong[2]} cần tìm`);
+  }
+  // Ngữ văn: phải nói học sinh làm việc với đoạn nào của văn bản
+  if (mon === 'NGU_VAN' && !/đoạn|cảnh|văn bản|trích|trang|sgk|phiếu|tài liệu|lời thoại|câu thơ|khổ|chi tiết|nhân vật/i.test(viec)) thieu.push('phạm vi văn bản (đoạn nào)');
   return thieu;
 }
 
 /** Lối Sửa KHBD cũ: khung CV 5512 đủ 4 bước; năng lực số đúng mã giáo viên chọn, có tiêu chí; học sinh dùng AI thì có prompt mẫu. Hàm thuần. */
-export function kiemTraKhung(h: HoatDongGoiY, maChon: string[], canNls = maChon.length > 0, choAi = true): string[] {
+export function kiemTraKhung(h: HoatDongGoiY, maChon: string[], canNls = maChon.length > 0, choAi = true, mon?: string): string[] {
   const loi: string[] = [];
   const kh = h.khung5512;
   if (!kh) return ['Thiếu khung CV 5512 (nội dung, sản phẩm, tổ chức thực hiện).'];
@@ -301,7 +315,8 @@ export function kiemTraKhung(h: HoatDongGoiY, maChon: string[], canNls = maChon.
   const chungChung = (['thucHien', 'baoCao'] as const).filter((b) => laSanPhamChung(kh.buoc[b].sanPham));
   if (chungChung.length) loi.push(`Nhạt: sản phẩm cần đạt chưa cụ thể ở ${chungChung.map((b) => (b === 'thucHien' ? 'Bước 2' : 'Bước 3')).join(', ')} (ghi rõ kết quả học sinh phải có, vd nội dung câu trả lời, sản phẩm mẫu).`);
   if (!h.chotGoc && laChotChung(h.chotKienThuc)) loi.push('Thiếu chốt kiến thức cụ thể ở Bước 4 (nêu rõ nội dung kiến thức, thông điệp được chốt).');
-  const thieuCg = thieuChuyenGiao(kh.buoc.chuyenGiao.viec);
+  const thieuCg = thieuChuyenGiao(kh.buoc.chuyenGiao.viec, mon);
+  if (!kh.buoc.chuyenGiao.sanPham.trim() && !/nộp|sản phẩm|hoàn thành|ghi (vào|ra)|điền|viết|vẽ|lập|trình bày/i.test(kh.buoc.chuyenGiao.viec)) thieuCg.push('sản phẩm phải nộp');
   if (thieuCg.length) loi.push(`Nhạt: chuyển giao nhiệm vụ chưa rõ, thiếu ${thieuCg.join(', ')}.`);
   if (buoc.some((b) => soTu(b.viec) < SO_TU_BUOC_KHUNG)) loi.push(`Nhạt: tổ chức thực hiện chưa cụ thể (mỗi bước cần nêu rõ GV làm gì, HS làm gì; từ ${SO_TU_BUOC_KHUNG} chữ).`);
   if (coDungAi(h.nhom, h.congNghe, ...buoc.map((b) => b.viec)) && !kh.promptMau.trim()) loi.push('Thiếu prompt AI mẫu cho học sinh.');
@@ -311,9 +326,8 @@ export function kiemTraKhung(h: HoatDongGoiY, maChon: string[], canNls = maChon.
 /** Áp phần GIỮ NGUYÊN do code làm: chép nguyên văn mục tiêu cũ, giữ giai đoạn trong tiến trình. Hàm thuần. */
 export function giuHoatDongCu(g: GoiY, cu: HoatDongCu): GoiY {
   const p = tachHoatDongCu(cu);
-  const chot = cu.sanPhamCanDat?.trim();
   return { ...g, hoatDong: g.hoatDong.map((h0) => {
-    const h = { ...h0, mucTieu: p.mucTieu ?? h0.mucTieu, thoiDiem: p.thoiDiem ?? h0.thoiDiem, ...(chot ? { chotKienThuc: chot, chotGoc: true } : {}) };
+    const h = { ...h0, mucTieu: p.mucTieu ?? h0.mucTieu, thoiDiem: p.thoiDiem ?? h0.thoiDiem };
     return { ...h, khung5512: ganChot(h) };
   }) };
 }
@@ -374,11 +388,20 @@ export function kiemTraGoiY(g: GoiY, k: Pick<Khbd, 'dieuKien'> & Partial<Pick<Kh
     if (la.length) loi.push(`Không hợp: ${LOI_TRICH_DAN(la)}`);
     // Ngữ văn có giáo án: ý chốt phải bám giáo án
     const nguonK = k.mon ? nguonChot({ mon: k.mon, bai: k.bai, lop: k.lop, theLoai: k.theLoai, sgk: k.sgk, nguon: k.nguon }) : '';
-    const ngoai = nguonK && !h.chotGoc ? chotNgoaiGiaoAn(h.chotKienThuc, nguonK) : [];
-    if (ngoai.length) loi.push(`Không hợp: ${LOI_CHOT_NGOAI(ngoai)}`);
+    const spcd = cu?.sanPhamCanDat?.trim();
+    if (spcd) {
+      // Lối Sửa: chốt là phần KIẾN THỨC của cột "Sản phẩm cần đạt" trong giáo án
+      const ngoaiSp = chotNgoaiGiaoAn(h.chotKienThuc, spcd);
+      if (ngoaiSp.length) loi.push(`Không hợp: chốt có ý không có trong "Sản phẩm cần đạt" của giáo án: ${ngoaiSp.map((t) => `“${t.slice(0, 60)}”`).join('; ')}.`);
+      const khongKt = yChot(h.chotKienThuc).filter(laKhongPhaiKienThuc);
+      if (khongKt.length) loi.push(`Nhạt: chốt chép cả phần không phải kiến thức (tiêu chí, phiếu, nhiệm vụ): ${khongKt.map((t) => `“${t.slice(0, 50)}”`).join('; ')}.`);
+    } else {
+      const ngoai = nguonK ? chotNgoaiGiaoAn(h.chotKienThuc, nguonK) : [];
+      if (ngoai.length) loi.push(`Không hợp: ${LOI_CHOT_NGOAI(ngoai)}`);
+    }
     // Ngữ văn: hoạt động đọc hiểu, luyện tập phải chạm yếu tố đặc trưng thể loại
     if (tl && (h.thoiDiem === 'hinh_thanh' || h.thoiDiem === 'luyen_tap') && !yeuToCham([h.ten, h.yTuong, h.mucTieu, h.diemTuDuy, h.cauHoiMau, h.chotKienThuc, ...h.kichBan.map((b) => b.buoc)].join('\n'), tl, k.bai, k.lop).length) loi.push(LOI_THE_LOAI(tl));
-    if (cu) loi.push(...kiemTraKhung(h, maChon, canNls ?? maChon.length > 0, k.tichHop ? coBatAi({ tichHop: k.tichHop }) : true));
+    if (cu) loi.push(...kiemTraKhung(h, maChon, canNls ?? maChon.length > 0, k.tichHop ? coBatAi({ tichHop: k.tichHop }) : true, k.mon));
     if (h.thoiLuong > 15) loi.push(`Dài ${h.thoiLuong} phút (ưu tiên 5–15).`);
     if (phutToiDa && h.thoiLuong > phutToiDa) loi.push(`Dài hơn thời lượng hoạt động (${phutToiDa} phút).`);
     const tongKichBan = h.kichBan.reduce((s, b) => s + b.phut, 0);
@@ -389,7 +412,7 @@ export function kiemTraGoiY(g: GoiY, k: Pick<Khbd, 'dieuKien'> & Partial<Pick<Kh
   const coCongNghe = g.hoatDong.filter((h) => h.congNghe.trim());
   if (coCongNghe.length >= 2 && coCongNghe.every((h) => chiQuenThuoc(h.congNghe))) nghiem.push(`Công nghệ chưa mới: các phương án có công nghệ chỉ dùng công cụ hỏi – đáp quen thuộc (${[...new Set(coCongNghe.flatMap((h) => timCongCu(h.congNghe).map((c) => c.ten)))].join(', ')}); cần ít nhất 1 phương án dùng công nghệ để học sinh tạo, mô phỏng, nhập vai hoặc phân tích dữ liệu.`);
   const soHay = theoHoatDong.filter((l) => !laNhatHoacKhongHop(l)).length;
-  if (theoHoatDong.some((l) => l.some((x) => x.includes('chốt kiến thức có ý không có trong giáo án')))) nghiem.push('Có phương án chốt kiến thức bằng ý không có trong giáo án (Ngữ văn): chỉ chốt bằng ý của giáo án.');
+  if (theoHoatDong.some((l) => l.some((x) => x.includes('chốt kiến thức có ý không có trong giáo án') || x.includes('không có trong "Sản phẩm cần đạt"')))) nghiem.push('Có phương án chốt kiến thức bằng ý không có trong giáo án (Ngữ văn): chỉ chốt bằng ý của giáo án.');
   if (theoHoatDong.some((l) => l.some((x) => x.includes('trích dẫn không có trong KHBD gốc')))) nghiem.push('Có phương án tự viết câu trích không có trong giáo án (Ngữ văn): chỉ dùng câu trích có trong giáo án.');
   if (n >= 3 && soHay < 3) nghiem.push(`Chỉ có ${soHay} phương án không nhạt; cần ít nhất 3. Thay phương án nhạt bằng phương án có vấn đề thật, điểm tư duy rõ.`);
   const sttHopLe = (i: number) => Number.isInteger(i) && i >= 1 && i <= n;

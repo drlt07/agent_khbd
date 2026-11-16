@@ -409,3 +409,5 @@ Góp ý của tác giả: kiến thức chốt lấy từ sản phẩm cần đ�
 - Chuyển giao (`thieuChuyenGiao`): phải có thời gian, hình thức (cá nhân/cặp/nhóm), nhiệm vụ cụ thể (câu hỏi, yêu cầu, phiếu); thiếu → nhạt. Mô tả schema Bước 1 đòi đủ 6 ý; lời nhắc: vai nhập chỉ là vỏ, nhiệm vụ gọi đúng thuật ngữ, không biến phân tích nghệ thuật thành buộc tội nhân vật.
 - Gợi ý lại: lời nhắc liệt kê lỗi cụ thể từng phương án (trước chỉ "0 phương án không nhạt").
 - Kiểm thử `tests/san-pham-can-dat.test.ts`; tổng 275 đạt.
+- Sửa lại (16/11/2026, góp ý tác giả "không phải chép nguyên, phải đọc biết cái nào là kiến thức"): không chép nguyên văn cả cột nữa. AI đọc cột "Sản phẩm cần đạt", phân loại kiến thức / không phải kiến thức, chốt chỉ bằng ý kiến thức (theo khía cạnh, lời giáo án). Luật: ý chốt không có trong cột "Sản phẩm cần đạt" → không hợp; ý chốt là tiêu chí, phiếu, "HS nhận nhiệm vụ"… (`laKhongPhaiKienThuc`) → nhạt. Áp cho lối Sửa mọi môn.
+- Chuyển giao siết thêm: "tìm N chứng cứ/yếu tố…" phải nêu tên N yếu tố; Ngữ văn phải có phạm vi văn bản (đoạn nào); phải có sản phẩm phải nộp. `rules/ngu-van.md` v6 (E.7, E.8). Tổng 275 kiểm thử đạt.
