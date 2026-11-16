@@ -390,3 +390,12 @@ Góp ý của tác giả (ảnh lỗi "hoatDong.3.vaiTro: expected string, recei
 - Luật `kiemTraKhung`: bỏ "dùng mã giáo viên không chọn"; mã phải có trong thư viện, mã AI chỉ khi bật năng lực AI.
 - Bấm "Chèn vào giáo án": mã mới của phương án tự thêm vào danh sách tích hợp (`maMoiCuaPhuongAn`), ghi dấu vết. Thẻ gợi ý đánh dấu "mã mới, thêm khi chèn".
 - Kiểm thử thêm trong `tests/giu-hoat-dong.test.ts`; tổng 265 đạt.
+
+## Gemini: ép khuôn JSON, tự sửa JSON hỏng, thử lại – 16/11/2026
+
+Tác giả gặp "Kết quả không đúng khuôn (Gemini không trả JSON)" khi gợi ý đổi mới "Nhiệm vụ 2.2" (khuôn lớn: khung CV 5512, 4–6 phương án).
+
+- Gửi `responseJsonSchema` (khuôn zod, bỏ `$schema`) để Gemini trả đúng khuôn; mô hình không nhận (400) thì gửi lại chỉ với khuôn trong lời nhắc. `maxOutputTokens` 32000.
+- `tachJson` + `suaJson`: sửa lỗi hay gặp (gạch chéo LaTeX `\mathrm`, `\frac`; dấu phẩy thừa; xuống dòng trong chuỗi); bỏ phần "suy nghĩ" (thought) của câu trả lời.
+- Không đọc được JSON → tự gửi lại 1 lần; vẫn hỏng thì báo lỗi kèm lí do và độ dài câu trả lời để dễ dò.
+- Kiểm thử `tests/gemini.test.ts` (Gemini giả lập); tổng 270 đạt. Chưa thử với khóa Gemini thật trong phiên.

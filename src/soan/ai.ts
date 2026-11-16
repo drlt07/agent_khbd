@@ -21,10 +21,38 @@ export const saiKhuon = (chiTiet: string) => new LoiAi({ ma: 'sai_khuon', thongB
 /** Lấy khối JSON đầu tiên trong văn bản (Gemini đôi khi bọc trong ```json). */
 export function tachJson(s: string): unknown {
   const t = s.trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '');
-  try { return JSON.parse(t); } catch { /* thử tìm khối */ }
+  try { return JSON.parse(t); } catch { /* thử tìm khối, sửa lỗi nhỏ */ }
   const a = t.indexOf('{'), b = t.lastIndexOf('}');
-  if (a >= 0 && b > a) return JSON.parse(t.slice(a, b + 1));
-  throw new Error('Không có JSON');
+  if (a < 0 || b <= a) throw new Error('Không có JSON');
+  const khoi = t.slice(a, b + 1);
+  try { return JSON.parse(khoi); } catch { /* sửa lỗi nhỏ */ }
+  return JSON.parse(suaJson(khoi));
+}
+
+/** Sửa lỗi JSON hay gặp ở Gemini: gạch chéo ngược sai (LaTeX \frac), dấu phẩy thừa trước } ], xuống dòng trong chuỗi. Hàm thuần. */
+export function suaJson(s: string): string {
+  let ra = '', trongChuoi = false;
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (trongChuoi) {
+      if (c === '\\') {
+        const n = s[i + 1] ?? '';
+        // \f, \b theo sau là chữ thường (\frac, \beta) là lệnh LaTeX, không phải kí tự điều khiển; \n, \t, \r giữ nguyên
+        const laTex = (n === 'f' || n === 'b') && /^[a-z]{2,}/.test(s.slice(i + 1));
+        if ('"\\/bfnrt'.includes(n) && !laTex) { ra += c + n; i++; continue; }
+        if (n === 'u' && /^[0-9a-fA-F]{4}$/.test(s.slice(i + 2, i + 6))) { ra += c; continue; }
+        ra += '\\\\'; continue; // gạch chéo đứng một mình → gạch chéo thật
+      }
+      if (c === '"') trongChuoi = false;
+      if (c === '\n') { ra += '\\n'; continue; }
+      if (c === '\r') continue;
+      ra += c;
+    } else {
+      if (c === '"') trongChuoi = true;
+      ra += c;
+    }
+  }
+  return ra.replace(/,(\s*[}\]])/g, '$1');
 }
 
 /** Điền mục bị AI bỏ sót (chữ → "", danh sách → [], đúng/sai → false) để không hỏng cả lượt; mục quan trọng bị trống do luật nội dung bắt. Hàm thuần. */
@@ -85,28 +113,41 @@ export function aiClaude(cfg: CauHinhKhoa): GoiAi {
 export function aiGemini(cfg: CauHinhKhoa, fetchFn: typeof fetch = fetch): GoiAi {
   const model = cfg.moHinh?.trim() || MO_HINH_MAC_DINH.gemini;
   return async <T,>(y: YeuCauAi<T>): Promise<T> => {
-    const khuon = JSON.stringify(z.toJSONSchema(y.schema as z.ZodType));
-    let res: Response;
-    try {
-      res = await fetchFn(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', 'x-goog-api-key': cfg.khoa.trim() },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: y.he }] },
-          contents: [{ role: 'user', parts: [{ text: `${y.nhac}\n\nChỉ trả về một đối tượng JSON đúng khuôn sau (JSON Schema):\n${khuon}` }] }],
-          generationConfig: { responseMimeType: 'application/json', maxOutputTokens: 16000 },
-        }),
-      });
-    } catch { throw new LoiAi(loiMatMang('gemini')); }
-    let body: any = null;
-    try { body = await res.json(); } catch { /* thân rỗng */ }
+    const { $schema: _bo, ...jsonSchema } = z.toJSONSchema(y.schema as z.ZodType) as Record<string, unknown>;
+    const khuon = JSON.stringify(jsonSchema);
+    // Ép khuôn bằng responseJsonSchema; mô hình không nhận (400) thì gửi lại chỉ với khuôn trong lời nhắc
+    const goi = async (epKhuon: boolean) => {
+      let res: Response;
+      try {
+        res = await fetchFn(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', 'x-goog-api-key': cfg.khoa.trim() },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: y.he }] },
+            contents: [{ role: 'user', parts: [{ text: `${y.nhac}\n\nChỉ trả về một đối tượng JSON đúng khuôn sau (JSON Schema):\n${khuon}` }] }],
+            generationConfig: { responseMimeType: 'application/json', maxOutputTokens: 32000, ...(epKhuon ? { responseJsonSchema: jsonSchema } : {}) },
+          }),
+        });
+      } catch { throw new LoiAi(loiMatMang('gemini')); }
+      let body: any = null;
+      try { body = await res.json(); } catch { /* thân rỗng */ }
+      return { res, body };
+    };
+    let { res, body } = await goi(true);
+    if (res.status === 400) ({ res, body } = await goi(false));
     if (!res.ok) throw new LoiAi(phanLoaiLoiHttp('gemini', res.status, body));
-    const ketThuc = phanLoaiKetThuc('gemini', body);
-    if (ketThuc) throw new LoiAi(ketThuc);
-    const text = (body?.candidates?.[0]?.content?.parts ?? []).map((p: any) => p.text ?? '').join('');
-    let du: unknown;
-    try { du = tachJson(text); } catch { throw saiKhuon('Gemini không trả JSON'); }
-    return kiemKhuon(y.schema, du);
+    for (let lan = 0; ; lan++) {
+      const ketThuc = phanLoaiKetThuc('gemini', body);
+      if (ketThuc) throw new LoiAi(ketThuc);
+      // bỏ phần "suy nghĩ" (thought) nếu có, chỉ lấy câu trả lời
+      const text = (body?.candidates?.[0]?.content?.parts ?? []).filter((p: any) => !p.thought).map((p: any) => p.text ?? '').join('');
+      let du: unknown;
+      try { du = tachJson(text); } catch (e) {
+        if (lan === 0) { ({ res, body } = await goi(false)); if (!res.ok) throw new LoiAi(phanLoaiLoiHttp('gemini', res.status, body)); continue; }
+        throw saiKhuon(`Gemini không trả JSON đọc được (${String((e as Error)?.message ?? e).slice(0, 80)}; ${text.length} kí tự)`);
+      }
+      return kiemKhuon(y.schema, du);
+    }
   };
 }
 
