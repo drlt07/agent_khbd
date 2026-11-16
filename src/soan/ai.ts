@@ -27,8 +27,26 @@ export function tachJson(s: string): unknown {
   throw new Error('Không có JSON');
 }
 
+/** Điền mục bị AI bỏ sót (chữ → "", danh sách → [], đúng/sai → false) để không hỏng cả lượt; mục quan trọng bị trống do luật nội dung bắt. Hàm thuần. */
+export function dienMucThieu(du: unknown, issues: z.core.$ZodIssue[]): boolean {
+  let da = false;
+  for (const i of issues) {
+    const it = i as { code: string; expected?: string };
+    if (it.code !== 'invalid_type' || !i.path.length) continue;
+    const rong = it.expected === 'string' ? '' : it.expected === 'array' ? [] : it.expected === 'boolean' ? false : undefined;
+    if (rong === undefined) continue;
+    let o: unknown = du;
+    for (const p of i.path.slice(0, -1)) o = o && typeof o === 'object' ? (o as Record<PropertyKey, unknown>)[p as PropertyKey] : undefined;
+    const khoa = i.path[i.path.length - 1] as PropertyKey;
+    // chỉ điền mục VẮNG MẶT; mục có mà sai kiểu vẫn báo sai khuôn
+    if (o && typeof o === 'object' && (o as Record<PropertyKey, unknown>)[khoa] === undefined) { (o as Record<PropertyKey, unknown>)[khoa] = rong; da = true; }
+  }
+  return da;
+}
+
 export function kiemKhuon<T>(schema: z.ZodType<T>, du: unknown): T {
-  const r = schema.safeParse(du);
+  let r = schema.safeParse(du);
+  if (!r.success && du && typeof du === 'object' && dienMucThieu(du, r.error.issues)) r = schema.safeParse(du);
   if (!r.success) throw saiKhuon(r.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; '));
   return r.data;
 }

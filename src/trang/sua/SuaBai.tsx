@@ -185,6 +185,11 @@ function BuocXacNhan({ k, sua, ai }: { k: SuaKhbd; sua: (f: (x: SuaKhbd) => SuaK
                 {Object.entries(THE_LOAI_VAN).map(([m, t]) => <option key={m} value={m}>{t}</option>)}
               </select>
               <p className="text-[13px] text-muted">Môn Ngữ văn: AI giữ nguyên kiến thức của giáo án, chỉ thiết kế hoạt động theo đặc trưng thể loại này. Câu trích không có trong giáo án sẽ bị luật loại.</p>
+            <label className="text-sm font-semibold mt-2" htmlFor="sgk-chot">Kiến thức SGK để chốt (không bắt buộc)</label>
+            <textarea id="sgk-chot" rows={5} value={k.sgk ?? ''} onChange={(e) => sua((x) => ({ ...x, sgk: e.target.value || undefined }))}
+              placeholder="Dán phần Tri thức ngữ văn, câu hỏi sau văn bản, nội dung SGK của bài (từ sách của thầy/cô)…"
+              className="px-3 py-2 rounded-xl border border-line-strong bg-surface text-[14.5px] focus:border-accent outline-none" />
+            <p className="text-[13px] text-muted">AI chốt kiến thức theo khía cạnh (Nội dung, Nghệ thuật…) dựa vào giáo án và phần SGK này, dùng đúng thuật ngữ; ý ngoài nguồn bị luật loại. Phần dán chỉ lưu trong bản nháp trên máy thầy/cô và gửi cho AI khi soạn.</p>
               {(() => {
                 const r = timTheoBai(k.bai, k.lop);
                 if (!r) return null;

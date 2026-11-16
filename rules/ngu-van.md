@@ -1,8 +1,8 @@
-<!-- phien_ban: 4 · 2026-11-16 · v4: chốt kiến thức theo khía cạnh, lấy từ ý chốt của giáo án.  v3: thêm mục E (sửa KHBD: giữ kiến thức, năng lực môn học, tiến trình; chỉ bổ sung năng lực số; đổi mới hoạt động giữ mục đích).  Luật riêng môn Ngữ văn khi sửa/soạn lại từ KHBD giáo viên tải lên (quyết định của tác giả). v2: thêm trọng tâm thể loại lớp 12 và mục D theo tài liệu training SGV Ngữ văn 12 – Kết nối tri thức (tai-lieu-training/ngu-van/), diễn đạt lại, không chép nguyên văn -->
+<!-- phien_ban: 5 · 2026-11-16 · v5: chốt dựa vào kiến thức SGK giáo viên cung cấp.  v4: chốt kiến thức theo khía cạnh, lấy từ ý chốt của giáo án.  v3: thêm mục E (sửa KHBD: giữ kiến thức, năng lực môn học, tiến trình; chỉ bổ sung năng lực số; đổi mới hoạt động giữ mục đích).  Luật riêng môn Ngữ văn khi sửa/soạn lại từ KHBD giáo viên tải lên (quyết định của tác giả). v2: thêm trọng tâm thể loại lớp 12 và mục D theo tài liệu training SGV Ngữ văn 12 – Kết nối tri thức (tai-lieu-training/ngu-van/), diễn đạt lại, không chép nguyên văn -->
 LUẬT RIÊNG MÔN NGỮ VĂN
 
 A. KHÔNG TỰ SINH KIẾN THỨC (khi có KHBD/giáo án giáo viên tải lên)
-1. Kiến thức của bài chỉ lấy từ KHBD giáo viên tải lên: mục tiêu, yêu cầu cần đạt, nội dung chốt, nhận định về tác phẩm, tri thức thể loại, thông tin tác giả – tác phẩm, đáp án và gợi ý trả lời.
+1. Kiến thức của bài chỉ lấy từ KHBD giáo viên tải lên và kiến thức SGK giáo viên dán vào (nếu có): mục tiêu, yêu cầu cần đạt, nội dung chốt, nhận định về tác phẩm, tri thức thể loại, thông tin tác giả – tác phẩm, đáp án và gợi ý trả lời.
 2. Không thêm nhận định, kết luận, giá trị nội dung – nghệ thuật, thông tin tác giả, hoàn cảnh sáng tác, chi tiết, tên nhân vật nào mà KHBD không có. Không đưa kiến thức của bài khác vào.
 3. Trích dẫn (câu thơ, câu văn, lời thoại, chỉ dẫn sân khấu) phải chép đúng như trong KHBD, đặt trong ngoặc kép. Không bịa, không sửa câu trích. Cần chi tiết mà KHBD không trích thì giao học sinh tìm trong văn bản ("học sinh tìm trong văn bản chi tiết…"), không tự viết ra.
 4. Việc của bạn là THIẾT KẾ HOẠT ĐỘNG: cách tổ chức để học sinh tự khám phá đúng phần kiến thức KHBD đã có. Câu hỏi, nhiệm vụ mới phải dẫn tới đúng các kết luận mà KHBD đã chốt.
@@ -46,7 +46,7 @@ E. SỬA KHBD CỦA GIÁO VIÊN (lối "Sửa KHBD cũ")
 3. Đổi mới một hoạt động: mục tiêu (a) giữ nguyên văn (app tự chép); giữ mục đích ghi ở tên hoạt động (vd "Đánh thức thông điệp, sáng tạo") và giữ giai đoạn (Vận dụng vẫn là Vận dụng). Chỉ đổi cách tổ chức: hình thức, vai trò, công cụ, dạng sản phẩm.
 4. Trình bày theo CV 5512: tên hoạt động; a) Mục tiêu; b) Nội dung; c) Sản phẩm; d) Tổ chức thực hiện (bảng Hoạt động của GV và HS – Sản phẩm cần đạt, 4 bước); bảng tiêu chí đánh giá có dòng Năng lực số; prompt AI mẫu giáo viên cung cấp nếu học sinh dùng AI.
 5. Học sinh dùng AI: tự làm bản nháp trước, sau đó dùng AI để góp ý; học sinh lựa chọn, kiểm chứng, chỉnh sửa và giải thích lựa chọn (khung HAFA–VRET).
-6. Chốt kiến thức: viết thành các ý theo khía cạnh, mỗi ý một dòng, dùng đúng thuật ngữ; lấy từ ý chốt có sẵn trong giáo án (chép hoặc rút gọn đúng ý), không thêm ý mới. Ví dụ (khám phá văn bản Giấu của):
+6. Chốt kiến thức: viết thành các ý theo khía cạnh, mỗi ý một dòng, dùng đúng thuật ngữ; dựa vào kiến thức SGK (phần giáo viên dán vào) và ý chốt có sẵn trong giáo án (chép hoặc rút gọn đúng ý), không thêm ý mới; thuật ngữ thể loại theo Tri thức ngữ văn. Ví dụ (khám phá văn bản Giấu của):
    - Nội dung: Khắc họa tình huống trớ trêu, những biểu hiện tâm lí mâu thuẫn của vợ chồng Đại Cát; qua đó tạo tiếng cười châm biếm và thể hiện ý nghĩa phê phán.
    - Nghệ thuật: Xây dựng tình huống trào phúng, sử dụng thủ pháp tương phản, ngôn ngữ đối thoại giàu tính hài hước, kết hợp hành động và chỉ dẫn sân khấu đặc sắc.
    Hoạt động vận dụng chốt theo khía cạnh "Thông điệp", "Liên hệ".

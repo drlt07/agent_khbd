@@ -30,9 +30,10 @@ function boiCanh(k: Khbd): string {
   if (k.yccd.length) dong.push(`Yêu cầu cần đạt đã được giáo viên xác nhận:\n${k.yccd.map((y) => `${y.ma}: ${y.noiDung}`).join('\n')}`);
   if (k.nguon) dong.push([
     `KHBD này được soạn lại từ giáo án cũ của giáo viên (${k.nguon.tenTep}). Giữ đúng nội dung kiến thức, yêu cầu cần đạt, ví dụ và bài tập cốt lõi của giáo án cũ; THIẾT KẾ HOẠT ĐỘNG MỚI: cách tổ chức khác, học sinh tích cực hơn, không chép lại câu chữ và cách tổ chức cũ.`,
-    k.mon === 'NGU_VAN' ? 'NGỮ VĂN – KHÔNG TỰ SINH KIẾN THỨC: mục tiêu, yêu cầu cần đạt, nội dung chốt, nhận định về tác phẩm, đáp án và gợi ý trả lời CHỈ lấy từ giáo án cũ dưới đây; câu trích chép đúng từ giáo án. Bạn chỉ thiết kế hoạt động theo đặc trưng thể loại.' : '',
+    k.mon === 'NGU_VAN' ? `NGỮ VĂN – KHÔNG TỰ SINH KIẾN THỨC: mục tiêu, yêu cầu cần đạt, nội dung chốt, nhận định về tác phẩm, đáp án và gợi ý trả lời CHỈ lấy từ giáo án cũ dưới đây${k.sgk?.trim() ? ' và kiến thức SGK giáo viên cung cấp' : ''}; câu trích chép đúng nguồn. Bạn chỉ thiết kế hoạt động theo đặc trưng thể loại.` : '',
     `Giáo án cũ (${k.mon === 'NGU_VAN' ? 'nguồn kiến thức DUY NHẤT' : 'chỉ để tham khảo kiến thức'}):\n<<<\n${k.nguon.toanVan}\n>>>`,
   ].filter(Boolean).join('\n'));
+  if (k.mon === 'NGU_VAN' && k.sgk?.trim()) dong.push(`KIẾN THỨC SGK GIÁO VIÊN CUNG CẤP (nguồn để chốt kiến thức ở bước Kết luận, nhận định và đáp án; chốt theo khía cạnh "- Nội dung: …", "- Nghệ thuật: …", dùng đúng thuật ngữ; không thêm ý ngoài nguồn):\n<<<\n${k.sgk.trim().slice(0, 8000)}\n>>>`);
   return dong.join('\n');
 }
 

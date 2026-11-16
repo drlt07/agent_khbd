@@ -67,6 +67,8 @@ export interface SuaKhbd {
   chen: Chen[];
   /** Ngữ văn: thể loại văn bản chính (AI xác định, giáo viên sửa được) */
   theLoai?: TheLoaiVan;
+  /** Ngữ văn: kiến thức SGK giáo viên dán vào làm nguồn chốt (chỉ lưu trên máy giáo viên). */
+  sgk?: string;
   /** Hoạt động mới giáo viên chọn từ gợi ý của AI; xuất thành khối bổ sung ngay sau hoạt động cũ. */
   hoatDongMoi?: HoatDongMoi[];
   maBo: { ma: string; lyDo: string }[];
@@ -98,7 +100,7 @@ export function taoKhbdTuGiaoAnCu(s: SuaKhbd): Khbd {
   }
   return {
     id: `k${Date.now().toString(36)}`, mon: s.mon, lop: s.lop, boSach: '', bai: s.bai, soTiet, phuongPhap: 'cv5512',
-    tichHop: s.tichHop, dieuKien: s.dieuKien,
+    tichHop: s.tichHop, dieuKien: s.dieuKien, sgk: s.sgk,
     yccd: s.yccd, yccdDaXacNhan: s.yccdDaXacNhan,
     phanBo: phanBoMacDinh('cv5512', soTiet),
     hoatDong: (['HD1', 'HD2', 'HD3', 'HD4'] as MaHd[]).map((ma) => ({ ma, ten: TEN_HD.cv5512[ma], phut: 0 })),
@@ -124,6 +126,7 @@ export const boiCanhGoiY = (k: SuaKhbd): Khbd => ({
   id: k.id, mon: k.mon, lop: k.lop, boSach: '', bai: k.bai, soTiet: 1, phuongPhap: 'cv5512',
   tichHop: k.tichHop, dieuKien: k.dieuKien, yccd: k.yccd, yccdDaXacNhan: k.yccdDaXacNhan,
   phanBo: [], hoatDong: [], maTichHop: [], maBo: [], dauVet: [], capNhat: '',
+  sgk: k.sgk,
   // Ngữ văn: gợi ý hoạt động mới đối chiếu trích dẫn với giáo án và bám thể loại
   nguon: k.mon === 'NGU_VAN' ? { tenTep: k.tenTep, toanVan: toanVanGiaoAn(k), hoatDong: [], theLoai: k.theLoai } : undefined,
 });

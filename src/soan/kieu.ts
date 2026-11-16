@@ -239,6 +239,8 @@ export interface Khbd {
   yccdDaXacNhan: boolean;
   /** Ngữ văn: thể loại văn bản chính giáo viên chọn (mã THE_LOAI_VAN); không có thì theo SGV hoặc giáo án cũ. */
   theLoai?: string;
+  /** Ngữ văn: kiến thức SGK giáo viên dán vào (Tri thức ngữ văn, câu hỏi…) làm nguồn chốt; chỉ lưu trong bản nháp trên máy giáo viên. */
+  sgk?: string;
   phanBo: PhanBo[];
   mucTieu?: z.infer<typeof MucTieuOut>;
   giaiDoan1?: z.infer<typeof GiaiDoan1Out>;

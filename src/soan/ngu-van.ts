@@ -57,5 +57,5 @@ export const phanVan = (k: { mon: string; bai?: string; lop?: number; theLoai?: 
   k.mon === 'NGU_VAN' ? `\n\n${nhacNguVan((k.theLoai ?? k.nguon?.theLoai) as TheLoaiVan | undefined, k.bai, k.lop)}` : '';
 
 /** Ngữ văn có KHBD gốc: trích dẫn không có trong KHBD gốc (rỗng nếu không phải Ngữ văn hoặc không có KHBD gốc). */
-export const trichDanLa = (k: { mon: string; nguon?: { toanVan: string } }, vanBan: string) =>
-  k.mon === 'NGU_VAN' && k.nguon?.toanVan ? trichDanKhongCo(vanBan, k.nguon.toanVan) : [];
+export const trichDanLa = (k: { mon: string; sgk?: string; nguon?: { toanVan: string } }, vanBan: string) =>
+  k.mon === 'NGU_VAN' && (k.nguon?.toanVan || k.sgk?.trim()) ? trichDanKhongCo(vanBan, `${k.nguon?.toanVan ?? ''}\n${k.sgk ?? ''}`) : [];

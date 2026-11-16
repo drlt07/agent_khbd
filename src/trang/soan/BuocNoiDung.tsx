@@ -48,6 +48,11 @@ export default function BuocNoiDung({ k, sua, ai }: { k: Khbd; sua: (f: (k: Khbd
               {sgv && <><strong>Theo SGV Ngữ văn 12:</strong> Bài {sgv.bai.so}. {sgv.bai.ten}{sgv.vanBan ? ` · ${sgv.vanBan.ten} (${sgv.vanBan.tieuLoai})` : ''}. </>}
               {tl ? <>AI thiết kế hoạt động khai thác đúng yếu tố đặc trưng của {THE_LOAI_VAN[tl].toLowerCase()}: {KHO_THE_LOAI[tl].yeuTo.map((y) => y.ten.toLowerCase()).join('; ')}.</> : 'Chọn thể loại để AI thiết kế hoạt động bám đặc trưng thể loại.'}
             </p>
+            <label className="text-sm font-semibold mt-2" htmlFor="sgk-chot">Kiến thức SGK để chốt (không bắt buộc)</label>
+            <textarea id="sgk-chot" rows={5} value={k.sgk ?? ''} onChange={(e) => sua((x) => ({ ...x, sgk: e.target.value || undefined }))}
+              placeholder="Dán phần Tri thức ngữ văn, câu hỏi sau văn bản, nội dung SGK của bài (từ sách của thầy/cô)…"
+              className="px-3 py-2 rounded-xl border border-line-strong bg-surface text-[14.5px] focus:border-accent outline-none" />
+            <p className="text-[13px] text-muted">AI chốt kiến thức theo khía cạnh (Nội dung, Nghệ thuật…) dựa vào giáo án và phần SGK này, dùng đúng thuật ngữ; ý ngoài nguồn bị luật loại. Phần dán chỉ lưu trong bản nháp trên máy thầy/cô và gửi cho AI khi soạn.</p>
           </div>
         );
       })()}

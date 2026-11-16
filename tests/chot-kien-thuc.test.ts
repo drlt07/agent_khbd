@@ -66,3 +66,29 @@ describe('Giáo án không có dòng chốt riêng: tổng hợp từ câu hỏi
     expect(tachChotGiaoAn('Sản phẩm dự kiến: Tiếng cười bật ra từ tình huống hiểu lầm giữa hai vợ chồng.')).toHaveLength(1);
   });
 });
+
+import { nguonChot, triThucTheLoai } from '../src/soan/chot-kien-thuc';
+import { trichDanLa } from '../src/soan/ngu-van';
+
+describe('Chốt dựa vào kiến thức SGK giáo viên dán vào', () => {
+  const sgk = 'Hài kịch: Thủ pháp trào phúng bao gồm tạo tình huống hiểu lầm hài hước, phóng đại cử chỉ, tạo tương phản gây cười.\nCâu hỏi 2: Nhận biết các yếu tố trào phúng trong ngôn ngữ đối thoại của hai nhân vật.';
+  it('nguồn chốt = giáo án + SGK + tri thức thể loại; chỉ môn Văn, phải có giáo án hoặc SGK', () => {
+    const n = nguonChot({ mon: 'NGU_VAN', bai: 'Giấu của', lop: 12, sgk });
+    expect(n).toContain('Thủ pháp trào phúng bao gồm');
+    expect(n).toContain('Chỉ dẫn sân khấu'); // tri thức thể loại kịch
+    expect(triThucTheLoai({ mon: 'NGU_VAN', bai: 'Giấu của', lop: 12 })).toContain('Hài kịch');
+    expect(nguonChot({ mon: 'NGU_VAN', bai: 'Giấu của', lop: 12 })).toBe('');
+    expect(nguonChot({ mon: 'VAT_LI', sgk })).toBe('');
+  });
+  it('chốt bám SGK thì qua; ý ngoài giáo án và SGK vẫn bị bắt; câu trích từ SGK được chấp nhận', () => {
+    const n = nguonChot({ mon: 'NGU_VAN', bai: 'Giấu của', lop: 12, sgk, nguon: { toanVan: giaoAn } });
+    expect(chotNgoaiGiaoAn('- Nghệ thuật: thủ pháp trào phúng: tình huống hiểu lầm hài hước, phóng đại cử chỉ, tương phản gây cười.', n)).toEqual([]);
+    expect(chotNgoaiGiaoAn('- Nội dung: Vở kịch ca ngợi tình yêu quê hương và tinh thần lao động sáng tạo.', n)).toHaveLength(1);
+    expect(trichDanLa({ mon: 'NGU_VAN', sgk }, 'Theo SGK: “tạo tình huống hiểu lầm hài hước, phóng đại cử chỉ”')).toEqual([]);
+  });
+  it('lời nhắc: có khối kiến thức SGK; soạn mới không có giáo án vẫn chốt theo SGK', () => {
+    expect(nhacChotGiaoAn({ mon: 'NGU_VAN', sgk })).toContain('KIẾN THỨC SGK GIÁO VIÊN CUNG CẤP');
+    expect(nhacChotGiaoAn({ mon: 'NGU_VAN', sgk })).toContain('chỉ dùng ý có trong kiến thức SGK');
+    expect(nhacChotGiaoAn({ mon: 'NGU_VAN', sgk, nguon: { tenTep: 'g', toanVan: giaoAn, hoatDong: [] } })).toContain('CHỐT KIẾN THỨC LẤY TỪ GIÁO ÁN VÀ SGK');
+  });
+});

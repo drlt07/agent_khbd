@@ -371,3 +371,22 @@ Tác giả hỏi kiến thức chốt theo luật và nguồn nào, và đưa v�
 - Ô "Sản phẩm cần đạt" Bước 4 hiện chốt nhiều dòng. `rules/ngu-van.md` v4 (mục E.6). Kiểm thử `tests/chot-kien-thuc.test.ts` dùng đúng ví dụ của tác giả; tổng 256 đạt.
 - Giới hạn: đo bám giáo án theo từ ngữ trùng, không hiểu nghĩa; diễn đạt lại quá xa có thể bị bắt nhầm, ý sai mà dùng lại từ của giáo án có thể lọt.
 - Bổ sung (16/11/2026): giáo án không có dòng chốt riêng → AI tổng hợp chốt từ câu hỏi, câu trả lời dự kiến, sản phẩm có trong giáo án (vẫn bị luật đo bám giáo án); khía cạnh giáo án không có thì ghi "giáo viên bổ sung theo KHBD" (dòng này không bị luật bắt nhầm). Nhận thêm dòng "Sản phẩm dự kiến:", "Kết quả dự kiến:", "Đáp án:", "Gợi ý trả lời:" làm ý chốt. Tổng 259 kiểm thử đạt.
+
+## Chốt kiến thức dựa vào kiến thức SGK – 16/11/2026
+
+Quyết định của tác giả: "chốt lại dựa vào kiến thức SGK".
+
+- App không có và không lưu nội dung SGK (CLAUDE.md: không chép nguyên văn SGK; repo công khai). Thêm ô "Kiến thức SGK để chốt" (môn Văn, bước 2 cả lối Soạn mới và Sửa KHBD): giáo viên dán Tri thức ngữ văn, câu hỏi, nội dung SGK của bài từ sách của mình. Lưu trong bản nháp trên máy giáo viên (localStorage), gửi cho AI khi soạn. Trường mới `sgk` ở `Khbd`, `SuaKhbd`.
+- Nguồn chốt (`nguonChot`): giáo án + SGK giáo viên dán + tri thức thể loại (kho thể loại, diễn đạt lại theo Tri thức ngữ văn). Luật ý chốt ngoài nguồn và luật câu trích đo trên các nguồn này.
+- Lời nhắc: khối "Kiến thức SGK giáo viên cung cấp" trong gợi ý hoạt động, đổi mới hoạt động, soạn từng phần (bước Kết luận, đáp án). Soạn mới không có giáo án vẫn chốt theo SGK đã dán.
+- `rules/ngu-van.md` v5. Kiểm thử thêm trong `tests/chot-kien-thuc.test.ts`; tổng 262 đạt. Đã kiểm tra ô nhập trên trình duyệt.
+
+## Năng lực số gợi ý theo từng hoạt động; AI sót mục không làm hỏng cả lượt – 16/11/2026
+
+Góp ý của tác giả (ảnh lỗi "hoatDong.3.vaiTro: expected string, received undefined" khi gợi ý cho "Nhiệm vụ 2.2. Tìm hiểu nghệ thuật trào phúng"): năng lực số phải linh hoạt, gợi ý ở từng hoạt động (HĐ1, HĐ2 cũng thêm được), không phải gợi ý hết ở bước 2 rồi cố định vào HĐ3.
+
+- `kiemKhuon` (`src/soan/ai.ts`): AI (thường là Gemini) bỏ sót mục chữ/danh sách/đúng-sai → app điền rỗng (`dienMucThieu`) rồi kiểm lại; mục quan trọng bị trống do luật nội dung bắt ("Thiếu …"), AI gợi ý lại. Mục có mà sai kiểu vẫn báo sai khuôn.
+- Gợi ý đổi mới hoạt động (lối Sửa): khối "Năng lực số cho riêng <hoạt động>" – mỗi phương án gắn 1–2 mã hợp nhất với việc học sinh làm trong chính hoạt động đó, ưu tiên mã giáo viên đã chọn nếu hợp, không thì chọn mã khác trong thư viện (đưa kèm thư viện mã; mã AI chỉ khi bật năng lực AI). Bắt buộc có mã khi giáo viên đã chọn mã hoặc bấm "Thêm năng lực số".
+- Luật `kiemTraKhung`: bỏ "dùng mã giáo viên không chọn"; mã phải có trong thư viện, mã AI chỉ khi bật năng lực AI.
+- Bấm "Chèn vào giáo án": mã mới của phương án tự thêm vào danh sách tích hợp (`maMoiCuaPhuongAn`), ghi dấu vết. Thẻ gợi ý đánh dấu "mã mới, thêm khi chèn".
+- Kiểm thử thêm trong `tests/giu-hoat-dong.test.ts`; tổng 265 đạt.

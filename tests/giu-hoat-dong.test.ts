@@ -63,8 +63,12 @@ describe('Đổi mới hoạt động Văn trong Sửa KHBD: giữ mục tiêu, 
   it('luật khung: phải có mã năng lực số GV chọn, tiêu chí năng lực số, prompt mẫu khi dùng AI; không dùng mã lạ', () => {
     const ma = ['3.1.5.1', 'NLb'];
     expect(kiemTraKhung(pa('a', 'I', 'van_dung', khung(['3.1.5.1'])), ma)).toEqual([]);
-    expect(kiemTraKhung(pa('a', 'I', 'van_dung', khung([])), ma).join(' ')).toContain('chưa bổ sung năng lực số');
-    expect(kiemTraKhung(pa('a', 'I', 'van_dung', khung(['9.9.9.9'])), ma).join(' ')).toContain('mã giáo viên không chọn');
+    expect(kiemTraKhung(pa('a', 'I', 'van_dung', khung([])), ma).join(' ')).toContain('chưa bổ sung năng lực số cho hoạt động này');
+    // mã khác trong thư viện, hợp hoạt động này: được dùng (không bắt buộc đúng mã đã chọn ở bước 2)
+    expect(kiemTraKhung(pa('a', 'I', 'van_dung', khung(['1.2.5.1'])), ma)).toEqual([]);
+    expect(kiemTraKhung(pa('a', 'I', 'van_dung', khung(['9.9.9.9'])), ma).join(' ')).toContain('mã không có trong thư viện');
+    // năng lực AI chưa bật thì không được gắn mã NLa–NLd
+    expect(kiemTraKhung(pa('a', 'I', 'van_dung', khung(['NLb'])), [], true, false).join(' ')).toContain('năng lực AI chưa bật');
     expect(kiemTraKhung(pa('a', 'I', 'van_dung', khung(['3.1.5.1'], '')), ma)).toContain('Thiếu prompt AI mẫu cho học sinh.');
     // đánh giá linh hoạt: không bắt buộc bảng tiêu chí; thiếu hẳn cách đánh giá năng lực số thì chỉ nhắc
     const kh = khung(['3.1.5.1']); kh.tieuChi = []; kh.buoc.ketLuan.viec = 'GV nhận xét sản phẩm, chốt thông điệp lớp kịch về lòng tham và cái giá của nó';
@@ -156,5 +160,29 @@ describe('Sản phẩm cần đạt cụ thể, Bước 4 có kiến thức ch�
     expect(kh.buoc.ketLuan.sanPham).toBe(`${KIEN_THUC_CHOT}${h.chotKienThuc}`);
     const h2 = { ...h, khung5512: { ...h.khung5512!, buoc: { ...h.khung5512!.buoc, ketLuan: { viec: 'v', sanPham: 'HS ghi vào vở hai thông điệp mẫu đã được cả lớp chọn' } } } };
     expect(ganChot(h2)!.buoc.ketLuan.sanPham).toBe(`${KIEN_THUC_CHOT}${h.chotKienThuc}\nHS ghi vào vở hai thông điệp mẫu đã được cả lớp chọn`);
+  });
+});
+
+import { kiemKhuon } from '../src/soan/ai';
+import { GoiYGiuOut, maMoiCuaPhuongAn } from '../src/soan/goi-y';
+
+describe('Năng lực số gợi ý theo từng hoạt động; AI sót mục không làm hỏng cả lượt', () => {
+  it('AI bỏ sót vaiTro (lỗi tác giả chụp) → app điền rỗng, không báo sai khuôn; mục có mà sai kiểu vẫn báo', () => {
+    const g = { phanTich: { trongTam: 't', khoKhan: [], kieuHoatDong: 'k', coHoiAi: 'c' }, hoatDong: [pa('Xưởng thông điệp Giấu của', 'I', 'van_dung', khung(['3.1.5.1']))], uuTien: { deTrienKhai: 1, sangTao: 1, aiMoPhong: 1, lyDo: 'l' } } as Record<string, any>;
+    delete g.hoatDong[0].vaiTro;
+    expect(kiemKhuon(GoiYGiuOut, structuredClone(g)).hoatDong[0].vaiTro).toBe('');
+    const sai = structuredClone(g); sai.hoatDong[0].thoiLuong = 'năm';
+    expect(() => kiemKhuon(GoiYGiuOut, sai)).toThrow('Kết quả không đúng khuôn');
+  });
+  it('lời nhắc: năng lực số cho RIÊNG hoạt động đang đổi mới, có thư viện mã; ưu tiên mã đã chọn nếu hợp', () => {
+    const n = nhacGoiY({ ...k, tichHop: { nls: [], ai: [], tiengAnh: 'khong' } }, undefined, 'Thêm năng lực số', { ...cu, ten: 'HOẠT ĐỘNG 1. KHỞI ĐỘNG – SÂN KHẤU HÓA' });
+    expect(n).toContain('NĂNG LỰC SỐ CHO RIÊNG "HOẠT ĐỘNG 1. KHỞI ĐỘNG – SÂN KHẤU HÓA"');
+    expect(n).toContain('1.2.5.1:');
+    expect(n).not.toContain('NLb:'); // chưa bật năng lực AI
+    expect(nhacGoiY(k, undefined, '', cu)).toContain('Ưu tiên mã giáo viên đã chọn nếu hợp (3.1.5.1, NLb)');
+  });
+  it('mã mới của phương án được thêm vào danh sách tích hợp khi chèn (không trùng, chỉ mã hợp lệ)', () => {
+    const h = pa('a', 'I', 'van_dung', khung(['3.1.5.1', '1.2.5.1', '9.9.9.9']));
+    expect(maMoiCuaPhuongAn(h, { nls: ['3.1.5.1'], ai: [] })).toEqual(['1.2.5.1']);
   });
 });

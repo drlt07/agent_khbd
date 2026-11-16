@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { The, NhanAiLam, Nut } from '../../thanh-phan/chung';
 import { ChuCT } from '../../thanh-phan/cong-thuc';
 import type { GoiAi } from '../../soan/ai';
-import { NHOM_HINH_THUC } from '../../soan/goi-y';
+import { maMoiCuaPhuongAn, NHOM_HINH_THUC } from '../../soan/goi-y';
+import { laMaAi } from '../../thu-vien';
 import { boiCanhGoiY, hoatDongCu, type SuaKhbd } from '../../sua/quy-trinh';
 import GoiYHoatDong from '../soan/GoiYHoatDong';
 
@@ -43,11 +44,16 @@ export default function DoiMoiHoatDong({ k, sua, ai }: { k: SuaKhbd; sua: (f: (x
               {mo === h.tu && (
                 <div className="vao mt-3">
                   <GoiYHoatDong k={boiCanh} cu={hoatDongCu(k, h)} ai={ai} dong={() => setMo(null)} dung={async (_huongDan, _ten, g) => {
-                    sua((x) => ({
-                      ...x,
-                      hoatDongMoi: [...(x.hoatDongMoi ?? []), { id: `m${Date.now().toString(36)}`, hoatDong: h.ten, chenSau: h.den, goiY: g }],
-                      dauVet: [...x.dauVet, { buoc: 6, phan: h.ten, ketQua: 'gv_sua', lyDo: `Chèn hoạt động mới “${g.ten}”`, thoiDiem: new Date().toISOString() }],
-                    }));
+                    sua((x) => {
+                      // Mã năng lực số/AI gợi ý riêng cho hoạt động này: giáo viên đã chọn phương án thì thêm vào danh sách tích hợp
+                      const them = maMoiCuaPhuongAn(g, x.tichHop);
+                      return {
+                        ...x,
+                        tichHop: { ...x.tichHop, nls: [...x.tichHop.nls, ...them.filter((m) => !laMaAi(m))], ai: [...x.tichHop.ai, ...them.filter(laMaAi)] },
+                        hoatDongMoi: [...(x.hoatDongMoi ?? []), { id: `m${Date.now().toString(36)}`, hoatDong: h.ten, chenSau: h.den, goiY: g }],
+                        dauVet: [...x.dauVet, { buoc: 6, phan: h.ten, ketQua: 'gv_sua', lyDo: `Chèn hoạt động mới “${g.ten}”${them.length ? `; thêm mã ${them.join(', ')} cho hoạt động này` : ''}`, thoiDiem: new Date().toISOString() }],
+                      };
+                    });
                   }} />
                 </div>
               )}
