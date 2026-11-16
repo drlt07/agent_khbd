@@ -1,0 +1,46 @@
+/**
+ * Chốt kiến thức bám giáo án (góp ý của tác giả 16/11/2026, ví dụ "Khái quát giá trị nội dung và nghệ thuật" bài Giấu của).
+ * - Code tìm các ý chốt có sẵn trong giáo án (Nội dung:, Nghệ thuật:, Chốt:, Kết luận:, Thông điệp:…) để đưa cho AI làm nguồn.
+ * - Luật (Ngữ văn có giáo án): mỗi ý chốt của phương án mới phải bám giáo án (đa số cặp âm tiết có trong giáo án).
+ * Hàm thuần, có kiểm thử.
+ */
+import { boDau } from '../thu-vien';
+
+const NHAN = /^\s*[-–•+*]?\s*(?:\d+[.)]\s*)?(nội dung|nghệ thuật|ý nghĩa|giá trị|chốt|gv chốt|kết luận|kiến thức|thông điệp|bài học|đặc điểm|tác dụng|chủ đề|nhân vật|tình huống|xung đột|ngôn ngữ|nguồn gốc tiếng cười|khái quát)[^:]{0,40}:\s*(.+)$/i;
+
+/** Các ý chốt có sẵn trong giáo án (dòng "Khía cạnh: nội dung"), không trùng, tối đa 15. */
+export function tachChotGiaoAn(vanBan: string): string[] {
+  const ra: string[] = [];
+  for (const dong of vanBan.split('\n')) {
+    const m = dong.match(NHAN);
+    if (!m || m[2].trim().split(/\s+/).length < 4) continue;
+    const t = dong.trim().replace(/^[-–•+*]\s*/, '').slice(0, 400);
+    if (!ra.includes(t)) ra.push(t);
+    if (ra.length >= 15) break;
+  }
+  return ra;
+}
+
+const amTiet = (s: string) => boDau(s).replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean);
+const capAmTiet = (s: string) => { const a = amTiet(s); return a.slice(0, -1).map((x, i) => `${x} ${a[i + 1]}`); };
+
+/** Các ý của phần chốt (theo dòng hoặc dấu chấm phẩy), bỏ nhãn "Kiến thức chốt", lấy phần sau nhãn khía cạnh. */
+export function yChot(chot: string): string[] {
+  return chot.split(/\n|;\s+/).map((x) => x.replace(/^\s*[-–•+*]?\s*(kiến thức chốt:\s*)?/i, '').trim()).filter((x) => amTiet(x).length >= 4);
+}
+
+/** Tỉ lệ cặp âm tiết của một ý có trong giáo án (bỏ phần nhãn "Nội dung:" …). */
+export function doBam(y: string, giaoAn: string): number {
+  const noiDung = y.includes(':') ? y.slice(y.indexOf(':') + 1) : y;
+  const cap = capAmTiet(noiDung);
+  if (!cap.length) return 1;
+  const goc = ` ${amTiet(giaoAn).join(' ')} `;
+  return cap.filter((c) => goc.includes(` ${c} `)).length / cap.length;
+}
+
+export const NGUONG_BAM = 0.5;
+/** Các ý chốt không bám giáo án (dưới ngưỡng). */
+export const chotNgoaiGiaoAn = (chot: string, giaoAn: string) => yChot(chot).filter((y) => doBam(y, giaoAn) < NGUONG_BAM);
+export const LOI_CHOT_NGOAI = (ds: string[]) => `Ngữ văn: chốt kiến thức có ý không có trong giáo án (không tự sinh kiến thức): ${ds.map((t) => `“${t.slice(0, 70)}${t.length > 70 ? '…' : ''}”`).join('; ')}.`;
+
+export const MAU_CHOT = 'Chốt kiến thức viết thành các ý ngắn, mỗi ý một dòng "- Khía cạnh: nội dung", dùng đúng thuật ngữ môn/thể loại. Ví dụ Ngữ văn (khám phá văn bản): "- Nội dung: Khắc họa tình huống trớ trêu, những biểu hiện tâm lí mâu thuẫn của nhân vật; qua đó tạo tiếng cười châm biếm và thể hiện ý nghĩa phê phán." / "- Nghệ thuật: Xây dựng tình huống trào phúng, thủ pháp tương phản, ngôn ngữ đối thoại hài hước, kết hợp hành động và chỉ dẫn sân khấu." Hoạt động vận dụng: "- Thông điệp: …", "- Liên hệ: …".';

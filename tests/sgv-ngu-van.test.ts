@@ -43,7 +43,7 @@ describe('Dữ liệu SGV Ngữ văn 12 (tài liệu training)', () => {
     expect(phanVan({ mon: 'VAT_LI', bai: 'Giấu của', lop: 12 })).toBe('');
   });
   it('luật Ngữ văn v2 có mục D theo SGV', () => {
-    expect(PHIEN_BAN_LUAT_VAN).toBe('3');
+    expect(PHIEN_BAN_LUAT_VAN).toBe('4');
     expect(luatNguVan()).toContain('D. TỔ CHỨC DẠY HỌC THEO ĐỊNH HƯỚNG SÁCH GIÁO VIÊN');
     expect(luatNguVan()).toContain('Không dồn mọi câu hỏi vào Hình thành kiến thức');
   });

@@ -360,3 +360,13 @@ Góp ý của tác giả (ảnh phương án "Bắt lỗi AI: giải cứu thôn
 - Code đưa kiến thức chốt vào ô "Sản phẩm cần đạt" của Bước 4 (`ganChot`, dạng "Kiến thức chốt: …"); áp cả khi sinh gợi ý, khi xem trước và khi xuất Word (kể cả phương án đã chèn trước đó).
 - Luật `laSanPhamChung`: sản phẩm cần đạt Bước 2, Bước 3 chung chung ("HS tiếp nhận nhiệm vụ", "Sản phẩm … của nhóm", "Phản hồi trực quan…", "Đánh giá chung…") → nhạt; chốt kiến thức chung chung → thiếu; AI phải gợi ý lại. Lời nhắc và mô tả schema đòi ghi kết quả cụ thể ở từng bước.
 - Kiểm thử dùng đúng phương án tác giả chụp; tổng 252 đạt.
+
+## Chốt kiến thức theo khía cạnh, bám ý chốt của giáo án – 16/11/2026
+
+Tác giả hỏi kiến thức chốt theo luật và nguồn nào, và đưa ví dụ chốt mẫu ("Khái quát giá trị nội dung và nghệ thuật": "- Nội dung: …", "- Nghệ thuật: …").
+
+- `src/soan/chot-kien-thuc.ts` (hàm thuần): `tachChotGiaoAn` tìm ý chốt có sẵn trong giáo án (dòng "Nội dung:", "Nghệ thuật:", "Chốt:", "Kết luận:", "Thông điệp:"…); `chotNgoaiGiaoAn` – ý chốt có dưới 50% cặp âm tiết trong giáo án là ý ngoài giáo án; `MAU_CHOT` – mẫu chốt theo khía cạnh.
+- Lời nhắc: mọi gợi ý viết chốt theo mẫu "- Khía cạnh: nội dung"; Ngữ văn có giáo án: đưa ý chốt của hoạt động cũ (không có thì của cả giáo án) làm nguồn bắt buộc.
+- Luật: Ngữ văn có giáo án, ý chốt ngoài giáo án → "Không hợp", AI gợi ý lại. Luật câu trích mở rộng sang bảng 4 bước, nội dung, sản phẩm, prompt mẫu.
+- Ô "Sản phẩm cần đạt" Bước 4 hiện chốt nhiều dòng. `rules/ngu-van.md` v4 (mục E.6). Kiểm thử `tests/chot-kien-thuc.test.ts` dùng đúng ví dụ của tác giả; tổng 256 đạt.
+- Giới hạn: đo bám giáo án theo từ ngữ trùng, không hiểu nghĩa; diễn đạt lại quá xa có thể bị bắt nhầm, ý sai mà dùng lại từ của giáo án có thể lọt.

@@ -50,7 +50,7 @@ const bam3 = [{ yeuCau: 'vận dụng thông điệp', cachDat: 'nhận diện b
 const pa = (ten: string, nhom: HoatDongGoiY['nhom'], thoiDiem: HoatDongGoiY['thoiDiem'], kh: ReturnType<typeof khung>): HoatDongGoiY => ({
   ten, nhom, yTuong: 'Xưởng thông điệp: nhóm tự viết nháp trước rồi nhờ chatbot AI góp ý', congNghe: 'Chatbot AI (Gemini/ChatGPT)', canKiemTra: false, thoiLuong: 5, mucChuanBi: 'thap', thoiDiem,
   mucTieu: 'AI tự viết mục tiêu mới', diemTuDuy: 'Chọn thông điệp đúng ý nghĩa lớp kịch', tuCham: { tuDuy: 4, hapDan: 5, khaThi: 4, bamBai: 4 }, chuanBi: ['Điện thoại/máy tính bảng (1 máy/nhóm)'],
-  kichBan: [{ buoc: 'Học sinh tự làm trước bản nháp, rồi hỏi AI', phut: 5 }], vaiTro: 'v', cauHoiMau: 'Thông điệp nào cảnh tỉnh lòng tham Giấu của?', sanPham: 's', danhGia: 'đg', chotKienThuc: 'Tiếng cười bật ra từ mâu thuẫn giữa toan tính giữ của và hành động lộ liễu của nhân vật.', doiMoi: 'Học sinh tự tạo sản phẩm thay vì nghe giảng', nangLuc: [{ ten: 'Năng lực đọc hiểu văn bản', bieuHien: 'chỉ ra chi tiết làm cơ sở cho nhận định' }], duPhong: 'Viết tay trên thẻ giấy', khung5512: kh, bamMucTieu: bam3,
+  kichBan: [{ buoc: 'Học sinh tự làm trước bản nháp, rồi hỏi AI', phut: 5 }], vaiTro: 'v', cauHoiMau: 'Thông điệp nào cảnh tỉnh lòng tham Giấu của?', sanPham: 's', danhGia: 'đg', chotKienThuc: '- Thông điệp: Đừng để lòng tham điều khiển cuộc sống, liên hệ với lớp kịch.', doiMoi: 'Học sinh tự tạo sản phẩm thay vì nghe giảng', nangLuc: [{ ten: 'Năng lực đọc hiểu văn bản', bieuHien: 'chỉ ra chi tiết làm cơ sở cho nhận định' }], duPhong: 'Viết tay trên thẻ giấy', khung5512: kh, bamMucTieu: bam3,
 });
 
 describe('Đổi mới hoạt động Văn trong Sửa KHBD: giữ mục tiêu, giai đoạn, chỉ thêm năng lực số', () => {

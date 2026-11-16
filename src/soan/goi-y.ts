@@ -14,6 +14,7 @@ import { LOI_TRICH_DAN, phanVan, trichDanLa } from './ngu-van';
 import { coBatAi, coDungAi, coLamTruoc, LOI_LAM_TRUOC, phanHafa } from './hafa-vret';
 import { LOI_THE_LOAI, theLoaiCua, yeuToCham } from './the-loai-van';
 import { tachHoatDongCu } from './giu-hoat-dong';
+import { chotNgoaiGiaoAn, LOI_CHOT_NGOAI, MAU_CHOT, tachChotGiaoAn } from './chot-kien-thuc';
 import { chiQuenThuoc, CONG_CU_SO, dungDuoc, nhacCongCu, timCongCu } from './cong-cu-so';
 
 export const NHOM_HINH_THUC = {
@@ -55,7 +56,7 @@ export const GoiYOut = z.object({
     cauHoiMau: z.string().describe('Ít nhất một câu hỏi/nhiệm vụ cụ thể gắn với bài'),
     sanPham: z.string(),
     danhGia: z.string().describe('Cách đánh giá linh hoạt (quan sát, câu hỏi, bảng kiểm, nhận xét sản phẩm…) và dấu hiệu chứng minh học sinh đạt'),
-    chotKienThuc: z.string().describe('Kiến thức/kết luận được chốt, viết CỤ THỂ nội dung (vd "Tiếng cười bật ra từ mâu thuẫn giữa…"), không ghi chung chung "GV nhận xét, chốt kiến thức"'),
+    chotKienThuc: z.string().describe('Kiến thức được chốt, CỤ THỂ, mỗi ý một dòng "- Khía cạnh: nội dung" (vd "- Nội dung: …\\n- Nghệ thuật: …"); Ngữ văn có giáo án: lấy từ ý chốt của giáo án; không ghi chung chung "GV nhận xét, chốt kiến thức"'),
     doiMoi: z.string().describe('Điểm đổi mới so với cách dạy thông thường (học sinh được làm gì mới, khác nghe giảng – trả lời)'),
     nangLuc: z.array(z.object({ ten: z.string().describe('Năng lực đặc thù môn, năng lực chung hoặc năng lực số'), bieuHien: z.string().describe('Biểu hiện cụ thể của học sinh trong hoạt động') })).describe('Năng lực học sinh được phát triển qua hoạt động (1–3)'),
     bamMucTieu: z.array(z.object({ yeuCau: z.string().describe('Một yêu cầu trong mục tiêu, vd "HS vận dụng được thông điệp…"'), cachDat: z.string().describe('Việc cụ thể trong hoạt động giúp học sinh đạt yêu cầu này') })).describe('Tách mục tiêu thành từng yêu cầu; mỗi yêu cầu có việc cụ thể để đạt'),
@@ -207,11 +208,21 @@ export const YEU_CAU_HOAT_DONG = [
   'CHẤT LƯỢNG MỖI PHƯƠNG ÁN:',
   '- Bám sát mục tiêu: tách mục tiêu thành từng yêu cầu (HS … được …); mỗi yêu cầu có một việc cụ thể trong hoạt động để học sinh đạt (bamMucTieu). Hoạt động linh hoạt, sáng tạo nhưng phải dẫn tới đúng các yêu cầu ấy.',
   '- Triển khai cụ thể: mỗi bước nêu GV làm gì, nói gì (câu hỏi, nhiệm vụ cụ thể), HS làm gì, theo hình thức nào, bao lâu; viết sao cho giáo viên đọc là dạy được ngay.',
-  '- Chốt kiến thức cụ thể ở cuối hoạt động: viết rõ nội dung kiến thức, kết luận, thông điệp được chốt; không ghi chung chung "GV nhận xét, chốt kiến thức".',
+  '- Chốt kiến thức cụ thể ở cuối hoạt động: viết rõ nội dung kiến thức, kết luận, thông điệp được chốt; không ghi chung chung "GV nhận xét, chốt kiến thức". ' + MAU_CHOT,
   '- Tính đổi mới: nêu điểm mới so với nghe giảng – trả lời (học sinh được làm, tạo, tranh luận, kiểm chứng gì).',
   '- Phát triển năng lực: nêu 1–3 năng lực (đặc thù môn, năng lực chung, năng lực số nếu có) kèm biểu hiện cụ thể của học sinh.',
   '- Đánh giá linh hoạt: chọn hình thức hợp hoạt động (quan sát, câu hỏi, bảng kiểm, nhận xét sản phẩm, tiêu chí…); không bắt buộc bảng tiêu chí cố định.',
 ].join('\n');
+
+/** Ngữ văn có giáo án: ý chốt có sẵn (ưu tiên trong hoạt động cũ, rồi toàn giáo án) làm nguồn bắt buộc cho phần chốt. */
+export function nhacChotGiaoAn(k: Pick<Khbd, 'mon' | 'nguon'>, cu?: HoatDongCu): string {
+  if (k.mon !== 'NGU_VAN' || !k.nguon?.toanVan) return '';
+  const trongHd = cu ? tachChotGiaoAn(cu.noiDung) : [];
+  const ds = trongHd.length ? trongHd : tachChotGiaoAn(k.nguon.toanVan);
+  return ds.length
+    ? `CHỐT KIẾN THỨC LẤY TỪ GIÁO ÁN (nguồn bắt buộc; chép hoặc rút gọn đúng ý, giữ thuật ngữ; không thêm ý mới):\n${ds.map((x) => `- ${x}`).join('\n')}`
+    : 'Giáo án chưa ghi ý chốt rõ ràng: chốt kiến thức chỉ dùng ý có trong giáo án; thiếu thì ghi "- Kiến thức: giáo viên bổ sung theo KHBD".';
+}
 
 /** Lối Sửa KHBD cũ: phần GIỮ NGUYÊN và phần ĐƯỢC ĐỔI của hoạt động. */
 function nhacGiu(k: Khbd, cu: HoatDongCu): string {
@@ -221,6 +232,7 @@ function nhacGiu(k: Khbd, cu: HoatDongCu): string {
     'GIỮ NGUYÊN (không viết lại, không đổi): mục tiêu của hoạt động (app chép nguyên văn mục tiêu cũ vào phương án); kiến thức và năng lực môn học; vị trí của hoạt động trong tiến trình bài' + (p.thoiDiem ? ` (giai đoạn ${THOI_DIEM[p.thoiDiem]}, thoiDiem = "${p.thoiDiem}")` : '') + '; mục đích của hoạt động' + (p.mucDich ? `: "${p.mucDich}" – mọi phương án phải đạt đúng mục đích này, chỉ khác cách tổ chức` : '') + '.',
     p.mucTieu ? `Mục tiêu cũ (giữ nguyên văn): ${p.mucTieu}` : '',
     p.sanPham ? `Sản phẩm cũ (tham khảo; được đổi hình thức nhưng phải phục vụ cùng mục tiêu): ${p.sanPham}` : '',
+    nhacChotGiaoAn(k, cu),
     'ĐƯỢC ĐỔI: cách tổ chức (hình thức, vai trò, công cụ, sản phẩm cụ thể) và BỔ SUNG năng lực số.',
     p.mucTieu ? `Các yêu cầu trong mục tiêu cần bám (bamMucTieu phải đáp ứng đủ ${yeuCauMucTieu(p.mucTieu).length} yêu cầu): ${yeuCauMucTieu(p.mucTieu).map((y, i) => `(${i + 1}) ${y}`).join(' ')}` : '',
     ma.length ? `Bổ sung năng lực số/AI: mỗi phương án gắn ít nhất 1 mã giáo viên đã chọn (${ma.join(', ')}) với biểu hiện cụ thể của học sinh; nêu cách đánh giá năng lực số (hình thức tùy chọn).` : 'Giáo viên chưa chọn mã năng lực số: không gắn mã.',
@@ -272,7 +284,7 @@ export function ganChot(h: HoatDongGoiY): Khung5512 | undefined {
   if (!kh || !h.chotKienThuc.trim()) return kh;
   const cu = kh.buoc.ketLuan.sanPham.trim();
   const them = cu && !cu.startsWith(KIEN_THUC_CHOT) && !laSanPhamChung(cu) && !cu.includes(h.chotKienThuc.trim()) ? `\n${cu}` : '';
-  return { ...kh, buoc: { ...kh.buoc, ketLuan: { ...kh.buoc.ketLuan, sanPham: `${KIEN_THUC_CHOT}${h.chotKienThuc.trim()}${them}` } } };
+  return { ...kh, buoc: { ...kh.buoc, ketLuan: { ...kh.buoc.ketLuan, sanPham: `${KIEN_THUC_CHOT}${h.chotKienThuc.includes('\n') ? '\n' : ''}${h.chotKienThuc.trim()}${them}` } } };
 }
 
 export interface KetQuaLuatGoiY { nghiem: string[]; nhac: string[]; theoHoatDong: string[][] }
@@ -316,8 +328,12 @@ export function kiemTraGoiY(g: GoiY, k: Pick<Khbd, 'dieuKien'> & Partial<Pick<Kh
     // HAFA–VRET: học sinh dùng AI thì phải tự làm trước
     else if (coDungAi(h.nhom, h.yTuong, ...h.kichBan.map((b) => b.buoc)) && !coLamTruoc([h.yTuong, h.vaiTro, ...h.kichBan.map((b) => b.buoc), ...(h.khung5512 ? Object.values(h.khung5512.buoc).map((b) => b.viec) : [])].join('\n'))) loi.push(`Không hợp: ${LOI_LAM_TRUOC}`);
     // Ngữ văn có giáo án gốc: không được tự viết câu trích
-    const la = k.mon ? trichDanLa({ mon: k.mon, nguon: k.nguon }, [h.yTuong, h.mucTieu, h.cauHoiMau, h.sanPham, h.danhGia, h.chotKienThuc, h.diemTuDuy, ...h.kichBan.map((b) => b.buoc)].join('\n')) : [];
+    const khungVb = h.khung5512 ? [h.khung5512.noiDung, h.khung5512.sanPham, ...Object.values(h.khung5512.buoc).flatMap((b) => [b.viec, b.sanPham]), h.khung5512.promptMau] : [];
+    const la = k.mon ? trichDanLa({ mon: k.mon, nguon: k.nguon }, [h.yTuong, h.mucTieu, h.cauHoiMau, h.sanPham, h.danhGia, h.chotKienThuc, h.diemTuDuy, ...h.kichBan.map((b) => b.buoc), ...khungVb].join('\n')) : [];
     if (la.length) loi.push(`Không hợp: ${LOI_TRICH_DAN(la)}`);
+    // Ngữ văn có giáo án: ý chốt phải bám giáo án
+    const ngoai = k.mon === 'NGU_VAN' && k.nguon?.toanVan ? chotNgoaiGiaoAn(h.chotKienThuc, k.nguon.toanVan) : [];
+    if (ngoai.length) loi.push(`Không hợp: ${LOI_CHOT_NGOAI(ngoai)}`);
     // Ngữ văn: hoạt động đọc hiểu, luyện tập phải chạm yếu tố đặc trưng thể loại
     if (tl && (h.thoiDiem === 'hinh_thanh' || h.thoiDiem === 'luyen_tap') && !yeuToCham([h.ten, h.yTuong, h.mucTieu, h.diemTuDuy, h.cauHoiMau, h.chotKienThuc, ...h.kichBan.map((b) => b.buoc)].join('\n'), tl, k.bai, k.lop).length) loi.push(LOI_THE_LOAI(tl));
     if (cu) loi.push(...kiemTraKhung(h, maChon));
@@ -331,6 +347,7 @@ export function kiemTraGoiY(g: GoiY, k: Pick<Khbd, 'dieuKien'> & Partial<Pick<Kh
   const coCongNghe = g.hoatDong.filter((h) => h.congNghe.trim());
   if (coCongNghe.length >= 2 && coCongNghe.every((h) => chiQuenThuoc(h.congNghe))) nghiem.push(`Công nghệ chưa mới: các phương án có công nghệ chỉ dùng công cụ hỏi – đáp quen thuộc (${[...new Set(coCongNghe.flatMap((h) => timCongCu(h.congNghe).map((c) => c.ten)))].join(', ')}); cần ít nhất 1 phương án dùng công nghệ để học sinh tạo, mô phỏng, nhập vai hoặc phân tích dữ liệu.`);
   const soHay = theoHoatDong.filter((l) => !laNhatHoacKhongHop(l)).length;
+  if (theoHoatDong.some((l) => l.some((x) => x.includes('chốt kiến thức có ý không có trong giáo án')))) nghiem.push('Có phương án chốt kiến thức bằng ý không có trong giáo án (Ngữ văn): chỉ chốt bằng ý của giáo án.');
   if (theoHoatDong.some((l) => l.some((x) => x.includes('trích dẫn không có trong KHBD gốc')))) nghiem.push('Có phương án tự viết câu trích không có trong giáo án (Ngữ văn): chỉ dùng câu trích có trong giáo án.');
   if (n >= 3 && soHay < 3) nghiem.push(`Chỉ có ${soHay} phương án không nhạt; cần ít nhất 3. Thay phương án nhạt bằng phương án có vấn đề thật, điểm tư duy rõ.`);
   const sttHopLe = (i: number) => Number.isInteger(i) && i >= 1 && i <= n;
