@@ -80,6 +80,29 @@ export interface SuaKhbd {
 
 export interface HoatDongMoi { id: string; hoatDong: string; chenSau: string; goiY: HoatDongGoiY }
 
+/**
+ * Hoạt động mới THAY HẲN hoạt động cũ (quyết định của tác giả 16/11/2026): các đoạn của hoạt động cũ (từ "tu" đến "den") bị bỏ,
+ * khối hoạt động mới đặt đúng chỗ hoạt động cũ. Đoạn dùng chung với hoạt động khác chưa thay (vd một bảng chứa nhiều nhiệm vụ)
+ * thì không bỏ: khi đó hoạt động mới chèn sau hoạt động cũ như trước. Mỗi hoạt động cũ chỉ lấy phương án chọn sau cùng. Hàm thuần.
+ */
+export function thayTheHoatDong(k: Pick<SuaKhbd, 'doan' | 'hoatDong' | 'hoatDongMoi'>): { an: Set<string>; tai: Map<string, HoatDongMoi> } {
+  const an = new Set<string>(), tai = new Map<string, HoatDongMoi>();
+  const viTri = (ma: string) => k.doan.findIndex((d) => d.ma === ma);
+  const pham = (h: { tu: string; den: string }) => { const a = viTri(h.tu), b = viTri(h.den); return a >= 0 && b >= a ? k.doan.slice(a, b + 1).map((d) => d.ma) : []; };
+  const cuoi = new Map<string, HoatDongMoi>();
+  for (const m of k.hoatDongMoi ?? []) cuoi.set(m.hoatDong, m);
+  const thay = new Set(cuoi.keys());
+  const giu = new Set(k.hoatDong.filter((h) => !thay.has(h.ten)).flatMap(pham));
+  for (const [ten, m] of cuoi) {
+    const h = k.hoatDong.find((x) => x.ten === ten);
+    const ds = h ? pham(h) : [];
+    if (!ds.length || ds.some((ma) => giu.has(ma))) { tai.set(`sau:${m.chenSau}`, m); continue; }
+    ds.forEach((ma) => an.add(ma));
+    tai.set(ds[0], m);
+  }
+  return { an, tai };
+}
+
 /** Văn bản của một hoạt động trong giáo án cũ (các đoạn từ "tu" đến "den"), để AI đọc khi gợi ý hoạt động mới. */
 export function hoatDongCu(k: SuaKhbd, h: SuaKhbd['hoatDong'][number]): HoatDongCu {
   const a = k.doan.findIndex((d) => d.ma === h.tu), b = k.doan.findIndex((d) => d.ma === h.den);

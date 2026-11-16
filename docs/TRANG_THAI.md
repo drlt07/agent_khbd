@@ -430,3 +430,12 @@ Góp ý của tác giả (ảnh mục tiêu "3. Năng lực số và sử dụng
 - Xem trước, file Word: dòng mục tiêu của giáo viên giữ nguyên, mã ghi bổ sung (tô xanh) ngay dưới "→ Năng lực số 3.1.5.1: HS …". Mã của các hoạt động đã đổi mới (`maTuHoatDongMoi`) cũng lên Mục tiêu, kèm tên hoạt động.
 - Kiểm thử `tests/ma-muc-tieu.test.ts` dùng đúng mục tiêu tác giả chụp; tổng 285 đạt. Giáo án mẫu (Vật lí) không có mục năng lực số nên chưa xem thẻ trên trình duyệt.
 - Quyết định của tác giả (16/11/2026, ngoại lệ với nguyên tắc "giữ nguyên văn nội dung của giáo viên"): đoạn mô tả năng lực số dài trong giáo án cũ (vd "3. Năng lực số và sử dụng AI có trách nhiệm" + các gạch đầu dòng) là thừa → BỎ, thay bằng tiêu đề "3. Năng lực số, năng lực AI" và các dòng gọn "Năng lực số <mã>: HS …", "Năng lực AI <mã>: HS …" (gộp mã gắn cho mục tiêu, mã chèn, mã của hoạt động đổi mới; không trùng). Chỉ thay khi có ít nhất 1 mã; giáo án không có mục này thì dòng gọn đặt sau đoạn cuối của Mục tiêu (`trinhBayMucTieuNls`). Hậu kiểm ghi số đoạn được thay. Tổng 286 kiểm thử đạt.
+
+## Hoạt động mới thay hẳn hoạt động cũ; khối gọn; bảng xuống dòng – 16/11/2026
+
+Quyết định của tác giả (ngoại lệ với "giữ nguyên văn nội dung của giáo viên"): phương án đề xuất thay thế thì thay luôn, xóa nhiệm vụ/hoạt động cũ; không cần ghi bám mục tiêu, năng lực phát triển (thẩm mĩ…), mã năng lực số trong khối hoạt động – mã đẩy lên Mục tiêu "3. Năng lực số". Ảnh file Word: ô bảng bị dính dòng ("Bước 1. Chuyển giao nhiệm vụ+ Từ tiết trước…", "II. Khám phá văn bản3. Chân dung…").
+
+- `thayTheHoatDong` (`src/sua/quy-trinh.ts`, hàm thuần): đoạn của hoạt động cũ (tu…den) bị bỏ, khối mới đặt đúng chỗ; đoạn dùng chung với hoạt động chưa thay (một bảng chứa nhiều nhiệm vụ) thì không bỏ, chèn sau như cũ; mỗi hoạt động chỉ lấy phương án chọn sau cùng (chọn lại thì thay phương án trước).
+- Khối hoạt động trong giáo án xuất ra (Word, xem trước) dạng gọn: tiêu đề, a) b) c) d), bảng tổ chức, tiêu chí (nếu có), prompt mẫu, dự phòng; bỏ "Đề xuất thay thế", "Bám mục tiêu", "Năng lực phát triển", "Điểm đổi mới", "Năng lực số" (mã lên Mục tiêu qua `trinhBayMucTieuNls`). Thẻ gợi ý vẫn hiện đủ để giáo viên chọn.
+- Dính dòng trong ô bảng: do bộ đọc cũ bỏ ranh giới đoạn trong ô (đã sửa ở mục "Đọc bảng lồng trong ô"); bản nháp đọc bằng bộ cũ cần tải lại giáo án, bấm "AI đọc giáo án".
+- Hậu kiểm ghi số đoạn được thay. Tổng 287 kiểm thử đạt.

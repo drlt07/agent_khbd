@@ -9,7 +9,7 @@ import GoiYHoatDong from '../soan/GoiYHoatDong';
 
 /**
  * Lối Sửa KHBD cũ: AI đọc từng hoạt động trong giáo án và gợi ý cách tổ chức mới.
- * Phương án giáo viên chọn được chèn thành khối bổ sung (tô xanh nhạt) ngay sau hoạt động cũ; nội dung gốc giữ nguyên văn.
+ * Phương án giáo viên chọn THAY HẲN hoạt động cũ (quyết định của tác giả 16/11/2026), tô xanh nhạt.
  */
 export default function DoiMoiHoatDong({ k, sua, ai }: { k: SuaKhbd; sua: (f: (x: SuaKhbd) => SuaKhbd) => void; ai: GoiAi | null }) {
   const [mo, setMo] = useState<string | null>(null);
@@ -19,7 +19,7 @@ export default function DoiMoiHoatDong({ k, sua, ai }: { k: SuaKhbd; sua: (f: (x
   return (
     <The className="p-5">
       <div className="flex items-center justify-between gap-2"><h2 className="text-base">Đổi mới hoạt động</h2><NhanAiLam ai="ai" /></div>
-      <p className="text-sm text-muted mt-1">AI đọc nội dung từng hoạt động trong giáo án và gợi ý cách tổ chức mới theo đặc trưng môn. Phương án được chọn chèn ngay sau hoạt động cũ, tô nền xanh nhạt.</p>
+      <p className="text-sm text-muted mt-1">AI đọc nội dung từng hoạt động trong giáo án và gợi ý cách tổ chức mới theo đặc trưng môn. Phương án được chọn thay hẳn hoạt động cũ trong giáo án xuất ra (tô nền xanh nhạt); chọn phương án khác thì thay phương án trước.</p>
       {!k.hoatDong.length && <p className="text-sm text-warn-fg mt-3">Chưa nhận ra hoạt động nào trong giáo án. Quay lại bước 1 bấm “AI đọc giáo án”.</p>}
       <ul className="mt-3 flex flex-col divide-y divide-line">
         {k.hoatDong.map((h) => {
@@ -50,7 +50,7 @@ export default function DoiMoiHoatDong({ k, sua, ai }: { k: SuaKhbd; sua: (f: (x
                       return {
                         ...x,
                         tichHop: { ...x.tichHop, nls: [...x.tichHop.nls, ...them.filter((m) => !laMaAi(m))], ai: [...x.tichHop.ai, ...them.filter(laMaAi)] },
-                        hoatDongMoi: [...(x.hoatDongMoi ?? []), { id: `m${Date.now().toString(36)}`, hoatDong: h.ten, chenSau: h.den, goiY: g }],
+                        hoatDongMoi: [...(x.hoatDongMoi ?? []).filter((y) => y.hoatDong !== h.ten), { id: `m${Date.now().toString(36)}`, hoatDong: h.ten, chenSau: h.den, goiY: g }],
                         dauVet: [...x.dauVet, { buoc: 6, phan: h.ten, ketQua: 'gv_sua', lyDo: `Chèn hoạt động mới “${g.ten}”${them.length ? `; thêm mã ${them.join(', ')} cho hoạt động này` : ''}`, thoiDiem: new Date().toISOString() }],
                       };
                     });

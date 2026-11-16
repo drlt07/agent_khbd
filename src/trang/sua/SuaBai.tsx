@@ -8,7 +8,7 @@ import { DIEM_DAT } from '../../soan/luat';
 import { THIET_BI_GOI_Y } from '../../soan/kieu';
 import { docDocx, kiemTraTep } from '../../sua/doc-docx';
 import { luuTep } from '../../thanh-phan/luu-tep';
-import { boiCanhGoiY, deXuat, hoatDongCu, kiemTraChen, kiemTraCuoi, phanTich, taoKhbdTuGiaoAnCu, type Chen, type SuaKhbd } from '../../sua/quy-trinh';
+import { boiCanhGoiY, thayTheHoatDong, type HoatDongMoi, deXuat, hoatDongCu, kiemTraChen, kiemTraCuoi, phanTich, taoKhbdTuGiaoAnCu, type Chen, type SuaKhbd } from '../../sua/quy-trinh';
 import { goiYMa, type KetQuaGoiYMa, type MaDuocGoiY } from '../../soan/goi-y-ma';
 import { taiWordSua, tenTepSua } from '../../sua/xuat-word';
 import { aiMauSua, doanMau, TEN_TEP_MAU, THIET_LAP_MAU } from '../../sua/mau';
@@ -333,6 +333,19 @@ function SoanLaiCaBai({ k }: { k: SuaKhbd }) {
 function BuocXem({ k, kiemTra }: { k: SuaKhbd; kiemTra: { nghiem: string[]; nhac: string[] } }) {
   const dung = k.chen.filter((c) => c.dung);
   const tbNl = trinhBayMucTieuNls(k);
+  const tt = thayTheHoatDong(k);
+  const khoiMoi = (m: HoatDongMoi, gon: boolean) => (
+    <div key={m.id} className="my-2 rounded-lg bg-[var(--bo-sung)] px-3 py-2 border-l-4 border-accent">
+      {m.goiY.khung5512 ? <KhungHoatDongMoi tenCu={m.hoatDong} h={m.goiY} gon={gon} /> : <>
+        <div className="font-semibold">{gon ? m.goiY.ten : <>Đề xuất hoạt động mới (thay thế hoặc làm mới “{m.hoatDong}”): {m.goiY.ten}</>}</div>
+        <p className="text-[14px] text-muted">{NHOM_HINH_THUC[m.goiY.nhom]} · {m.goiY.thoiLuong} phút</p>
+        <p><b>Ý tưởng:</b> <ChuCT t={m.goiY.yTuong} /></p>
+        {m.goiY.kichBan.map((b, i) => <p key={i}>Bước {i + 1}: <ChuCT t={b.buoc} /> ({b.phut} phút)</p>)}
+        <p><b>Câu hỏi/nhiệm vụ mẫu:</b> <ChuCT t={m.goiY.cauHoiMau} /></p>
+        <p className="text-[14px]"><b>Sản phẩm:</b> <ChuCT t={m.goiY.sanPham} /> <b>Đánh giá:</b> <ChuCT t={m.goiY.danhGia} /></p>
+      </>}
+    </div>
+  );
   return (
     <div className="flex flex-col gap-5">
       <The className="p-5">
@@ -340,11 +353,11 @@ function BuocXem({ k, kiemTra }: { k: SuaKhbd; kiemTra: { nghiem: string[]; nhac
         <ul className="mt-2 flex flex-col gap-1 text-[14.5px]">
           {kiemTra.nghiem.map((l) => <li key={l} className="text-err-fg">✕ {l}</li>)}
           {kiemTra.nhac.map((l) => <li key={l} className="text-warn-fg">! {l}</li>)}
-          {!kiemTra.nghiem.length && !kiemTra.nhac.length && <li className="text-luat">✓ Đạt toàn bộ luật. Nội dung gốc giữ nguyên {k.doan.length - tbNl.an.size}/{k.doan.length} đoạn{tbNl.an.size ? `; ${tbNl.an.size} đoạn mô tả năng lực số được thay bằng dòng mã` : ''}.</li>}
+          {!kiemTra.nghiem.length && !kiemTra.nhac.length && <li className="text-luat">✓ Đạt toàn bộ luật. Nội dung gốc giữ nguyên {k.doan.length - tbNl.an.size - tt.an.size}/{k.doan.length} đoạn{tbNl.an.size ? `; ${tbNl.an.size} đoạn mô tả năng lực số được thay bằng dòng mã` : ''}{tt.an.size ? `; ${tt.an.size} đoạn của hoạt động cũ được thay bằng hoạt động mới` : ''}.</li>}
         </ul>
       </The>
       <article className="bg-surface border border-line rounded-2xl shadow-the px-5 sm:px-10 py-8 text-[15px] leading-relaxed">
-        {k.doan.map((d) => tbNl.an.has(d.ma) ? (
+        {k.doan.map((d) => tt.an.has(d.ma) ? (tt.tai.get(d.ma) ? khoiMoi(tt.tai.get(d.ma)!, true) : null) : tbNl.an.has(d.ma) ? (
           tbNl.tieuDe?.doan === d.ma ? <div key={d.ma} className="mt-1 rounded-md bg-[var(--bo-sung)] px-2 py-1"><p className="font-semibold">{tbNl.tieuDe.text}</p>{tbNl.dong.map((t) => <p key={t}>- <b>{t.slice(0, t.indexOf(':') + 1)}</b>{t.slice(t.indexOf(':') + 1)}</p>)}</div> : null
         ) : (
           <div key={d.ma}>
@@ -353,18 +366,7 @@ function BuocXem({ k, kiemTra }: { k: SuaKhbd; kiemTra: { nghiem: string[]; nhac
             ) : <p className={`whitespace-pre-line ${d.loai === 'tieuDe' ? 'tieu-de mt-4' : 'mt-1'}`}>{d.loai === 'muc' ? '– ' : ''}{d.text}</p>}
             {tbNl.sauDoan === d.ma && tbNl.dong.map((t) => <p key={t} className="mt-1 rounded-md bg-[var(--bo-sung)] px-2 py-1">- <b>{t.slice(0, t.indexOf(':') + 1)}</b>{t.slice(t.indexOf(':') + 1)}</p>)}
             {d.ma === k.mucTieuDen && dung.filter((c) => c.loai === 'clil').map((c) => <p key={`mt${c.id}`} className="mt-1 rounded-md bg-[var(--bo-sung)] px-2 py-1"><b>Tiếng Anh (CLIL):</b> dùng key words {c.keyWords.map((w) => w.en).join(', ')}.</p>)}
-            {(k.hoatDongMoi ?? []).filter((m) => m.chenSau === d.ma).map((m) => (
-              <div key={m.id} className="my-2 rounded-lg bg-[var(--bo-sung)] px-3 py-2 border-l-4 border-accent">
-                {m.goiY.khung5512 ? <KhungHoatDongMoi tenCu={m.hoatDong} h={m.goiY} /> : <>
-                <div className="font-semibold">Đề xuất hoạt động mới (thay thế hoặc làm mới “{m.hoatDong}”): {m.goiY.ten}</div>
-                <p className="text-[14px] text-muted">{NHOM_HINH_THUC[m.goiY.nhom]} · {m.goiY.thoiLuong} phút</p>
-                <p><b>Ý tưởng:</b> <ChuCT t={m.goiY.yTuong} /></p>
-                {m.goiY.kichBan.map((b, i) => <p key={i}>Bước {i + 1}: <ChuCT t={b.buoc} /> ({b.phut} phút)</p>)}
-                <p><b>Câu hỏi/nhiệm vụ mẫu:</b> <ChuCT t={m.goiY.cauHoiMau} /></p>
-                <p className="text-[14px]"><b>Sản phẩm:</b> <ChuCT t={m.goiY.sanPham} /> <b>Đánh giá:</b> <ChuCT t={m.goiY.danhGia} /></p>
-                </>}
-              </div>
-            ))}
+            {tt.tai.get(`sau:${d.ma}`) && khoiMoi(tt.tai.get(`sau:${d.ma}`)!, false)}
             {dung.filter((c) => c.chenSau === d.ma).map((c) => (
               <div key={c.id} className="my-2 rounded-lg bg-[var(--bo-sung)] px-3 py-2 border-l-4 border-accent">
                 <div className="font-semibold">{c.loai === 'clil' ? 'Bổ sung – Tiếng Anh (CLIL)' : `Bổ sung – ${/^NL[a-d]$/.test(c.ma) ? 'Năng lực AI' : 'Năng lực số'} ${c.ma}`}</div>

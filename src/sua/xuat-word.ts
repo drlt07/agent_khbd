@@ -5,7 +5,7 @@
 import { AlignmentType, BorderStyle, Document, Packer, Paragraph, ShadingType, Table, TableCell, TableRow, TextRun, WidthType, type ParagraphChild } from 'docx';
 import { chuCongThuc } from '../soan/word-cong-thuc';
 import { laMaAi, moTaMa, vanBanGoc } from '../thu-vien';
-import type { Chen, HoatDongMoi, SuaKhbd } from './quy-trinh';
+import { thayTheHoatDong, type Chen, type HoatDongMoi, type SuaKhbd } from './quy-trinh';
 import { ganChot, NHOM_HINH_THUC } from '../soan/goi-y';
 import { TEN_BUOC_KHUNG, tieuDeHoatDongMoi } from '../soan/giu-hoat-dong';
 import { trinhBayMucTieuNls } from './ma-muc-tieu';
@@ -46,13 +46,13 @@ function khoiBoSung(c: Chen): Paragraph[] {
 }
 
 /** Hoạt động mới đề xuất (giáo viên đã chọn): đặt ngay sau hoạt động cũ, tô nền xanh nhạt. */
-export function khoiHoatDongMoi(m: HoatDongMoi): (Paragraph | Table)[] {
+export function khoiHoatDongMoi(m: HoatDongMoi, gon = false): (Paragraph | Table)[] {
   const h = m.goiY;
   const kh = ganChot(h);
   if (kh) {
     const p = (nhan: string, giaTri: string) => doan([chu(`${nhan} `, { dam: true }), ...chuCT(giaTri)], { nen: NEN_BO_SUNG });
     const ra: (Paragraph | Table)[] = [
-      doan([chu(`Đề xuất thay thế “${m.hoatDong}”:`, { dam: true })], { nen: NEN_BO_SUNG }),
+      ...(gon ? [] : [doan([chu(`Đề xuất thay thế “${m.hoatDong}”:`, { dam: true })], { nen: NEN_BO_SUNG })]),
       doan([chu(tieuDeHoatDongMoi(m.hoatDong, h.ten, h.thoiLuong), { dam: true })], { nen: NEN_BO_SUNG }),
       p('a) Mục tiêu:', h.mucTieu),
       p('b) Nội dung:', kh.noiDung),
@@ -61,11 +61,11 @@ export function khoiHoatDongMoi(m: HoatDongMoi): (Paragraph | Table)[] {
       bang([['Hoạt động của GV và HS', 'Sản phẩm cần đạt'], ...(Object.keys(TEN_BUOC_KHUNG) as (keyof typeof TEN_BUOC_KHUNG)[]).map((b) => [`${TEN_BUOC_KHUNG[b]}\n${kh.buoc[b].viec}`, kh.buoc[b].sanPham])], true),
     ];
     if (h.chotKienThuc && !kh.buoc.ketLuan.viec.includes(h.chotKienThuc) && !kh.buoc.ketLuan.sanPham.includes(h.chotKienThuc)) ra.push(p('Chốt kiến thức:', h.chotKienThuc));
-    if (h.bamMucTieu?.length) ra.push(p('Bám mục tiêu:', h.bamMucTieu.map((x) => `${x.yeuCau} → ${x.cachDat}`).join('; ')));
-    if (h.nangLuc?.length) ra.push(p('Năng lực phát triển:', h.nangLuc.map((n) => `${n.ten} (${n.bieuHien})`).join('; ')));
-    if (h.doiMoi) ra.push(p('Điểm đổi mới:', h.doiMoi));
+    if (!gon && h.bamMucTieu?.length) ra.push(p('Bám mục tiêu:', h.bamMucTieu.map((x) => `${x.yeuCau} → ${x.cachDat}`).join('; ')));
+    if (!gon && h.nangLuc?.length) ra.push(p('Năng lực phát triển:', h.nangLuc.map((n) => `${n.ten} (${n.bieuHien})`).join('; ')));
+    if (!gon && h.doiMoi) ra.push(p('Điểm đổi mới:', h.doiMoi));
     if (kh.tieuChi.length) { ra.push(doan([chu('TIÊU CHÍ ĐÁNH GIÁ', { dam: true })], { nen: NEN_BO_SUNG })); ra.push(bang([['Tiêu chí', 'Yêu cầu cần đạt'], ...kh.tieuChi.map((t) => [t.tieuChi, t.yeuCau])], true)); }
-    if (kh.tichHopNls.length) ra.push(p('Năng lực số:', kh.tichHopNls.map((n) => `${n.ma} – ${n.bieuHien}`).join('; ')));
+    if (!gon && kh.tichHopNls.length) ra.push(p('Năng lực số:', kh.tichHopNls.map((n) => `${n.ma} – ${n.bieuHien}`).join('; ')));
     if (kh.promptMau.trim()) ra.push(p('Prompt AI mẫu (GV cung cấp):', `“${kh.promptMau.trim()}”`));
     if (h.congNghe) ra.push(p('Dự phòng khi không có Internet:', h.duPhong));
     return ra;
@@ -98,8 +98,13 @@ export function dungTaiLieuSua(k: SuaKhbd): Document {
 
   // Năng lực số/AI ở Mục tiêu: dòng gọn "Năng lực số <mã>: HS …" (đoạn mô tả dài của giáo án cũ được thay – quyết định của tác giả)
   const tb = trinhBayMucTieuNls(k);
+  // Hoạt động mới thay hẳn hoạt động cũ (quyết định của tác giả)
+  const tt = thayTheHoatDong(k);
   const dongNl = () => tb.dong.forEach((t) => { const i = t.indexOf(':'); con.push(doan([chu(`- ${t.slice(0, i + 1)} `, { dam: true }), chu(t.slice(i + 1).trim())], { nen: NEN_BO_SUNG })); });
   for (const d of k.doan) {
+    const moiTai = tt.tai.get(d.ma);
+    if (moiTai) con.push(...khoiHoatDongMoi(moiTai, true));
+    if (tt.an.has(d.ma)) continue;
     if (tb.an.has(d.ma)) {
       if (tb.tieuDe?.doan === d.ma) { con.push(doan([chu(tb.tieuDe.text, { dam: true })], { nen: NEN_BO_SUNG })); dongNl(); }
       continue;
@@ -112,7 +117,8 @@ export function dungTaiLieuSua(k: SuaKhbd): Document {
       dung.filter((c) => c.loai === 'clil').forEach((c) => con.push(doan([chu('Tiếng Anh (CLIL): ', { dam: true }), chu(`dùng key words ${c.keyWords.map((w) => w.en).join(', ')} trong ${c.hoatDong}.`)], { nen: NEN_BO_SUNG })));
     }
     for (const c of theoViTri.get(d.ma) ?? []) con.push(...khoiBoSung(c));
-    for (const m of (k.hoatDongMoi ?? []).filter((x) => x.chenSau === d.ma)) con.push(...khoiHoatDongMoi(m));
+    const moiSau = tt.tai.get(`sau:${d.ma}`);
+    if (moiSau) con.push(...khoiHoatDongMoi(moiSau));
   }
 
   if (dung.length) {

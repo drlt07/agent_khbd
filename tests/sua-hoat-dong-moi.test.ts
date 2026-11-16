@@ -29,23 +29,25 @@ describe('Sửa KHBD cũ: AI đọc hoạt động cũ và gợi ý hoạt độ
     expect(r.luat.nghiem).toEqual([]);
   });
 
-  it('file Word: hoạt động mới đứng ngay sau hoạt động cũ, nội dung gốc giữ nguyên văn', async () => {
+  it('file Word: hoạt động mới THAY HẲN hoạt động cũ, đúng vị trí; khối gọn (không ghi bám mục tiêu, năng lực phát triển, điểm đổi mới, mã năng lực số); các đoạn khác giữ nguyên', async () => {
     const k0 = { ...(await phanTich(moi(), aiMauSua)), yccdDaXacNhan: true };
     const h = k0.hoatDong[1];
     const g = (await goiYHoatDong(boiCanhGoiY(k0), aiMauSua, undefined, '', hoatDongCu(k0, h))).goiY.hoatDong[1];
     const k: SuaKhbd = { ...k0, hoatDongMoi: [{ id: 'm1', hoatDong: h.ten, chenSau: h.den, goiY: g }] };
     const xml = await (await JSZip.loadAsync(await Packer.toBuffer(dungTaiLieuSua(k)))).file('word/document.xml')!.async('string');
     const chu = xml.replace(/<[^>]+>/g, '');
-    const viTriMoi = chu.indexOf(`Đề xuất thay thế “${h.ten}”:`);
-    expect(chu).toContain('d) Tổ chức thực hiện:');
-    expect(chu).toContain('Hoạt động của GV và HS');
+    const a = k.doan.findIndex((d) => d.ma === h.tu), b = k.doan.findIndex((d) => d.ma === h.den);
+    // đoạn của hoạt động cũ không còn
+    for (const d of k.doan.slice(a, b + 1)) if (d.text.trim().length > 20) expect(chu).not.toContain(d.text.trim().slice(0, 40).replace(/&/g, '&amp;'));
+    // hoạt động mới nằm giữa hoạt động trước và hoạt động sau
+    const viTriMoi = chu.indexOf('d) Tổ chức thực hiện:');
     expect(viTriMoi).toBeGreaterThan(0);
-    const cuoiHdCu = k.doan.find((d) => d.ma === h.den)!.text.trim().slice(0, 25);
-    const hdSau = k.doan[k.doan.findIndex((d) => d.ma === h.den) + 1].text.trim().slice(0, 25);
-    expect(chu.indexOf(cuoiHdCu)).toBeLessThan(viTriMoi);
-    expect(chu.indexOf(hdSau, viTriMoi)).toBeGreaterThan(viTriMoi);
-    // Mọi đoạn gốc vẫn còn
-    for (const d of k.doan) if (d.loai !== 'bang' && d.text.trim()) expect(chu).toContain(d.text.trim().split('\n')[0].slice(0, 20).replace(/&/g, '&amp;'));
+    expect(chu.indexOf(k.doan[a - 1].text.trim().slice(0, 25))).toBeLessThan(viTriMoi);
+    expect(chu.indexOf(k.doan[b + 1].text.trim().slice(0, 25), viTriMoi)).toBeGreaterThan(viTriMoi);
+    // khối gọn
+    for (const x of ['Đề xuất thay thế', 'Bám mục tiêu:', 'Năng lực phát triển:', 'Điểm đổi mới:']) expect(chu).not.toContain(x);
+    // đoạn ngoài hoạt động cũ giữ nguyên
+    for (const d of [...k.doan.slice(0, a), ...k.doan.slice(b + 1)]) if (d.loai !== 'bang' && d.text.trim()) expect(chu).toContain(d.text.trim().split('\n')[0].slice(0, 20).replace(/&/g, '&amp;'));
   });
 });
 
@@ -63,5 +65,21 @@ describe('Sửa KHBD cũ: AI gợi ý mã năng lực số theo giáo án', () =
     expect(r.boQua).toEqual([]);
     expect(r.nls.map((m) => m.ma)).toEqual(['5.3.5.1', '1.2.5.1']);
     expect(r.ai.map((m) => m.ma)).toEqual(['NLa']);
+  });
+});
+
+import { thayTheHoatDong } from '../src/sua/quy-trinh';
+describe('Thay hoạt động cũ', () => {
+  it('đoạn dùng chung với hoạt động chưa thay (một bảng chứa nhiều nhiệm vụ) thì không xóa, chèn sau như cũ; chọn 2 lần thì lấy lần sau', () => {
+    const doan = [{ ma: 'D1', loai: 'doan', text: 'HĐ1' }, { ma: 'D2', loai: 'bang', text: 'b', hang: [['a']] }, { ma: 'D3', loai: 'doan', text: 'HĐ2' }] as never;
+    const hoatDong = [{ ten: 'HĐ1', tu: 'D1', den: 'D2', phut: 5 }, { ten: 'HĐ2', tu: 'D2', den: 'D3', phut: 5 }];
+    const m = (id: string, ten: string, chenSau: string) => ({ id, hoatDong: ten, chenSau, goiY: {} as never });
+    const r = thayTheHoatDong({ doan, hoatDong, hoatDongMoi: [m('a', 'HĐ1', 'D2')] });
+    expect(r.an.size).toBe(0);
+    expect(r.tai.get('sau:D2')?.id).toBe('a');
+    const r2 = thayTheHoatDong({ doan, hoatDong, hoatDongMoi: [m('a', 'HĐ1', 'D2'), m('b', 'HĐ2', 'D3'), m('c', 'HĐ2', 'D3')] });
+    expect([...r2.an].sort()).toEqual(['D1', 'D2', 'D3']);
+    expect(r2.tai.get('D1')?.id).toBe('a');
+    expect(r2.tai.get('D2')?.id).toBe('c');
   });
 });

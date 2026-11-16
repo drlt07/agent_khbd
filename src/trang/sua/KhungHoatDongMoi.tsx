@@ -3,11 +3,12 @@ import { ganChot, type HoatDongGoiY } from '../../soan/goi-y';
 import { TEN_BUOC_KHUNG, tieuDeHoatDongMoi } from '../../soan/giu-hoat-dong';
 
 /** Hoạt động mới trình bày theo khung CV 5512 (a–d, bảng GV–HS / sản phẩm, tiêu chí, prompt mẫu). */
-export default function KhungHoatDongMoi({ tenCu, h }: { tenCu: string; h: HoatDongGoiY }) {
+/** gon: bản thay hẳn hoạt động cũ trong giáo án (bỏ dòng "Đề xuất thay thế", bám mục tiêu, năng lực phát triển, điểm đổi mới, mã năng lực số – mã đã lên Mục tiêu). */
+export default function KhungHoatDongMoi({ tenCu, h, gon = false }: { tenCu: string; h: HoatDongGoiY; gon?: boolean }) {
   const kh = ganChot(h) ?? h.khung5512!;
   return (
     <div className="flex flex-col gap-1">
-      <div className="text-[13px] text-muted">Đề xuất thay thế “{tenCu}”</div>
+      {!gon && <div className="text-[13px] text-muted">Đề xuất thay thế “{tenCu}”</div>}
       <div className="font-semibold">{tieuDeHoatDongMoi(tenCu, h.ten, h.thoiLuong)}</div>
       <p><b>a) Mục tiêu:</b> <ChuCT t={h.mucTieu} /></p>
       <p><b>b) Nội dung:</b> <ChuCT t={kh.noiDung} /></p>
@@ -27,9 +28,9 @@ export default function KhungHoatDongMoi({ tenCu, h }: { tenCu: string; h: HoatD
         </table>
       </div>
       {h.chotKienThuc && !kh.buoc.ketLuan.viec.includes(h.chotKienThuc) && !kh.buoc.ketLuan.sanPham.includes(h.chotKienThuc) && <p className="text-[14px]"><b>Chốt kiến thức:</b> <ChuCT t={h.chotKienThuc} /></p>}
-      {h.bamMucTieu?.length > 0 && <div className="text-[14px]"><b>Bám mục tiêu:</b><ul className="list-disc pl-5">{h.bamMucTieu.map((m, i) => <li key={i}>{m.yeuCau} → <ChuCT t={m.cachDat} /></li>)}</ul></div>}
-      {h.nangLuc?.length > 0 && <p className="text-[14px]"><b>Năng lực phát triển:</b> {h.nangLuc.map((n) => `${n.ten} (${n.bieuHien})`).join('; ')}</p>}
-      {h.doiMoi && <p className="text-[14px]"><b>Điểm đổi mới:</b> <ChuCT t={h.doiMoi} /></p>}
+      {!gon && h.bamMucTieu?.length > 0 && <div className="text-[14px]"><b>Bám mục tiêu:</b><ul className="list-disc pl-5">{h.bamMucTieu.map((m, i) => <li key={i}>{m.yeuCau} → <ChuCT t={m.cachDat} /></li>)}</ul></div>}
+      {!gon && h.nangLuc?.length > 0 && <p className="text-[14px]"><b>Năng lực phát triển:</b> {h.nangLuc.map((n) => `${n.ten} (${n.bieuHien})`).join('; ')}</p>}
+      {!gon && h.doiMoi && <p className="text-[14px]"><b>Điểm đổi mới:</b> <ChuCT t={h.doiMoi} /></p>}
       {kh.tieuChi.length > 0 && (
         <div className="overflow-x-auto mt-1">
           <table className="w-full text-[14px] border border-line">
@@ -38,7 +39,7 @@ export default function KhungHoatDongMoi({ tenCu, h }: { tenCu: string; h: HoatD
           </table>
         </div>
       )}
-      {kh.tichHopNls.length > 0 && <p className="text-[14px]"><b>Năng lực số:</b> {kh.tichHopNls.map((n) => <span key={n.ma}><span className="ma">{n.ma}</span> {n.bieuHien}. </span>)}</p>}
+      {!gon && kh.tichHopNls.length > 0 && <p className="text-[14px]"><b>Năng lực số:</b> {kh.tichHopNls.map((n) => <span key={n.ma}><span className="ma">{n.ma}</span> {n.bieuHien}. </span>)}</p>}
       {kh.promptMau.trim() && <p className="text-[14px]"><b>Prompt AI mẫu (GV cung cấp):</b> “{kh.promptMau.trim()}”</p>}
     </div>
   );
