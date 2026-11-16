@@ -30,7 +30,7 @@ export default function GanMaMucTieu({ k, sua, ai }: { k: SuaKhbd; sua: (f: (x: 
   return (
     <The className="p-5">
       <div className="flex items-center justify-between gap-2"><h2 className="text-base">Gắn mã cho mục tiêu năng lực số của giáo án</h2><NhanAiLam ai="ai" /></div>
-      <p className="text-sm text-muted mt-1">Giáo án có {dong.length} dòng mục tiêu năng lực số chưa gắn mã. AI gợi ý mã (TT 02/2025, QĐ 2422) và biểu hiện cho từng dòng; lời của thầy/cô giữ nguyên, mã ghi bổ sung (tô xanh) ngay dưới dòng.</p>
+      <p className="text-sm text-muted mt-1">Giáo án có {dong.length} dòng mục tiêu năng lực số chưa gắn mã. AI gợi ý mã (TT 02/2025, QĐ 2422) và biểu hiện cho từng dòng. Khi xuất, đoạn mô tả này được thay bằng các dòng gọn “Năng lực số <mã>: HS …”, “Năng lực AI <mã>: HS …” (tô xanh).</p>
       <Nut kieu={ds.length ? 'phu' : 'chinh'} className="mt-3" dang={dang} disabled={!ai || dang} onClick={xin}>{dang ? 'AI đang gắn mã…' : ds.length ? 'Gợi ý lại' : 'AI gợi ý mã cho mục tiêu'}</Nut>
       {loi && <HopBao kieu="err" className="mt-3">{loi}</HopBao>}
       {boQua.length > 0 && <p className="text-[13px] text-warn-fg mt-2">Luật loại: {boQua.join('; ')}</p>}

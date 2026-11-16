@@ -16,18 +16,23 @@ const TIEU_DE_KHAC = /^\s*(\d+[.)]|[IVX]+[.)]|[a-d][.)])\s|^\s*(phẩm chất|n�
 
 /** Các dòng mục tiêu năng lực số trong giáo án: dòng sau tiêu đề "Năng lực số…" tới tiêu đề kế tiếp. Hàm thuần. */
 export function dongMucTieuNls(doan: Doan[], mucTieuDen?: string): Doan[] {
+  return phanMucTieuNls(doan, mucTieuDen).dong;
+}
+
+/** Tiêu đề mục năng lực số/AI trong Mục tiêu và các dòng của mục. Hàm thuần. */
+export function phanMucTieuNls(doan: Doan[], mucTieuDen?: string): { tieuDe?: Doan; dong: Doan[] } {
   const het = mucTieuDen ? doan.findIndex((d) => d.ma === mucTieuDen) : -1;
   const pham = het >= 0 ? doan.slice(0, het + 1 + 8) : doan;
   const ra: Doan[] = [];
-  let trong = false;
+  let tieuDe: Doan | undefined;
   for (const d of pham) {
-    if (d.loai === 'bang') { if (trong) break; continue; }
+    if (d.loai === 'bang') { if (tieuDe) break; continue; }
     const t = d.text.trim();
-    if (TIEU_DE_NLS.test(t) && (TIEU_DE_KHAC.test(t) || t.length < 80) && !/^[-–•]/.test(t)) { trong = true; continue; }
-    if (trong && TIEU_DE_KHAC.test(t) && !/^[-–•]/.test(t)) break;
-    if (trong && t.split(/\s+/).length >= 5) ra.push(d);
+    if (!tieuDe && TIEU_DE_NLS.test(t) && (TIEU_DE_KHAC.test(t) || t.length < 80) && !/^[-–•]/.test(t)) { tieuDe = d; continue; }
+    if (tieuDe && TIEU_DE_KHAC.test(t) && !/^[-–•]/.test(t)) break;
+    if (tieuDe && t.split(/\s+/).length >= 5) ra.push(d);
   }
-  return ra.slice(0, 8);
+  return { tieuDe, dong: ra.slice(0, 8) };
 }
 
 export const GanMaOut = z.object({
@@ -72,7 +77,8 @@ export async function ganMaMucTieu(k: SuaKhbd, ai: GoiAi): Promise<{ ds: MaMucTi
 }
 
 export const tenLoaiMa = (ma: string) => (laMaAi(ma) ? 'Năng lực AI' : 'Năng lực số');
-export const dongBoSungMa = (m: { ma: string; bieuHien: string }) => `${tenLoaiMa(m.ma)} ${m.ma}: HS ${m.bieuHien.replace(/\.$/, '')}. (${moTaMa(m.ma).slice(0, 90)})`;
+/** Dòng năng lực gọn theo quyết định của tác giả: "Năng lực số 3.1.5.1: HS …", "Năng lực AI NLa: HS …". */
+export const dongBoSungMa = (m: { ma: string; bieuHien: string }) => `${tenLoaiMa(m.ma)} ${m.ma}: HS ${m.bieuHien.replace(/^(hs|học sinh)\s+/i, '').replace(/\.$/, '')}.`;
 
 /** Mã từ các hoạt động đã đổi mới, đưa lên Mục tiêu (bỏ mã đã có ở dòng chèn hoặc dòng mục tiêu). Hàm thuần. */
 export function maTuHoatDongMoi(k: Pick<SuaKhbd, 'hoatDongMoi' | 'chen' | 'maMucTieu'>): { ma: string; bieuHien: string; hoatDong: string }[] {
@@ -84,4 +90,28 @@ export function maTuHoatDongMoi(k: Pick<SuaKhbd, 'hoatDongMoi' | 'chen' | 'maMuc
     ra.push({ ma, bieuHien: n.bieuHien.trim().replace(/^(hs|học sinh)\s+/i, ''), hoatDong: m.hoatDong });
   }
   return ra;
+}
+
+/** Mọi mã năng lực số/AI của bài sau khi sửa: mã gắn cho mục tiêu, mã chèn (đề xuất), mã của hoạt động đổi mới; không trùng. */
+export function maNangLucBai(k: Pick<SuaKhbd, 'hoatDongMoi' | 'chen' | 'maMucTieu'>): { ma: string; bieuHien: string }[] {
+  const ra: { ma: string; bieuHien: string }[] = [];
+  const them = (ma: string, bieuHien: string) => { if (ma && !ra.some((x) => x.ma === ma)) ra.push({ ma, bieuHien }); };
+  for (const m of (k.maMucTieu ?? []).filter((x) => x.dung)) them(m.ma, m.bieuHien);
+  for (const c of k.chen.filter((x) => x.dung && x.loai !== 'clil')) them(c.ma, c.bieuHien);
+  for (const m of maTuHoatDongMoi(k)) them(m.ma, m.bieuHien);
+  return ra;
+}
+
+/**
+ * Cách trình bày phần năng lực số/AI ở Mục tiêu (quyết định của tác giả 16/11/2026): giáo án cũ có đoạn mô tả dài
+ * ("Năng lực số và sử dụng AI có trách nhiệm") thì BỎ, thay bằng các dòng gọn "Năng lực số <mã>: HS …", "Năng lực AI <mã>: HS …".
+ * Chỉ bỏ khi có ít nhất 1 mã để thay. Giáo án không có mục này thì các dòng gọn đặt sau đoạn cuối của Mục tiêu. Hàm thuần.
+ */
+export function trinhBayMucTieuNls(k: Pick<SuaKhbd, 'doan' | 'mucTieuDen' | 'hoatDongMoi' | 'chen' | 'maMucTieu'>): { an: Set<string>; tieuDe?: { doan: string; text: string }; dong: string[]; sauDoan?: string } {
+  const ds = maNangLucBai(k).map(dongBoSungMa);
+  if (!ds.length) return { an: new Set(), dong: [] };
+  const { tieuDe, dong } = phanMucTieuNls(k.doan, k.mucTieuDen);
+  if (!tieuDe) return { an: new Set(), dong: ds, sauDoan: k.mucTieuDen };
+  const so = tieuDe.text.match(/^\s*((?:\d+|[IVX]+|[a-d])[.)])\s*/)?.[1];
+  return { an: new Set([tieuDe.ma, ...dong.map((d) => d.ma)]), tieuDe: { doan: tieuDe.ma, text: `${so ? `${so} ` : ''}Năng lực số, năng lực AI` }, dong: ds };
 }

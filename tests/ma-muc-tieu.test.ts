@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { Packer } from 'docx';
 import JSZip from 'jszip';
-import { dongMucTieuNls, ganMaMucTieu, locGanMa, maTuHoatDongMoi, nhacGanMa } from '../src/sua/ma-muc-tieu';
+import { dongMucTieuNls, ganMaMucTieu, locGanMa, maTuHoatDongMoi, nhacGanMa, trinhBayMucTieuNls } from '../src/sua/ma-muc-tieu';
 import { dungTaiLieuSua } from '../src/sua/xuat-word';
 import type { SuaKhbd } from '../src/sua/quy-trinh';
 import type { Doan } from '../src/sua/doc-docx';
@@ -45,18 +45,30 @@ describe('Gắn mã cho mục tiêu năng lực số có sẵn trong giáo án',
     expect(r.ds[0].bieuHien).toBe('tạo và chỉnh sửa thẻ thông điệp trên Canva');
     expect(r.boQua).toHaveLength(2);
   });
-  it('gọi AI; file Word ghi mã bổ sung ngay dưới dòng mục tiêu, lời giáo viên giữ nguyên; mã của hoạt động đổi mới lên Mục tiêu', async () => {
-    const ai: GoiAi = async (y) => y.schema.parse({ ganMa: [{ doan: 'D005', ma: '3.1.5.1', bieuHien: 'tạo thẻ thông điệp trên Canva' }, { doan: 'D006', ma: 'NLa', bieuHien: 'đối chiếu gợi ý AI với đoạn trích' }] });
+  it('file Word: đoạn mô tả "Năng lực số và sử dụng AI có trách nhiệm" bị bỏ, thay bằng dòng gọn "Năng lực số <mã>: HS …", "Năng lực AI <mã>: HS …" (quyết định của tác giả)', async () => {
+    const ai: GoiAi = async (y) => y.schema.parse({ ganMa: [{ doan: 'D005', ma: '3.1.5.1', bieuHien: 'tạo thẻ thông điệp trên Canva' }, { doan: 'D006', ma: 'NLa', bieuHien: 'HS đối chiếu gợi ý AI với đoạn trích' }] });
     const r = await ganMaMucTieu(k, ai);
     const goiY = { khung5512: { tichHopNls: [{ ma: '1.2.5.1', bieuHien: 'đánh giá độ tin cậy của thông tin' }, { ma: '3.1.5.1', bieuHien: 'trùng' }] } } as never;
     const k2: SuaKhbd = { ...k, maMucTieu: r.ds, hoatDongMoi: [{ id: 'm', hoatDong: 'Hoạt động 3. Vận dụng', chenSau: 'D009', goiY }] };
     expect(maTuHoatDongMoi(k2)).toEqual([{ ma: '1.2.5.1', bieuHien: 'đánh giá độ tin cậy của thông tin', hoatDong: 'Hoạt động 3. Vận dụng' }]);
+    const tb = trinhBayMucTieuNls(k2);
+    expect(tb.dong).toEqual(['Năng lực số 3.1.5.1: HS tạo thẻ thông điệp trên Canva.', 'Năng lực AI NLa: HS đối chiếu gợi ý AI với đoạn trích.', 'Năng lực số 1.2.5.1: HS đánh giá độ tin cậy của thông tin.']);
     const xml = await (await JSZip.loadAsync(await Packer.toBuffer(dungTaiLieuSua({ ...k2, hoatDongMoi: [] })))).file('word/document.xml')!.async('string');
     const chu = xml.replace(/<[^>]+>/g, '');
-    const viTriDong = chu.indexOf('- Sử dụng công cụ số phù hợp');
-    const viTriMa = chu.indexOf('→ Năng lực số 3.1.5.1: HS tạo thẻ thông điệp trên Canva');
-    expect(viTriDong).toBeGreaterThan(0);
-    expect(viTriMa).toBeGreaterThan(viTriDong);
-    expect(chu).toContain('→ Năng lực AI NLa: HS đối chiếu gợi ý AI với đoạn trích');
+    expect(chu).not.toContain('Năng lực số và sử dụng AI có trách nhiệm');
+    expect(chu).not.toContain('Sử dụng công cụ số phù hợp để truy cập học liệu');
+    expect(chu).toContain('3. Năng lực số, năng lực AI');
+    expect(chu).toContain('- Năng lực số 3.1.5.1: HS tạo thẻ thông điệp trên Canva.');
+    expect(chu).toContain('- Năng lực AI NLa: HS đối chiếu gợi ý AI với đoạn trích.');
+    // phần khác của mục tiêu giữ nguyên, đúng thứ tự
+    expect(chu.indexOf('2. Năng lực')).toBeLessThan(chu.indexOf('3. Năng lực số, năng lực AI'));
+    expect(chu.indexOf('3. Năng lực số, năng lực AI')).toBeLessThan(chu.indexOf('4. Phẩm chất'));
+  });
+  it('chưa có mã nào thì giữ nguyên đoạn của giáo án (không để mục tiêu trống); giáo án không có mục này thì dòng gọn đặt sau Mục tiêu', () => {
+    expect(trinhBayMucTieuNls(k).an.size).toBe(0);
+    const khongMuc = { ...k, doan: doan.filter((x) => !['D004', 'D005', 'D006', 'D007'].includes(x.ma)), maMucTieu: [], chen: [{ id: 'c', loai: 'nls', ma: '3.1.5.1', hoatDong: 'HĐ3', chenSau: 'D009', phut: 5, noiDung: [], bieuHien: 'tạo thẻ thông điệp', congCu: '', minhChung: '', tieuChi: '', keyWords: [], dung: true }] } as unknown as SuaKhbd;
+    const tb = trinhBayMucTieuNls(khongMuc);
+    expect(tb.sauDoan).toBe('D009');
+    expect(tb.dong).toEqual(['Năng lực số 3.1.5.1: HS tạo thẻ thông điệp.']);
   });
 });

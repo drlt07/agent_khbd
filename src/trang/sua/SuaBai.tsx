@@ -15,7 +15,7 @@ import { aiMauSua, doanMau, TEN_TEP_MAU, THIET_LAP_MAU } from '../../sua/mau';
 import { ChonMa } from '../soan/Buoc1ThongTin';
 import DoiMoiHoatDong from './DoiMoiHoatDong';
 import GanMaMucTieu from './GanMaMucTieu';
-import { dongBoSungMa, maTuHoatDongMoi, tenLoaiMa } from '../../sua/ma-muc-tieu';
+import { trinhBayMucTieuNls } from '../../sua/ma-muc-tieu';
 import { NHOM_HINH_THUC } from '../../soan/goi-y';
 import { ChuCT } from '../../thanh-phan/cong-thuc';
 import { timTheoBai } from '../../soan/sgv-ngu-van';
@@ -332,6 +332,7 @@ function SoanLaiCaBai({ k }: { k: SuaKhbd }) {
 
 function BuocXem({ k, kiemTra }: { k: SuaKhbd; kiemTra: { nghiem: string[]; nhac: string[] } }) {
   const dung = k.chen.filter((c) => c.dung);
+  const tbNl = trinhBayMucTieuNls(k);
   return (
     <div className="flex flex-col gap-5">
       <The className="p-5">
@@ -339,18 +340,19 @@ function BuocXem({ k, kiemTra }: { k: SuaKhbd; kiemTra: { nghiem: string[]; nhac
         <ul className="mt-2 flex flex-col gap-1 text-[14.5px]">
           {kiemTra.nghiem.map((l) => <li key={l} className="text-err-fg">✕ {l}</li>)}
           {kiemTra.nhac.map((l) => <li key={l} className="text-warn-fg">! {l}</li>)}
-          {!kiemTra.nghiem.length && !kiemTra.nhac.length && <li className="text-luat">✓ Đạt toàn bộ luật. Nội dung gốc giữ nguyên {k.doan.length}/{k.doan.length} đoạn.</li>}
+          {!kiemTra.nghiem.length && !kiemTra.nhac.length && <li className="text-luat">✓ Đạt toàn bộ luật. Nội dung gốc giữ nguyên {k.doan.length - tbNl.an.size}/{k.doan.length} đoạn{tbNl.an.size ? `; ${tbNl.an.size} đoạn mô tả năng lực số được thay bằng dòng mã` : ''}.</li>}
         </ul>
       </The>
       <article className="bg-surface border border-line rounded-2xl shadow-the px-5 sm:px-10 py-8 text-[15px] leading-relaxed">
-        {k.doan.map((d) => (
+        {k.doan.map((d) => tbNl.an.has(d.ma) ? (
+          tbNl.tieuDe?.doan === d.ma ? <div key={d.ma} className="mt-1 rounded-md bg-[var(--bo-sung)] px-2 py-1"><p className="font-semibold">{tbNl.tieuDe.text}</p>{tbNl.dong.map((t) => <p key={t}>- <b>{t.slice(0, t.indexOf(':') + 1)}</b>{t.slice(t.indexOf(':') + 1)}</p>)}</div> : null
+        ) : (
           <div key={d.ma}>
             {d.loai === 'bang' && d.hang ? (
               <div className="overflow-x-auto my-2"><table className="w-full text-[14px] border border-line">{d.hang.map((h, i) => <tr key={i} className="border-t border-line">{h.map((c, j) => <td key={j} className="p-2 align-top whitespace-pre-line">{c}</td>)}</tr>)}</table></div>
             ) : <p className={`whitespace-pre-line ${d.loai === 'tieuDe' ? 'tieu-de mt-4' : 'mt-1'}`}>{d.loai === 'muc' ? '– ' : ''}{d.text}</p>}
-            {(k.maMucTieu ?? []).filter((x) => x.dung && x.doan === d.ma).map((m) => <p key={`mm${m.ma}`} className="mt-1 rounded-md bg-[var(--bo-sung)] px-2 py-1">→ {dongBoSungMa(m)}</p>)}
-            {d.ma === k.mucTieuDen && maTuHoatDongMoi(k).map((m) => <p key={`hm${m.ma}`} className="mt-1 rounded-md bg-[var(--bo-sung)] px-2 py-1"><b>{tenLoaiMa(m.ma)} {m.ma}:</b> HS {m.bieuHien} ({m.hoatDong}).</p>)}
-            {d.ma === k.mucTieuDen && dung.map((c) => <p key={`mt${c.id}`} className="mt-1 rounded-md bg-[var(--bo-sung)] px-2 py-1">{c.loai === 'clil' ? <><b>Tiếng Anh (CLIL):</b> dùng key words {c.keyWords.map((w) => w.en).join(', ')}.</> : <><b>{/^NL[a-d]$/.test(c.ma) ? 'Năng lực AI' : 'Năng lực số'} {c.ma}:</b> HS {c.bieuHien}.</>}</p>)}
+            {tbNl.sauDoan === d.ma && tbNl.dong.map((t) => <p key={t} className="mt-1 rounded-md bg-[var(--bo-sung)] px-2 py-1">- <b>{t.slice(0, t.indexOf(':') + 1)}</b>{t.slice(t.indexOf(':') + 1)}</p>)}
+            {d.ma === k.mucTieuDen && dung.filter((c) => c.loai === 'clil').map((c) => <p key={`mt${c.id}`} className="mt-1 rounded-md bg-[var(--bo-sung)] px-2 py-1"><b>Tiếng Anh (CLIL):</b> dùng key words {c.keyWords.map((w) => w.en).join(', ')}.</p>)}
             {(k.hoatDongMoi ?? []).filter((m) => m.chenSau === d.ma).map((m) => (
               <div key={m.id} className="my-2 rounded-lg bg-[var(--bo-sung)] px-3 py-2 border-l-4 border-accent">
                 {m.goiY.khung5512 ? <KhungHoatDongMoi tenCu={m.hoatDong} h={m.goiY} /> : <>

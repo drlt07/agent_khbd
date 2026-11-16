@@ -8,7 +8,7 @@ import { laMaAi, moTaMa, vanBanGoc } from '../thu-vien';
 import type { Chen, HoatDongMoi, SuaKhbd } from './quy-trinh';
 import { ganChot, NHOM_HINH_THUC } from '../soan/goi-y';
 import { TEN_BUOC_KHUNG, tieuDeHoatDongMoi } from '../soan/giu-hoat-dong';
-import { dongBoSungMa, maTuHoatDongMoi, tenLoaiMa } from './ma-muc-tieu';
+import { trinhBayMucTieuNls } from './ma-muc-tieu';
 import { tachDong } from '../soan/dinh-dang';
 
 const FONT = 'Times New Roman';
@@ -96,16 +96,20 @@ export function dungTaiLieuSua(k: SuaKhbd): Document {
   for (const c of dung) theoViTri.set(c.chenSau, [...(theoViTri.get(c.chenSau) ?? []), c]);
   const con: (Paragraph | Table)[] = [];
 
+  // Năng lực số/AI ở Mục tiêu: dòng gọn "Năng lực số <mã>: HS …" (đoạn mô tả dài của giáo án cũ được thay – quyết định của tác giả)
+  const tb = trinhBayMucTieuNls(k);
+  const dongNl = () => tb.dong.forEach((t) => { const i = t.indexOf(':'); con.push(doan([chu(`- ${t.slice(0, i + 1)} `, { dam: true }), chu(t.slice(i + 1).trim())], { nen: NEN_BO_SUNG })); });
   for (const d of k.doan) {
+    if (tb.an.has(d.ma)) {
+      if (tb.tieuDe?.doan === d.ma) { con.push(doan([chu(tb.tieuDe.text, { dam: true })], { nen: NEN_BO_SUNG })); dongNl(); }
+      continue;
+    }
     if (d.loai === 'bang' && d.hang) con.push(bang(d.hang));
     else d.text.split('\n').forEach((t) => con.push(doan([chu(d.loai === 'muc' ? `- ${t}` : t, { dam: d.loai === 'tieuDe' })])));
-    // Mã gắn cho dòng mục tiêu năng lực số có sẵn
-    for (const m of (k.maMucTieu ?? []).filter((x) => x.dung && x.doan === d.ma)) con.push(doan([chu(`→ ${dongBoSungMa(m)}`)], { nen: NEN_BO_SUNG }));
-    // Mã của các hoạt động đã đổi mới
-    if (d.ma === k.mucTieuDen) for (const m of maTuHoatDongMoi(k)) con.push(doan([chu(`${tenLoaiMa(m.ma)} ${m.ma}: `, { dam: true }), chu(`HS ${m.bieuHien} (${m.hoatDong}).`)], { nen: NEN_BO_SUNG }));
-    // Năng lực bổ sung vào mục tiêu
-    if (d.ma === k.mucTieuDen && dung.length) {
-      dung.forEach((c) => con.push(doan([chu(c.loai === 'clil' ? 'Tiếng Anh (CLIL): ' : `${laMaAi(c.ma) ? 'Năng lực AI' : 'Năng lực số'} ${c.ma}: `, { dam: true }), chu(c.loai === 'clil' ? `dùng key words ${c.keyWords.map((w) => w.en).join(', ')} trong ${c.hoatDong}.` : `HS ${c.bieuHien}.`)], { nen: NEN_BO_SUNG })));
+    if (tb.sauDoan === d.ma) dongNl();
+    // Tiếng Anh (CLIL) bổ sung vào mục tiêu
+    if (d.ma === k.mucTieuDen) {
+      dung.filter((c) => c.loai === 'clil').forEach((c) => con.push(doan([chu('Tiếng Anh (CLIL): ', { dam: true }), chu(`dùng key words ${c.keyWords.map((w) => w.en).join(', ')} trong ${c.hoatDong}.`)], { nen: NEN_BO_SUNG })));
     }
     for (const c of theoViTri.get(d.ma) ?? []) con.push(...khoiBoSung(c));
     for (const m of (k.hoatDongMoi ?? []).filter((x) => x.chenSau === d.ma)) con.push(...khoiHoatDongMoi(m));
