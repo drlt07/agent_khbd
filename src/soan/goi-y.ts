@@ -14,7 +14,7 @@ import { LOI_TRICH_DAN, phanVan, trichDanLa } from './ngu-van';
 import { coBatAi, coDungAi, coLamTruoc, LOI_LAM_TRUOC, phanHafa } from './hafa-vret';
 import { LOI_THE_LOAI, theLoaiCua, yeuToCham } from './the-loai-van';
 import { tachHoatDongCu } from './giu-hoat-dong';
-import { chotNgoaiGiaoAn, laKhongPhaiKienThuc, LOI_CHOT_NGOAI, MAU_CHOT, nguonChot, tachChotGiaoAn, yChot } from './chot-kien-thuc';
+import { chotBoSot, chotNgoaiGiaoAn, laKhongPhaiKienThuc, LOI_CHOT_NGOAI, MAU_CHOT, nguonChot, tachChotGiaoAn, yChot } from './chot-kien-thuc';
 import { chiQuenThuoc, CONG_CU_SO, dungDuoc, nhacCongCu, timCongCu } from './cong-cu-so';
 
 export const NHOM_HINH_THUC = {
@@ -223,7 +223,8 @@ export function nhacChotGiaoAn(k: Pick<Khbd, 'mon' | 'nguon'> & Partial<Pick<Khb
     'PHẦN CHỐT KIẾN THỨC – nguồn là cột "Sản phẩm cần đạt" của hoạt động này trong giáo án (dưới đây). ĐỌC và PHÂN LOẠI:',
     '- KIẾN THỨC: nhận định, đặc điểm, giá trị nội dung – nghệ thuật, tác dụng, kết luận, thông điệp về bài học.',
     '- KHÔNG PHẢI KIẾN THỨC: "HS nhận nhiệm vụ", phiếu đã điền, tiêu chí, bảng kiểm, sản phẩm hình thức (bài trình bày, poster…), lời dặn.',
-    'chotKienThuc = CHỈ các ý KIẾN THỨC, viết theo khía cạnh ("- Nội dung: …", "- Nghệ thuật: …", hoặc khía cạnh hợp hoạt động), dùng lời của giáo án (được rút gọn, gộp ý), không thêm ý mới, không ghi chú, không nhãn. Các bước tổ chức phải dẫn học sinh tới đúng các ý đó.',
+    'chotKienThuc = CHỈ các ý KIẾN THỨC, nhưng phải ĐỦ mọi ý kiến thức (vd đủ từng dòng của bảng thủ pháp/đặc điểm VÀ câu kết luận "=> …"), không bỏ sót; viết theo khía cạnh ("- Tình huống trào phúng: …", "- Nội dung: …", "- Nghệ thuật: …"), dùng lời của giáo án (được rút gọn câu chữ), không thêm ý mới, không ghi chú, không nhãn.',
+    '"Sản phẩm cần đạt" ở Bước 2, Bước 3 (câu trả lời học sinh phải đạt) cũng lấy đúng nội dung kiến thức của giáo án dưới đây, không tự viết chi tiết, dẫn chứng mới. Các bước tổ chức phải dẫn học sinh tới đúng các ý đó.',
     `<<<\n${cu.sanPhamCanDat.trim().slice(0, 3000)}\n>>>`,
   ].join('\n');
   if (k.mon !== 'NGU_VAN' || (!k.nguon?.toanVan && !k.sgk?.trim())) return '';
@@ -393,11 +394,18 @@ export function kiemTraGoiY(g: GoiY, k: Pick<Khbd, 'dieuKien'> & Partial<Pick<Kh
       // Lối Sửa: chốt là phần KIẾN THỨC của cột "Sản phẩm cần đạt" trong giáo án
       const ngoaiSp = chotNgoaiGiaoAn(h.chotKienThuc, spcd);
       if (ngoaiSp.length) loi.push(`Không hợp: chốt có ý không có trong "Sản phẩm cần đạt" của giáo án: ${ngoaiSp.map((t) => `“${t.slice(0, 60)}”`).join('; ')}.`);
+      const boSot = chotBoSot(h.chotKienThuc, spcd);
+      if (boSot.length) loi.push(`Thiếu ý kiến thức trong chốt (giáo án có, chốt bỏ sót): ${boSot.map((t) => `“${t.slice(0, 60)}”`).join('; ')}.`);
       const khongKt = yChot(h.chotKienThuc).filter(laKhongPhaiKienThuc);
       if (khongKt.length) loi.push(`Nhạt: chốt chép cả phần không phải kiến thức (tiêu chí, phiếu, nhiệm vụ): ${khongKt.map((t) => `“${t.slice(0, 50)}”`).join('; ')}.`);
     } else {
       const ngoai = nguonK ? chotNgoaiGiaoAn(h.chotKienThuc, nguonK) : [];
       if (ngoai.length) loi.push(`Không hợp: ${LOI_CHOT_NGOAI(ngoai)}`);
+    }
+    // Ngữ văn có giáo án: "sản phẩm cần đạt" Bước 2, 3 là câu trả lời dự kiến – phải bám giáo án, không tự viết chi tiết mới
+    if (nguonK && h.khung5512) {
+      const ngoaiSp = (['thucHien', 'baoCao'] as const).flatMap((b) => chotNgoaiGiaoAn(h.khung5512!.buoc[b].sanPham, nguonK).map((t) => `${b === 'thucHien' ? 'Bước 2' : 'Bước 3'}: “${t.slice(0, 60)}”`));
+      if (ngoaiSp.length) loi.push(`Không hợp: sản phẩm cần đạt có ý không có trong giáo án (tự sinh kiến thức): ${ngoaiSp.join('; ')}.`);
     }
     // Ngữ văn: hoạt động đọc hiểu, luyện tập phải chạm yếu tố đặc trưng thể loại
     if (tl && (h.thoiDiem === 'hinh_thanh' || h.thoiDiem === 'luyen_tap') && !yeuToCham([h.ten, h.yTuong, h.mucTieu, h.diemTuDuy, h.cauHoiMau, h.chotKienThuc, ...h.kichBan.map((b) => b.buoc)].join('\n'), tl, k.bai, k.lop).length) loi.push(LOI_THE_LOAI(tl));
@@ -412,7 +420,7 @@ export function kiemTraGoiY(g: GoiY, k: Pick<Khbd, 'dieuKien'> & Partial<Pick<Kh
   const coCongNghe = g.hoatDong.filter((h) => h.congNghe.trim());
   if (coCongNghe.length >= 2 && coCongNghe.every((h) => chiQuenThuoc(h.congNghe))) nghiem.push(`Công nghệ chưa mới: các phương án có công nghệ chỉ dùng công cụ hỏi – đáp quen thuộc (${[...new Set(coCongNghe.flatMap((h) => timCongCu(h.congNghe).map((c) => c.ten)))].join(', ')}); cần ít nhất 1 phương án dùng công nghệ để học sinh tạo, mô phỏng, nhập vai hoặc phân tích dữ liệu.`);
   const soHay = theoHoatDong.filter((l) => !laNhatHoacKhongHop(l)).length;
-  if (theoHoatDong.some((l) => l.some((x) => x.includes('chốt kiến thức có ý không có trong giáo án') || x.includes('không có trong "Sản phẩm cần đạt"')))) nghiem.push('Có phương án chốt kiến thức bằng ý không có trong giáo án (Ngữ văn): chỉ chốt bằng ý của giáo án.');
+  if (theoHoatDong.some((l) => l.some((x) => x.includes('chốt kiến thức có ý không có trong giáo án') || x.includes('không có trong "Sản phẩm cần đạt"') || x.includes('tự sinh kiến thức')))) nghiem.push('Có phương án chốt kiến thức bằng ý không có trong giáo án (Ngữ văn): chỉ chốt bằng ý của giáo án.');
   if (theoHoatDong.some((l) => l.some((x) => x.includes('trích dẫn không có trong KHBD gốc')))) nghiem.push('Có phương án tự viết câu trích không có trong giáo án (Ngữ văn): chỉ dùng câu trích có trong giáo án.');
   if (n >= 3 && soHay < 3) nghiem.push(`Chỉ có ${soHay} phương án không nhạt; cần ít nhất 3. Thay phương án nhạt bằng phương án có vấn đề thật, điểm tư duy rõ.`);
   const sttHopLe = (i: number) => Number.isInteger(i) && i >= 1 && i <= n;

@@ -27,7 +27,7 @@ const capAmTiet = (s: string) => { const a = amTiet(s); return a.slice(0, -1).ma
 
 /** Các ý của phần chốt (theo dòng hoặc dấu chấm phẩy), bỏ nhãn "Kiến thức chốt", lấy phần sau nhãn khía cạnh. */
 export function yChot(chot: string): string[] {
-  return chot.split(/\n|;\s+/).map((x) => x.replace(/^\s*[-–•+*]?\s*(kiến thức chốt:\s*)?/i, '').trim()).filter((x) => amTiet(x).length >= 4);
+  return chot.split(/\n|;\s+|(?=\(\d+\)\s)/).map((x) => x.replace(/^\s*(=>|⇒|→)?\s*[-–•+*]?\s*(\(\d+\)\s*)?(kiến thức chốt:\s*)?/i, '').trim()).filter((x) => amTiet(x).length >= 4);
 }
 
 /** Tỉ lệ cặp âm tiết của một ý có trong giáo án (bỏ phần nhãn "Nội dung:" …). */
@@ -65,3 +65,13 @@ export function nguonChot(k: { mon: string; bai?: string; lop?: number; theLoai?
 
 /** Ý không phải kiến thức (lấy nhầm từ cột Sản phẩm cần đạt): nhận nhiệm vụ, tiêu chí, phiếu, sản phẩm hình thức. Hàm thuần. */
 export const laKhongPhaiKienThuc = (y: string) => /^\s*(hs|học sinh|các nhóm|nhóm)\s+(tiếp nhận|nhận|hoàn thành|nộp|trình bày|ghi|điền|thảo luận)|tiêu chí|bảng kiểm|phiếu học tập|sản phẩm (của|các) nhóm|bài trình bày|poster|thang điểm/i.test(y);
+
+/** Các ý KIẾN THỨC trong cột "Sản phẩm cần đạt" của giáo án: bỏ dòng tiêu đề mục ("4. Tìm hiểu…"), dòng không phải kiến thức. */
+export function yKienThuc(sanPham: string): string[] {
+  return sanPham.split('\n').map((x) => x.replace(/^\s*(=>|⇒|→)?\s*[-–•+*]?\s*(\(\d+\)\s*)?/, '').trim())
+    .filter((x) => amTiet(x).length >= 5 && !laKhongPhaiKienThuc(x) && !(/^([IVX]+|\d+)[.)]\s/.test(x) && !x.includes(':') && amTiet(x).length <= 12));
+}
+
+export const NGUONG_DU = 0.4;
+/** Ý kiến thức của giáo án mà phần chốt bỏ sót (dưới 40% cặp âm tiết của ý có trong phần chốt). Hàm thuần. */
+export const chotBoSot = (chot: string, sanPham: string) => yKienThuc(sanPham).filter((y) => doBam(y, chot) < NGUONG_DU);

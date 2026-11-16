@@ -411,3 +411,12 @@ Góp ý của tác giả: kiến thức chốt lấy từ sản phẩm cần đ�
 - Kiểm thử `tests/san-pham-can-dat.test.ts`; tổng 275 đạt.
 - Sửa lại (16/11/2026, góp ý tác giả "không phải chép nguyên, phải đọc biết cái nào là kiến thức"): không chép nguyên văn cả cột nữa. AI đọc cột "Sản phẩm cần đạt", phân loại kiến thức / không phải kiến thức, chốt chỉ bằng ý kiến thức (theo khía cạnh, lời giáo án). Luật: ý chốt không có trong cột "Sản phẩm cần đạt" → không hợp; ý chốt là tiêu chí, phiếu, "HS nhận nhiệm vụ"… (`laKhongPhaiKienThuc`) → nhạt. Áp cho lối Sửa mọi môn.
 - Chuyển giao siết thêm: "tìm N chứng cứ/yếu tố…" phải nêu tên N yếu tố; Ngữ văn phải có phạm vi văn bản (đoạn nào); phải có sản phẩm phải nộp. `rules/ngu-van.md` v6 (E.7, E.8). Tổng 275 kiểm thử đạt.
+
+## Đọc bảng lồng trong ô; chốt đủ ý kiến thức; sản phẩm Bước 2–3 bám giáo án – 16/11/2026
+
+Tác giả so phần chốt (giáo án Giấu của: bảng 4 thủ pháp trào phúng lồng trong ô "Sản phẩm cần đạt" + câu kết luận) với kết quả app: Bước 4 chỉ còn câu kết luận; Bước 2 có chi tiết AI tự viết ("tay lén cất vàng", "ngó trước nhìn sau").
+
+- `src/sua/doc-docx.ts`: đọc bảng bằng khớp thẻ mở – đóng (trước dùng regex không tham lam, bảng lồng làm cắt sai bảng ngoài); bảng con trong ô trải thành dòng "cột 1: cột 2"; các đoạn trong ô xuống dòng (trước dính liền).
+- `chotBoSot`: ý kiến thức của cột "Sản phẩm cần đạt" (`yKienThuc`: bỏ tiêu đề mục, dòng không phải kiến thức) mà phần chốt bỏ sót → thiếu, AI gợi ý lại. Lời nhắc: chốt phải đủ từng dòng của bảng và câu kết luận.
+- Ngữ văn có giáo án: ô "Sản phẩm cần đạt" Bước 2, Bước 3 (câu trả lời dự kiến) phải bám giáo án (`chotNgoaiGiaoAn`) → không hợp nếu tự sinh chi tiết.
+- Kiểm thử `tests/bang-long.test.ts` dựng đúng cấu trúc giáo án và kết quả tác giả chụp; tổng 281 đạt.

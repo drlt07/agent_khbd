@@ -11,24 +11,85 @@ export const KICH_THUOC_TOI_DA = 20 * 1024 * 1024;
 
 const giaiMa = (s: string) => s
   .replace(/<br\s*\/?>/gi, '\n')
+  .replace(/<\/(p|li|h[1-6])>/gi, '\n')
   .replace(/<[^>]+>/g, '')
   .replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&')
   .replace(/[ \t]+/g, ' ').replace(/ *\n */g, '\n').trim();
 
-/** Tách HTML của mammoth thành đoạn. Hàm thuần, kiểm thử được không cần trình duyệt. */
+/** Vị trí thẻ đóng khớp với thẻ mở tại `tu` (tính cả thẻ cùng tên lồng nhau). */
+function timDong(html: string, tu: number, the: string): number {
+  const re = new RegExp(`<(\\/?)${the}\\b[^>]*>`, 'gi');
+  re.lastIndex = tu;
+  let sau = 0, m: RegExpExecArray | null;
+  while ((m = re.exec(html))) {
+    sau += m[1] ? -1 : 1;
+    if (sau === 0) return m.index + m[0].length;
+  }
+  return html.length;
+}
+
+/** Các khối con cấp ngoài cùng của `the` trong html (bỏ qua khối nằm trong bảng con). */
+function khoiCon(html: string, the: string): string[] {
+  const ra: string[] = [];
+  const re = new RegExp(`<(table|${the})\\b[^>]*>`, 'gi');
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(html))) {
+    const ten = m[1].toLowerCase();
+    const het = timDong(html, m.index, ten);
+    if (ten !== 'table') ra.push(html.slice(m.index + m[0].length, het).replace(new RegExp(`<\\/${ten}>$`, 'i'), ''));
+    re.lastIndex = het;
+  }
+  return ra;
+}
+
+/** Bảng (kể cả bảng lồng trong ô) → các hàng, mỗi hàng các ô; bảng con trong ô được trải thành dòng "cột 1: cột 2". */
+export function docBang(htmlTrongBang: string): string[][] {
+  return khoiCon(htmlTrongBang, 'tr').map((tr) => {
+    const o: string[] = [];
+    const re = /<(table|td|th)\b[^>]*>/gi;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(tr))) {
+      const ten = m[1].toLowerCase();
+      const het = timDong(tr, m.index, ten);
+      if (ten !== 'table') o.push(oChu(tr.slice(m.index + m[0].length, het).replace(new RegExp(`<\\/${ten}>$`, 'i'), '')));
+      re.lastIndex = het;
+    }
+    return o;
+  });
+}
+
+/** Chữ trong một ô: bảng con trải thành dòng, phần còn lại giải mã như đoạn văn. */
+function oChu(html: string): string {
+  let ra = '', tu = 0;
+  const re = /<table\b[^>]*>/gi;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(html))) {
+    ra += giaiMa(html.slice(tu, m.index)) + '\n';
+    const het = timDong(html, m.index, 'table');
+    ra += docBang(html.slice(m.index + m[0].length, het)).map((h) => h.filter(Boolean).join(h.filter(Boolean).length === 2 ? ': ' : ' | ')).filter(Boolean).join('\n') + '\n';
+    tu = het; re.lastIndex = het;
+  }
+  ra += giaiMa(html.slice(tu));
+  return ra.replace(/\n{2,}/g, '\n').trim();
+}
+
+/** Tách HTML của mammoth thành đoạn (bảng lồng trong ô được giữ trong ô). Hàm thuần, kiểm thử được không cần trình duyệt. */
 export function tachDoan(html: string): Doan[] {
   const ds: Omit<Doan, 'ma'>[] = [];
-  const re = /<(h[1-6]|p|ul|ol|table)\b[^>]*>([\s\S]*?)<\/\1>/gi;
+  const re = /<(h[1-6]|p|ul|ol|table)\b[^>]*>/gi;
   let m: RegExpExecArray | null;
   while ((m = re.exec(html))) {
     const the = m[1].toLowerCase();
+    const het = timDong(html, m.index, the);
+    const trong = html.slice(m.index + m[0].length, het).replace(new RegExp(`<\\/${the}>$`, 'i'), '');
+    re.lastIndex = het;
     if (the === 'table') {
-      const hang = [...m[2].matchAll(/<tr\b[^>]*>([\s\S]*?)<\/tr>/gi)].map((r) => [...r[1].matchAll(/<t[dh]\b[^>]*>([\s\S]*?)<\/t[dh]>/gi)].map((c) => giaiMa(c[1])));
+      const hang = docBang(trong);
       if (hang.some((h) => h.some(Boolean))) ds.push({ loai: 'bang', text: hang.map((h) => h.join(' | ')).join('\n'), hang });
     } else if (the === 'ul' || the === 'ol') {
-      for (const li of m[2].matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/gi)) { const t = giaiMa(li[1]); if (t) ds.push({ loai: 'muc', text: t }); }
+      for (const li of khoiCon(trong, 'li')) { const t = giaiMa(li); if (t) ds.push({ loai: 'muc', text: t }); }
     } else {
-      const t = giaiMa(m[2]);
+      const t = giaiMa(trong);
       if (t) ds.push({ loai: the.startsWith('h') ? 'tieuDe' : 'doan', text: t });
     }
   }
