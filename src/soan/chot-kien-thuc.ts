@@ -6,7 +6,7 @@
  */
 import { boDau } from '../thu-vien';
 
-const NHAN = /^\s*[-–•+*]?\s*(?:\d+[.)]\s*)?(nội dung|nghệ thuật|ý nghĩa|giá trị|chốt|gv chốt|kết luận|kiến thức|thông điệp|bài học|đặc điểm|tác dụng|chủ đề|nhân vật|tình huống|xung đột|ngôn ngữ|nguồn gốc tiếng cười|khái quát)[^:]{0,40}:\s*(.+)$/i;
+const NHAN = /^\s*[-–•+*]?\s*(?:\d+[.)]\s*)?(nội dung|nghệ thuật|ý nghĩa|giá trị|chốt|gv chốt|kết luận|kiến thức|thông điệp|bài học|đặc điểm|tác dụng|chủ đề|nhân vật|tình huống|xung đột|ngôn ngữ|nguồn gốc tiếng cười|khái quát|sản phẩm(?: dự kiến)?|dự kiến sản phẩm|kết quả dự kiến|đáp án|gợi ý trả lời|câu trả lời)[^:]{0,40}:\s*(.+)$/i;
 
 /** Các ý chốt có sẵn trong giáo án (dòng "Khía cạnh: nội dung"), không trùng, tối đa 15. */
 export function tachChotGiaoAn(vanBan: string): string[] {
@@ -40,7 +40,9 @@ export function doBam(y: string, giaoAn: string): number {
 
 export const NGUONG_BAM = 0.5;
 /** Các ý chốt không bám giáo án (dưới ngưỡng). */
-export const chotNgoaiGiaoAn = (chot: string, giaoAn: string) => yChot(chot).filter((y) => doBam(y, giaoAn) < NGUONG_BAM);
+export const GV_BO_SUNG = 'giáo viên bổ sung theo KHBD';
+/** Các ý chốt không bám giáo án (dưới ngưỡng); ý để giáo viên bổ sung không tính. */
+export const chotNgoaiGiaoAn = (chot: string, giaoAn: string) => yChot(chot).filter((y) => !boDau(y).includes(boDau(GV_BO_SUNG)) && doBam(y, giaoAn) < NGUONG_BAM);
 export const LOI_CHOT_NGOAI = (ds: string[]) => `Ngữ văn: chốt kiến thức có ý không có trong giáo án (không tự sinh kiến thức): ${ds.map((t) => `“${t.slice(0, 70)}${t.length > 70 ? '…' : ''}”`).join('; ')}.`;
 
 export const MAU_CHOT = 'Chốt kiến thức viết thành các ý ngắn, mỗi ý một dòng "- Khía cạnh: nội dung", dùng đúng thuật ngữ môn/thể loại. Ví dụ Ngữ văn (khám phá văn bản): "- Nội dung: Khắc họa tình huống trớ trêu, những biểu hiện tâm lí mâu thuẫn của nhân vật; qua đó tạo tiếng cười châm biếm và thể hiện ý nghĩa phê phán." / "- Nghệ thuật: Xây dựng tình huống trào phúng, thủ pháp tương phản, ngôn ngữ đối thoại hài hước, kết hợp hành động và chỉ dẫn sân khấu." Hoạt động vận dụng: "- Thông điệp: …", "- Liên hệ: …".';

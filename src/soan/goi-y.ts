@@ -221,7 +221,7 @@ export function nhacChotGiaoAn(k: Pick<Khbd, 'mon' | 'nguon'>, cu?: HoatDongCu):
   const ds = trongHd.length ? trongHd : tachChotGiaoAn(k.nguon.toanVan);
   return ds.length
     ? `CHỐT KIẾN THỨC LẤY TỪ GIÁO ÁN (nguồn bắt buộc; chép hoặc rút gọn đúng ý, giữ thuật ngữ; không thêm ý mới):\n${ds.map((x) => `- ${x}`).join('\n')}`
-    : 'Giáo án chưa ghi ý chốt rõ ràng: chốt kiến thức chỉ dùng ý có trong giáo án; thiếu thì ghi "- Kiến thức: giáo viên bổ sung theo KHBD".';
+    : 'Giáo án chưa ghi ý chốt riêng: TỔNG HỢP phần chốt từ câu hỏi, câu trả lời dự kiến, sản phẩm, nhận xét có trong hoạt động cũ và giáo án (đã đưa ở trên), viết theo khía cạnh ("- Nội dung: …", "- Nghệ thuật: …" hoặc khía cạnh hợp hoạt động), mỗi ý dùng lời của giáo án, không thêm ý mới. Khía cạnh nào giáo án không có thì ghi "- <khía cạnh>: giáo viên bổ sung theo KHBD".';
 }
 
 /** Lối Sửa KHBD cũ: phần GIỮ NGUYÊN và phần ĐƯỢC ĐỔI của hoạt động. */

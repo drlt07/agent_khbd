@@ -46,3 +46,23 @@ describe('Chốt kiến thức bám giáo án', () => {
     expect(ganChot(h)!.buoc.ketLuan.sanPham).toBe(`${KIEN_THUC_CHOT}\n- Nội dung: a b c d e f\n- Nghệ thuật: g h i k l m`);
   });
 });
+
+describe('Giáo án không có dòng chốt riêng: tổng hợp từ câu hỏi, câu trả lời, sản phẩm', () => {
+  const giaoAnKhongChot = [
+    'Hoạt động 2. Khám phá văn bản (20 phút)',
+    'GV hỏi: Vì sao ông Đại Cát nói lấp lửng? HS trả lời: vì sợ lộ chỗ giấu của nên nói bóng gió, dẫn tới hiểu lầm với bà Đại Cát.',
+    'GV hỏi: Chi tiết bức ảnh cụ Đại Lợi có ý nghĩa gì? HS: bức ảnh vừa là đạo cụ vừa phơi bày tâm lí ám ảnh của cải.',
+  ].join('\n');
+  it('lời nhắc yêu cầu tổng hợp chốt từ nội dung giáo án, không bảo giáo viên tự bổ sung cả phần', () => {
+    const n = nhacChotGiaoAn({ mon: 'NGU_VAN', nguon: { tenTep: 'g', toanVan: giaoAnKhongChot, hoatDong: [] } });
+    expect(n).toContain('TỔNG HỢP phần chốt từ câu hỏi, câu trả lời dự kiến, sản phẩm');
+  });
+  it('chốt tổng hợp đúng lời giáo án thì qua; ý "giáo viên bổ sung theo KHBD" không bị bắt nhầm; ý tự sinh vẫn bị bắt', () => {
+    const chot = '- Nội dung: ông Đại Cát nói lấp lửng vì sợ lộ chỗ giấu của, dẫn tới hiểu lầm; bức ảnh phơi bày tâm lí ám ảnh của cải.\n- Nghệ thuật: giáo viên bổ sung theo KHBD.';
+    expect(chotNgoaiGiaoAn(chot, giaoAnKhongChot)).toEqual([]);
+    expect(chotNgoaiGiaoAn('- Nghệ thuật: Lộng Chương kết hợp nhuần nhuyễn kịch nói phương Tây với nghệ thuật chèo.', giaoAnKhongChot)).toHaveLength(1);
+  });
+  it('dòng "Sản phẩm dự kiến:", "Đáp án:" trong giáo án cũng được lấy làm ý chốt', () => {
+    expect(tachChotGiaoAn('Sản phẩm dự kiến: Tiếng cười bật ra từ tình huống hiểu lầm giữa hai vợ chồng.')).toHaveLength(1);
+  });
+});

@@ -370,3 +370,4 @@ Tác giả hỏi kiến thức chốt theo luật và nguồn nào, và đưa v�
 - Luật: Ngữ văn có giáo án, ý chốt ngoài giáo án → "Không hợp", AI gợi ý lại. Luật câu trích mở rộng sang bảng 4 bước, nội dung, sản phẩm, prompt mẫu.
 - Ô "Sản phẩm cần đạt" Bước 4 hiện chốt nhiều dòng. `rules/ngu-van.md` v4 (mục E.6). Kiểm thử `tests/chot-kien-thuc.test.ts` dùng đúng ví dụ của tác giả; tổng 256 đạt.
 - Giới hạn: đo bám giáo án theo từ ngữ trùng, không hiểu nghĩa; diễn đạt lại quá xa có thể bị bắt nhầm, ý sai mà dùng lại từ của giáo án có thể lọt.
+- Bổ sung (16/11/2026): giáo án không có dòng chốt riêng → AI tổng hợp chốt từ câu hỏi, câu trả lời dự kiến, sản phẩm có trong giáo án (vẫn bị luật đo bám giáo án); khía cạnh giáo án không có thì ghi "giáo viên bổ sung theo KHBD" (dòng này không bị luật bắt nhầm). Nhận thêm dòng "Sản phẩm dự kiến:", "Kết quả dự kiến:", "Đáp án:", "Gợi ý trả lời:" làm ý chốt. Tổng 259 kiểm thử đạt.
