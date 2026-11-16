@@ -420,3 +420,12 @@ Tác giả so phần chốt (giáo án Giấu của: bảng 4 thủ pháp trào 
 - `chotBoSot`: ý kiến thức của cột "Sản phẩm cần đạt" (`yKienThuc`: bỏ tiêu đề mục, dòng không phải kiến thức) mà phần chốt bỏ sót → thiếu, AI gợi ý lại. Lời nhắc: chốt phải đủ từng dòng của bảng và câu kết luận.
 - Ngữ văn có giáo án: ô "Sản phẩm cần đạt" Bước 2, Bước 3 (câu trả lời dự kiến) phải bám giáo án (`chotNgoaiGiaoAn`) → không hợp nếu tự sinh chi tiết.
 - Kiểm thử `tests/bang-long.test.ts` dựng đúng cấu trúc giáo án và kết quả tác giả chụp; tổng 281 đạt.
+
+## Gắn mã cho mục tiêu năng lực số có sẵn trong giáo án – 16/11/2026
+
+Góp ý của tác giả (ảnh mục tiêu "3. Năng lực số và sử dụng AI có trách nhiệm" chỉ có lời mô tả): phần năng lực số không có mã và biểu hiện gợi ý tích hợp.
+
+- `src/sua/ma-muc-tieu.ts`: `dongMucTieuNls` (hàm thuần) tìm các dòng sau tiêu đề "Năng lực số…/sử dụng AI…" trong Mục tiêu, dừng ở tiêu đề kế tiếp; `ganMaMucTieu` – AI gợi ý mỗi dòng 1 mã (TT 02/2025 hoặc NLa–NLd) + biểu hiện; `locGanMa` – luật: đúng dòng có thật, mã trong thư viện, có biểu hiện, mỗi dòng một mã.
+- Bước 3 lối Sửa: thẻ "Gắn mã cho mục tiêu năng lực số của giáo án" (chỉ hiện khi giáo án có mục này); giáo viên tích dùng/bỏ, sửa biểu hiện; mã được dùng thêm vào danh sách tích hợp.
+- Xem trước, file Word: dòng mục tiêu của giáo viên giữ nguyên, mã ghi bổ sung (tô xanh) ngay dưới "→ Năng lực số 3.1.5.1: HS …". Mã của các hoạt động đã đổi mới (`maTuHoatDongMoi`) cũng lên Mục tiêu, kèm tên hoạt động.
+- Kiểm thử `tests/ma-muc-tieu.test.ts` dùng đúng mục tiêu tác giả chụp; tổng 285 đạt. Giáo án mẫu (Vật lí) không có mục năng lực số nên chưa xem thẻ trên trình duyệt.

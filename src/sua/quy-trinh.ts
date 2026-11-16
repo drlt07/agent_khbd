@@ -71,6 +71,8 @@ export interface SuaKhbd {
   sgk?: string;
   /** Hoạt động mới giáo viên chọn từ gợi ý của AI; xuất thành khối bổ sung ngay sau hoạt động cũ. */
   hoatDongMoi?: HoatDongMoi[];
+  /** Mã gắn cho dòng mục tiêu năng lực số có sẵn trong giáo án (giáo viên duyệt). */
+  maMucTieu?: import('./ma-muc-tieu').MaMucTieu[];
   maBo: { ma: string; lyDo: string }[];
   dauVet: DauVet[];
   daPhanTich: boolean;

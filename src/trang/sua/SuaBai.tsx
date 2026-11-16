@@ -14,6 +14,8 @@ import { taiWordSua, tenTepSua } from '../../sua/xuat-word';
 import { aiMauSua, doanMau, TEN_TEP_MAU, THIET_LAP_MAU } from '../../sua/mau';
 import { ChonMa } from '../soan/Buoc1ThongTin';
 import DoiMoiHoatDong from './DoiMoiHoatDong';
+import GanMaMucTieu from './GanMaMucTieu';
+import { dongBoSungMa, maTuHoatDongMoi, tenLoaiMa } from '../../sua/ma-muc-tieu';
 import { NHOM_HINH_THUC } from '../../soan/goi-y';
 import { ChuCT } from '../../thanh-phan/cong-thuc';
 import { timTheoBai } from '../../soan/sgv-ngu-van';
@@ -65,7 +67,7 @@ export default function SuaBai() {
   const baiMoi = () => { setK(null); setBuoc(0); setLaMau(false); setLoi(null); };
 
   const kiemTra = k ? kiemTraCuoi(k) : { nghiem: [], nhac: [] };
-  const choPhep = [true, !!k?.daPhanTich, !!k?.yccdDaXacNhan, !!k && (k.chen.length > 0 || k.maBo.length > 0 || (k.hoatDongMoi?.length ?? 0) > 0), !!k && kiemTra.nghiem.length === 0];
+  const choPhep = [true, !!k?.daPhanTich, !!k?.yccdDaXacNhan, !!k && (k.chen.length > 0 || k.maBo.length > 0 || (k.hoatDongMoi?.length ?? 0) > 0 || (k.maMucTieu ?? []).some((m) => m.dung)), !!k && kiemTra.nghiem.length === 0];
   const denDuoc = (i: number) => choPhep.slice(0, i + 1).every(Boolean);
 
   return (
@@ -299,6 +301,7 @@ function BuocDeXuat({ k, sua, ai, dang, coAi, chayDeXuat }: { k: SuaKhbd; sua: (
           </The>
         );
       })}
+      <GanMaMucTieu k={k} sua={sua} ai={ai} />
       <DoiMoiHoatDong k={k} sua={sua} ai={ai} />
       {k.maBo.map((b) => <HopBao key={b.ma} kieu="warn"><strong>{b.ma}</strong>: {b.lyDo}{k.chen.some((c) => c.ma === b.ma) ? ' Bản cuối vẫn ở trên (đang Bỏ); thầy/cô có thể bấm Dùng.' : ''}</HopBao>)}
     </div>
@@ -345,6 +348,8 @@ function BuocXem({ k, kiemTra }: { k: SuaKhbd; kiemTra: { nghiem: string[]; nhac
             {d.loai === 'bang' && d.hang ? (
               <div className="overflow-x-auto my-2"><table className="w-full text-[14px] border border-line">{d.hang.map((h, i) => <tr key={i} className="border-t border-line">{h.map((c, j) => <td key={j} className="p-2 align-top whitespace-pre-line">{c}</td>)}</tr>)}</table></div>
             ) : <p className={`whitespace-pre-line ${d.loai === 'tieuDe' ? 'tieu-de mt-4' : 'mt-1'}`}>{d.loai === 'muc' ? '– ' : ''}{d.text}</p>}
+            {(k.maMucTieu ?? []).filter((x) => x.dung && x.doan === d.ma).map((m) => <p key={`mm${m.ma}`} className="mt-1 rounded-md bg-[var(--bo-sung)] px-2 py-1">→ {dongBoSungMa(m)}</p>)}
+            {d.ma === k.mucTieuDen && maTuHoatDongMoi(k).map((m) => <p key={`hm${m.ma}`} className="mt-1 rounded-md bg-[var(--bo-sung)] px-2 py-1"><b>{tenLoaiMa(m.ma)} {m.ma}:</b> HS {m.bieuHien} ({m.hoatDong}).</p>)}
             {d.ma === k.mucTieuDen && dung.map((c) => <p key={`mt${c.id}`} className="mt-1 rounded-md bg-[var(--bo-sung)] px-2 py-1">{c.loai === 'clil' ? <><b>Tiếng Anh (CLIL):</b> dùng key words {c.keyWords.map((w) => w.en).join(', ')}.</> : <><b>{/^NL[a-d]$/.test(c.ma) ? 'Năng lực AI' : 'Năng lực số'} {c.ma}:</b> HS {c.bieuHien}.</>}</p>)}
             {(k.hoatDongMoi ?? []).filter((m) => m.chenSau === d.ma).map((m) => (
               <div key={m.id} className="my-2 rounded-lg bg-[var(--bo-sung)] px-3 py-2 border-l-4 border-accent">

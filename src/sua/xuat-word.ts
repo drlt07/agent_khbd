@@ -8,6 +8,7 @@ import { laMaAi, moTaMa, vanBanGoc } from '../thu-vien';
 import type { Chen, HoatDongMoi, SuaKhbd } from './quy-trinh';
 import { ganChot, NHOM_HINH_THUC } from '../soan/goi-y';
 import { TEN_BUOC_KHUNG, tieuDeHoatDongMoi } from '../soan/giu-hoat-dong';
+import { dongBoSungMa, maTuHoatDongMoi, tenLoaiMa } from './ma-muc-tieu';
 import { tachDong } from '../soan/dinh-dang';
 
 const FONT = 'Times New Roman';
@@ -98,6 +99,10 @@ export function dungTaiLieuSua(k: SuaKhbd): Document {
   for (const d of k.doan) {
     if (d.loai === 'bang' && d.hang) con.push(bang(d.hang));
     else d.text.split('\n').forEach((t) => con.push(doan([chu(d.loai === 'muc' ? `- ${t}` : t, { dam: d.loai === 'tieuDe' })])));
+    // Mã gắn cho dòng mục tiêu năng lực số có sẵn
+    for (const m of (k.maMucTieu ?? []).filter((x) => x.dung && x.doan === d.ma)) con.push(doan([chu(`→ ${dongBoSungMa(m)}`)], { nen: NEN_BO_SUNG }));
+    // Mã của các hoạt động đã đổi mới
+    if (d.ma === k.mucTieuDen) for (const m of maTuHoatDongMoi(k)) con.push(doan([chu(`${tenLoaiMa(m.ma)} ${m.ma}: `, { dam: true }), chu(`HS ${m.bieuHien} (${m.hoatDong}).`)], { nen: NEN_BO_SUNG }));
     // Năng lực bổ sung vào mục tiêu
     if (d.ma === k.mucTieuDen && dung.length) {
       dung.forEach((c) => con.push(doan([chu(c.loai === 'clil' ? 'Tiếng Anh (CLIL): ' : `${laMaAi(c.ma) ? 'Năng lực AI' : 'Năng lực số'} ${c.ma}: `, { dam: true }), chu(c.loai === 'clil' ? `dùng key words ${c.keyWords.map((w) => w.en).join(', ')} trong ${c.hoatDong}.` : `HS ${c.bieuHien}.`)], { nen: NEN_BO_SUNG })));
