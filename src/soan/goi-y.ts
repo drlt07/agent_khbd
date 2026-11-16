@@ -12,6 +12,7 @@ import { phutTheoHoatDong } from './phan-bo';
 import { TEN_HD, TuChamOut, type Khbd, type MaHd } from './kieu';
 import { LOI_TRICH_DAN, phanVan, trichDanLa } from './ngu-van';
 import { coBatAi, coDungAi, coLamTruoc, LOI_LAM_TRUOC, phanHafa } from './hafa-vret';
+import { LOI_THE_LOAI, theLoaiCua, yeuToCham } from './the-loai-van';
 
 export const NHOM_HINH_THUC = {
   A: 'Nhập vai và mô phỏng xã hội', B: 'Thí nghiệm và mô phỏng khoa học', C: 'Điều tra, phá án và giải quyết vấn đề',
@@ -182,7 +183,8 @@ export function nhacGoiY(k: Khbd, hd?: MaHd, yeuCau = '', cu?: HoatDongCu): stri
 
 export interface KetQuaLuatGoiY { nghiem: string[]; nhac: string[]; theoHoatDong: string[][] }
 
-export function kiemTraGoiY(g: GoiY, k: Pick<Khbd, 'dieuKien'> & Partial<Pick<Khbd, 'bai' | 'yccd' | 'tichHop' | 'mon' | 'nguon'>>, phutToiDa?: number): KetQuaLuatGoiY {
+export function kiemTraGoiY(g: GoiY, k: Pick<Khbd, 'dieuKien'> & Partial<Pick<Khbd, 'bai' | 'lop' | 'yccd' | 'tichHop' | 'mon' | 'nguon' | 'theLoai'>>, phutToiDa?: number): KetQuaLuatGoiY {
+  const tl = k.mon ? theLoaiCua({ mon: k.mon, bai: k.bai, lop: k.lop, theLoai: k.theLoai, nguon: k.nguon }) : undefined;
   const tk = tuKhoaBai([k.bai ?? '', ...(k.yccd ?? []).map((y) => y.noiDung), g.phanTich.trongTam, ...g.phanTich.khoKhan]);
   const batAi = k.tichHop ? coBatAi({ tichHop: k.tichHop }) : true;
   const nghiem: string[] = [], nhac: string[] = [];
@@ -213,6 +215,8 @@ export function kiemTraGoiY(g: GoiY, k: Pick<Khbd, 'dieuKien'> & Partial<Pick<Kh
     // Ngữ văn có giáo án gốc: không được tự viết câu trích
     const la = k.mon ? trichDanLa({ mon: k.mon, nguon: k.nguon }, [h.yTuong, h.mucTieu, h.cauHoiMau, h.sanPham, h.danhGia, h.chotKienThuc, h.diemTuDuy, ...h.kichBan.map((b) => b.buoc)].join('\n')) : [];
     if (la.length) loi.push(`Không hợp: ${LOI_TRICH_DAN(la)}`);
+    // Ngữ văn: hoạt động đọc hiểu, luyện tập phải chạm yếu tố đặc trưng thể loại
+    if (tl && (h.thoiDiem === 'hinh_thanh' || h.thoiDiem === 'luyen_tap') && !yeuToCham([h.ten, h.yTuong, h.mucTieu, h.diemTuDuy, h.cauHoiMau, h.chotKienThuc, ...h.kichBan.map((b) => b.buoc)].join('\n'), tl, k.bai, k.lop).length) loi.push(LOI_THE_LOAI(tl));
     if (h.thoiLuong > 15) loi.push(`Dài ${h.thoiLuong} phút (ưu tiên 5–15).`);
     if (phutToiDa && h.thoiLuong > phutToiDa) loi.push(`Dài hơn thời lượng hoạt động (${phutToiDa} phút).`);
     const tongKichBan = h.kichBan.reduce((s, b) => s + b.phut, 0);

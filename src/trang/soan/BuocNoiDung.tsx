@@ -4,6 +4,9 @@ import { BieuTuong } from '../../thanh-phan/bieu-tuong';
 import { rutYccd } from '../../soan/quy-trinh';
 import { LoiAi, type GoiAi } from '../../soan/ai';
 import type { Khbd } from '../../soan/kieu';
+import { THE_LOAI_VAN } from '../../soan/ngu-van';
+import { theLoaiCua, KHO_THE_LOAI } from '../../soan/the-loai-van';
+import { timTheoBai } from '../../soan/sgv-ngu-van';
 
 /** Bước 2 "Nội dung bài": AI đề xuất yêu cầu cần đạt theo chương trình môn; giáo viên sửa rồi xác nhận (luật 1.2). */
 export default function BuocNoiDung({ k, sua, ai }: { k: Khbd; sua: (f: (k: Khbd) => Khbd) => void; ai: GoiAi | null }) {
@@ -30,6 +33,24 @@ export default function BuocNoiDung({ k, sua, ai }: { k: Khbd; sua: (f: (k: Khbd
         <div className="flex gap-1"><NhanAiLam ai="ai" /><NhanAiLam ai="gv" /></div>
       </div>
       <p className="text-sm text-muted mt-1">AI đề xuất theo chương trình môn học (Chương trình GDPT 2018). Thầy/cô sửa cho đúng rồi xác nhận.</p>
+      {k.mon === 'NGU_VAN' && (() => {
+        const sgv = timTheoBai(k.bai, k.lop);
+        const tl = theLoaiCua(k);
+        return (
+          <div className="mt-4 rounded-xl border border-accent-line bg-accent-soft/40 p-3 flex flex-col gap-2">
+            <label className="text-sm font-semibold" htmlFor="the-loai-soan">Thể loại văn bản chính</label>
+            <select id="the-loai-soan" value={k.theLoai ?? ''} onChange={(e) => sua((x) => ({ ...x, theLoai: e.target.value || undefined }))}
+              className="px-3 py-2 rounded-xl border border-line-strong bg-surface text-[15px]">
+              <option value="">{sgv ? `Theo SGV (${tl ? THE_LOAI_VAN[tl] : 'nhiều thể loại'})` : 'Chưa chọn'}</option>
+              {Object.entries(THE_LOAI_VAN).filter(([m]) => m !== 'khac').map(([m, t]) => <option key={m} value={m}>{t}</option>)}
+            </select>
+            <p className="text-[13px] text-muted">
+              {sgv && <><strong>Theo SGV Ngữ văn 12:</strong> Bài {sgv.bai.so}. {sgv.bai.ten}{sgv.vanBan ? ` · ${sgv.vanBan.ten} (${sgv.vanBan.tieuLoai})` : ''}. </>}
+              {tl ? <>AI thiết kế hoạt động khai thác đúng yếu tố đặc trưng của {THE_LOAI_VAN[tl].toLowerCase()}: {KHO_THE_LOAI[tl].yeuTo.map((y) => y.ten.toLowerCase()).join('; ')}.</> : 'Chọn thể loại để AI thiết kế hoạt động bám đặc trưng thể loại.'}
+            </p>
+          </div>
+        );
+      })()}
       <div className="mt-4 flex flex-col gap-2">
         {k.yccd.map((y, i) => (
           <div key={i} className="flex gap-2 items-start">

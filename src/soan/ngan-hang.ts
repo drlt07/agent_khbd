@@ -17,6 +17,7 @@ import { phutTheoHoatDong } from './phan-bo';
 import { HUONG_DAN_HD } from './prompt';
 import { phanVan } from './ngu-van';
 import { phanHafa } from './hafa-vret';
+import { LOI_THE_LOAI, theLoaiCua, yeuToCham } from './the-loai-van';
 import { layPpdh, MA_LHDN } from './phuong-phap';
 import { NganHangOut, PhuongAnHdOut, TEN_HD, type Khbd, type MaHd, type NganHang, type PhuongAnHd } from './kieu';
 
@@ -98,7 +99,8 @@ export const laHinhThanh = (k: Pick<Khbd, 'phuongPhap'>, hd: MaHd) => k.phuongPh
 const laThieu = (loi: string[]) => loi.some((l) => l.startsWith('Thiếu') || l.startsWith('Dài'));
 
 /** phamVi: chỉ kiểm các hoạt động này (khi gợi ý từng hoạt động); bỏ trống = kiểm cả bộ, gồm số nhóm hình thức và độ phủ mã. */
-export function kiemTraNganHang(nh: NganHang, k: Pick<Khbd, 'dieuKien' | 'phanBo' | 'phuongPhap' | 'tichHop'> & Partial<Pick<Khbd, 'bai' | 'yccd'>>, phamVi?: MaHd[]): KetQuaLuatNganHang {
+export function kiemTraNganHang(nh: NganHang, k: Pick<Khbd, 'dieuKien' | 'phanBo' | 'phuongPhap' | 'tichHop'> & Partial<Pick<Khbd, 'bai' | 'yccd' | 'mon' | 'lop' | 'nguon' | 'theLoai'>>, phamVi?: MaHd[]): KetQuaLuatNganHang {
+  const tl = k.mon ? theLoaiCua({ mon: k.mon, bai: k.bai, lop: k.lop, theLoai: k.theLoai, nguon: k.nguon }) : undefined;
   const tk = tuKhoaBai([k.bai ?? '', ...(k.yccd ?? []).map((y) => y.noiDung), nh.phanTich.trongTam, ...nh.phanTich.khoKhan]);
   const batAi = coBatAi(k);
   const nghiem: string[] = [], nhac: string[] = [];
@@ -121,6 +123,7 @@ export function kiemTraNganHang(nh: NganHang, k: Pick<Khbd, 'dieuKien' | 'phanBo
     if (laChungChung(`${p.yTuong}\n${p.hocSinhLam}`)) loi.push('Nhạt: cách tổ chức chung chung (thảo luận rồi trình bày, hỏi – đáp, làm bài SGK).');
     if (laHinhThanh(k, p.hd) && p.tuCham.hapDan < HAP_DAN_HINH_THANH) loi.push(`Nhạt: hoạt động hình thành kiến thức chưa đủ sinh động (Hấp dẫn ${p.tuCham.hapDan}/5, cần từ ${HAP_DAN_HINH_THANH}).`);
     if (!ganVoiBai(p.ten, tk)) loi.push(LOI_TEN);
+    if (tl && k.phuongPhap === 'cv5512' && (p.hd === 'HD2' || p.hd === 'HD3') && !yeuToCham([p.ten, p.yTuong, p.hocSinhLam, p.diemTuDuy, p.sanPham].join('\n'), tl, k.bai, k.lop).length) loi.push(LOI_THE_LOAI(tl));
     if (!batAi && coDungAi(p.nhom, p.congCu, p.yTuong, p.hocSinhLam, ...p.nls.map((n) => n.congCu))) loi.push(LOI_AI);
     const canThem = [p.congCu, ...p.nls.map((n) => n.congCu)].filter((c) => c.trim() && !coTrongDanhSach(c, k.dieuKien.thietBi));
     if (canThem.length) loi.push(`Cần thiết bị chưa khai báo: ${[...new Set(canThem)].join(', ')}.`);

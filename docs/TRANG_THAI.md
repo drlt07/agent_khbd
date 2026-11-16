@@ -301,3 +301,14 @@ Tác giả đưa 4 file Sách giáo viên Ngữ văn 12 – Kết nối tri th�
 - `rules/ngu-van.md` v2: trọng tâm thể loại lớp 12; mục D tổ chức dạy học theo SGV (YCCĐ là gốc, câu hỏi đọc hiểu là nhiệm vụ chuyển giao, mạch Khởi động → Hình thành → Luyện tập → Vận dụng, không dồn câu hỏi vào Hình thành, tri thức ngữ văn không hàn lâm, không bắt chép lại thông tin có sẵn, kết nối bài đã học, đánh giá thường xuyên, giáo viên chủ động).
 - Màn "Sửa KHBD cũ": dưới ô thể loại hiện "Theo SGV Ngữ văn 12: Bài … · văn bản (tiểu loại)" và nút đổi thể loại cho khớp; giáo viên quyết định.
 - Kiểm thử `tests/sgv-ngu-van.test.ts`; tổng 227 đạt. Đã kiểm tra trên trình duyệt.
+
+## Ngữ văn: kiến thức đặc trưng thể loại đúng, hoạt động hay bám thể loại – 16/11/2026
+
+Yêu cầu của tác giả: đảm bảo kiến thức đặc trưng thể loại văn học và sinh hoạt động thật hay.
+
+- `data/the_loai_van.json`: kho 6 thể loại (truyện, thơ, kịch, kí, văn nghị luận, văn bản thông tin). Mỗi thể loại: 4–7 yếu tố đặc trưng (cách hiểu, học sinh nhìn vào đâu, câu hỏi khai thác, từ khóa), tiểu loại (tiểu thuyết hiện đại, truyền kì/kì ảo, thơ cổ điển/lãng mạn/tượng trưng – siêu thực, hài kịch, bi kịch, chèo – tuồng, phóng sự, hồi kí, tùy bút…, chính luận, nghị luận văn học/xã hội), 4–6 hoạt động hay gắn từng yếu tố, lỗi dạy lệch thể loại. Diễn đạt lại theo Tri thức ngữ văn SGV 12 và lí luận thể loại.
+- `src/soan/the-loai-van.ts` (hàm thuần): thể loại của bài (giáo viên chọn → SGV), tiểu loại, kiến thức thể loại cho lời nhắc, `yeuToCham` (hoạt động chạm yếu tố nào).
+- Lời nhắc AI môn Văn có khối "Kiến thức thể loại …" của đúng thể loại bài (không đưa cả 6 thể loại).
+- Luật code: gợi ý hoạt động, ngân hàng hoạt động (HĐ2, HĐ3) không chạm yếu tố nào → "Nhạt: chưa bám đặc trưng thể loại" (bị đẩy xuống, AI phải gợi ý lại nếu thiếu phương án hay); soạn HĐ2 Hình thành kiến thức mới khai thác dưới 2 yếu tố → soạn lại ≤ 2 lượt; bước Kiểm tra → nhắc.
+- Bước 2 "Nội dung bài" (luồng Soạn mới): ô "Thể loại văn bản chính" cho Ngữ văn, mặc định theo SGV; hiện các yếu tố đặc trưng AI sẽ khai thác. `Khbd.theLoai` mới.
+- Kiểm thử `tests/the-loai-van.test.ts` (kể cả: mọi hoạt động mẫu trong kho tự qua luật bám thể loại); tổng 234 đạt.

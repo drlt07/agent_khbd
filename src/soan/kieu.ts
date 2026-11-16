@@ -237,6 +237,8 @@ export interface Khbd {
   dieuKien: { thietBi: string[]; mucHs: 'yeu' | 'tb' | 'kha'; ghiChu: string };
   yccd: { ma: string; noiDung: string }[];
   yccdDaXacNhan: boolean;
+  /** Ngữ văn: thể loại văn bản chính giáo viên chọn (mã THE_LOAI_VAN); không có thì theo SGV hoặc giáo án cũ. */
+  theLoai?: string;
   phanBo: PhanBo[];
   mucTieu?: z.infer<typeof MucTieuOut>;
   giaiDoan1?: z.infer<typeof GiaiDoan1Out>;
