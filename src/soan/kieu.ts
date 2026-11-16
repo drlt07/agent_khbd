@@ -286,6 +286,6 @@ export const TEN_HD: Record<PhuongPhap, Record<MaHd, string>> = {
 
 export const THIET_BI_GOI_Y = [
   'Máy chiếu', 'Máy tính của giáo viên', 'Bảng phụ, bút dạ', 'Phiếu học tập in',
-  'Điện thoại/máy tính bảng (1 máy/nhóm)', 'Phòng máy (1 máy/HS)', 'Internet',
-  'Google Forms', 'Padlet', 'Canva', 'GeoGebra', 'Bảng tính (Excel/Google Sheets)', 'Chatbot AI (Gemini/ChatGPT)',
+  'Điện thoại/máy tính bảng (1 máy/nhóm)', 'Phòng máy (1 máy/HS)', 'Internet', 'Loa, micro', 'Webcam',
+  'Chatbot AI (Gemini/ChatGPT)',
 ];

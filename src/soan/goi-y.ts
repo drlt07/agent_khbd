@@ -14,6 +14,7 @@ import { LOI_TRICH_DAN, phanVan, trichDanLa } from './ngu-van';
 import { coBatAi, coDungAi, coLamTruoc, LOI_LAM_TRUOC, phanHafa } from './hafa-vret';
 import { LOI_THE_LOAI, theLoaiCua, yeuToCham } from './the-loai-van';
 import { tachHoatDongCu } from './giu-hoat-dong';
+import { chiQuenThuoc, CONG_CU_SO, dungDuoc, nhacCongCu, timCongCu } from './cong-cu-so';
 
 export const NHOM_HINH_THUC = {
   A: 'Nhập vai và mô phỏng xã hội', B: 'Thí nghiệm và mô phỏng khoa học', C: 'Điều tra, phá án và giải quyết vấn đề',
@@ -146,6 +147,8 @@ export const laNhatHoacKhongHop = (loi: string[]) => loi.some((l) => l.startsWit
 
 /** Công cụ có trong danh sách (khớp lỏng: "GeoGebra trên điện thoại" khớp "GeoGebra"). */
 export const coTrongDanhSach = (congCu: string, ds: string[]) => {
+  const kho = timCongCu(congCu);
+  if (kho.length && kho.every((c) => dungDuoc(c, ds))) return true;
   const cc = congCu.trim().toLowerCase();
   return !cc || ds.some((d) => { const x = d.trim().toLowerCase(); return !!x && (cc.includes(x) || x.includes(cc)); });
 };
@@ -158,11 +161,12 @@ export const nguyenTacHoatDong = () => LUAT_HOAT_DONG.replace(/<!--.*?-->\s*/s, 
 export interface HoatDongCu { ten: string; phut: number; noiDung: string }
 
 /** Dặn tên gắn với bài, hình thành kiến thức sinh động, AI theo lựa chọn của giáo viên (dùng chung cho mọi lời nhắc gợi ý). */
-export const TEN_VA_AI = (k: Pick<Khbd, 'tichHop'>) => [
+export const TEN_VA_AI = (k: Pick<Khbd, 'tichHop'> & Partial<Pick<Khbd, 'mon' | 'dieuKien'>>) => [
   'Tên hoạt động: sinh động, dễ nhớ nhưng PHẢI chứa khái niệm, nhân vật, tác phẩm hoặc hiện tượng chính của bài (vd "Thám tử parabol", "Phiên tòa xử Xuân Tóc Đỏ", "Phòng thí nghiệm động năng"); không đặt tên dùng được cho mọi bài ("Vé ra sân", "Thử thách 1").',
   'Hoạt động hình thành kiến thức: hình thức sinh động (trò chơi, nhập vai, điều tra, thí nghiệm, trạm, mảnh ghép, thiết kế…), học sinh tự phát hiện kiến thức qua việc làm; không nghe giảng rồi trả lời câu hỏi.',
   coBatAi(k) ? 'Giáo viên đã bật năng lực AI: chỉ dùng AI ở hoạt động thật sự cần, học sinh tự làm trước rồi mới hỏi AI.' : 'Giáo viên KHÔNG bật năng lực AI: không thiết kế hoạt động học sinh dùng AI, chatbot (không dùng nhóm I).',
-].join('\n');
+  k.mon && k.dieuKien ? nhacCongCu(k.mon, k.dieuKien.thietBi) : '',
+].filter(Boolean).join('\n');
 
 /** Ý tưởng xuyên suốt đã chọn và các hoạt động đã soạn: gợi ý phải hợp mạch và không lặp cơ chế. */
 function boiCanhBai(k: Khbd, hd?: MaHd): string {
@@ -308,6 +312,8 @@ export function kiemTraGoiY(g: GoiY, k: Pick<Khbd, 'dieuKien'> & Partial<Pick<Kh
     return loi;
   });
   if (theoHoatDong.some((l) => l.some((x) => /Thiếu/.test(x)))) nghiem.push('Có hoạt động thiếu mục bắt buộc (dự phòng, câu hỏi mẫu, đánh giá, chốt kiến thức cụ thể, điểm tư duy, điểm đổi mới, năng lực, đối chiếu mục tiêu, khung CV 5512, prompt mẫu).');
+  const coCongNghe = g.hoatDong.filter((h) => h.congNghe.trim());
+  if (coCongNghe.length >= 2 && coCongNghe.every((h) => chiQuenThuoc(h.congNghe))) nghiem.push(`Công nghệ chưa mới: các phương án có công nghệ chỉ dùng công cụ hỏi – đáp quen thuộc (${[...new Set(coCongNghe.flatMap((h) => timCongCu(h.congNghe).map((c) => c.ten)))].join(', ')}); cần ít nhất 1 phương án dùng công nghệ để học sinh tạo, mô phỏng, nhập vai hoặc phân tích dữ liệu.`);
   const soHay = theoHoatDong.filter((l) => !laNhatHoacKhongHop(l)).length;
   if (theoHoatDong.some((l) => l.some((x) => x.includes('trích dẫn không có trong KHBD gốc')))) nghiem.push('Có phương án tự viết câu trích không có trong giáo án (Ngữ văn): chỉ dùng câu trích có trong giáo án.');
   if (n >= 3 && soHay < 3) nghiem.push(`Chỉ có ${soHay} phương án không nhạt; cần ít nhất 3. Thay phương án nhạt bằng phương án có vấn đề thật, điểm tư duy rõ.`);
@@ -318,12 +324,12 @@ export function kiemTraGoiY(g: GoiY, k: Pick<Khbd, 'dieuKien'> & Partial<Pick<Kh
 
 /** Công cụ ngoài danh sách đã biết và ngoài thiết bị lớp đã khai báo → đánh dấu cần kiểm tra (không tin AI tự khai). */
 export function chuanHoaGoiY(g: GoiY, k: Pick<Khbd, 'dieuKien'>): GoiY {
-  const daBiet = [...CONG_CU_DA_BIET, ...k.dieuKien.thietBi].map((x) => x.toLowerCase());
+  const daBiet = [...CONG_CU_DA_BIET, ...CONG_CU_SO.map((c) => c.ten), ...k.dieuKien.thietBi].map((x) => x.toLowerCase());
   return {
     ...g,
     hoatDong: g.hoatDong.map((h) => {
       const cc = h.congNghe.trim().toLowerCase();
-      const la = cc && !daBiet.some((d) => cc.includes(d) || d.includes(cc));
+      const la = cc && !timCongCu(cc).length && !daBiet.some((d) => cc.includes(d) || d.includes(cc));
       return { ...h, tuCham: kepTuCham(h.tuCham), thoiLuong: Math.round(h.thoiLuong), canKiemTra: h.canKiemTra || !!la, kichBan: h.kichBan.map((b) => ({ ...b, phut: Math.round(b.phut) })) };
     }),
   };

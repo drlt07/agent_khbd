@@ -1,4 +1,4 @@
-<!-- phien_ban: 3 · 2026-11-11 · Tên gắn với bài, hình thành kiến thức sinh động, AI theo lựa chọn của giáo viên · Thêm điểm tư duy, dấu hiệu hoạt động hay/nhạt, ví dụ đối chiếu · Hướng dẫn thiết kế, gợi ý hoạt động do tác giả cung cấp -->
+<!-- phien_ban: 4 · 2026-11-16 · v4: công nghệ mới hơn (kho data/cong_cu_so.json), công cụ quen thuộc chỉ khi cần · Tên gắn với bài, hình thành kiến thức sinh động, AI theo lựa chọn của giáo viên · Thêm điểm tư duy, dấu hiệu hoạt động hay/nhạt, ví dụ đối chiếu · Hướng dẫn thiết kế, gợi ý hoạt động do tác giả cung cấp -->
 NGUYÊN TẮC THIẾT KẾ HOẠT ĐỘNG
 
 1. TÔN TRỌNG ĐẶC TRƯNG MÔN HỌC
@@ -31,7 +31,7 @@ J. Hợp tác nhóm, khám phá và tự kiến tạo kiến thức
 Không đưa ra nhiều hoạt động chỉ khác tên gọi nhưng cùng một cơ chế tổ chức.
 
 3. ỨNG DỤNG CÔNG NGHỆ ĐÚNG MỤC ĐÍCH
-Chủ động cân nhắc các công cụ như: GeoGebra, Desmos (Toán học); PhET (Vật lí, Hóa học, Sinh học, Toán học); MolView (mô hình phân tử); BioDigital Human (giải phẫu 3D); Google Earth (bản đồ và địa hình); NASA Eyes (không gian, thiên văn); Scratch, Python Tutor (thuật toán, lập trình); Twine (kể chuyện phân nhánh); Mentimeter, Padlet, Nearpod, Wordwall (tương tác lớp học); ChatGPT, Claude, Gemini và các công cụ AI thích hợp (nhập vai, phản biện, tạo tình huống, phân tích lỗi, phản hồi học tập). Có thể đề xuất công cụ khác nếu phù hợp hơn.
+Ưu tiên công nghệ để học sinh TẠO, MÔ PHỎNG, NHẬP VAI, ĐIỀU TRA, PHÂN TÍCH DỮ LIỆU, KIỂM CHỨNG; không chỉ trả lời trắc nghiệm. Ví dụ: NotebookLM (hỏi đáp chỉ dựa trên tài liệu của bài, tóm tắt âm thanh để nghe – phản biện), Gem/trợ lý AI tùy chỉnh (nhập vai nhân vật, gia sư gợi mở), Teachable Machine (học sinh tự huấn luyện mô hình AI), Genially (phòng thoát hiểm, trò chơi điều tra), Book Creator, Canva, CapCut (sách điện tử, poster, video ngắn), Twine (truyện, tình huống phân nhánh), ThingLink, Google Arts & Culture, Google Earth (tham quan, chú giải ảo), PhET, GeoGebra 3D/AR, Desmos, Tinkercad, MakeCode (mô phỏng, thiết kế), Flourish (kể chuyện bằng dữ liệu), bảng trắng cộng tác, mã QR trạm học tập. Công cụ hỏi – đáp quen thuộc (Padlet, Quizizz, Google Forms, Kahoot, Wordwall, Mentimeter, Blooket) chỉ dùng khi thật sự cần. Có thể đề xuất công cụ khác nếu phù hợp hơn.
 Không mặc định các ứng dụng đều miễn phí, có tiếng Việt hoặc sử dụng được trên mọi thiết bị. Nếu không chắc chắn về tính năng hoặc quyền truy cập, phải ghi rõ cần kiểm tra. Không tự bịa website, ứng dụng hoặc tính năng.
 
 4. QUY TẮC SỬ DỤNG AI

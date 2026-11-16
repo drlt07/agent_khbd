@@ -341,3 +341,14 @@ Góp ý của tác giả: ở bước 2 lối Sửa KHBD, phần năng lực s�
 - Nút "AI gợi ý mã theo giáo án" ở thẻ Năng lực số (bước 2). Dùng lại `goiYMa` của lối Soạn mới, thêm danh sách hoạt động của giáo án (`HoatDongGiaoAn`): AI giữ nguyên tiến trình, mỗi lí do nêu rõ tích hợp vào hoạt động nào của giáo án và học sinh làm gì.
 - Luật code như cũ: chỉ mã có trong thư viện, đúng loại, tối đa 3 mã NLS, 2 mã AI; giáo viên tự tích chọn, app không tích hộ. Mã AI gợi ý hiện ở thẻ Năng lực AI.
 - Dữ liệu mẫu demo có gợi ý mã cho giáo án Vật lí 10. Kiểm thử trong `tests/sua-hoat-dong-moi.test.ts`; tổng 244 đạt. Đã kiểm tra trên trình duyệt.
+
+## Gợi ý hoạt động: công nghệ mới hơn, không chỉ Padlet, Quizizz, Google Forms – 16/11/2026
+
+Góp ý của tác giả: gợi ý hoạt động chỉ quanh Padlet, Quizizz, Google Forms.
+
+- Nguyên nhân: danh sách "thiết bị" ở bước 2 có sẵn tên phần mềm (Google Forms, Padlet, Canva…) và luật soạn chỉ cho dùng công cụ có trong danh sách khai báo; ngân hàng hoạt động phạt công cụ chưa khai báo; danh sách công cụ trong `rules/hoat-dong.md` cũ, nghiêng về hỏi – đáp.
+- `data/cong_cu_so.json`: 26 công cụ (NotebookLM, Gem, Teachable Machine, Genially, Book Creator, Canva, CapCut, Twine, ThingLink, Google Arts & Culture, Google Earth, PhET, GeoGebra 3D/AR, Desmos, Tinkercad, MakeCode, Flourish, bảng trắng cộng tác, mã QR trạm…), mỗi công cụ: cách dùng để học sinh tạo/mô phỏng/nhập vai, môn hợp, cần máy học sinh hay giáo viên trình chiếu, cần Internet, lưu ý (độ tuổi, tài khoản, chi phí). Công cụ hỏi – đáp đánh dấu `quenThuoc`. Chưa đối chiếu điều khoản từng công cụ.
+- `src/soan/cong-cu-so.ts` (hàm thuần): nhận công cụ, kiểm tra chạy được với thiết bị khai báo, gợi ý công cụ hợp môn – thiết bị, lời nhắc.
+- Giáo viên khai báo THIẾT BỊ; phần mềm trong kho chạy được trên thiết bị ấy thì được dùng (`coTrongDanhSach`), áp cho gợi ý, ngân hàng hoạt động, ý tưởng bài. Bỏ tên phần mềm khỏi danh sách thiết bị gợi ý; thêm Loa – micro, Webcam.
+- Lời nhắc mọi gợi ý (`TEN_VA_AI`) thêm khối "Công nghệ mới, dùng đúng mục đích" với công cụ hợp môn và thiết bị lớp. Luật: bộ gợi ý có ≥ 2 phương án công nghệ mà đều chỉ dùng công cụ quen thuộc → AI gợi ý lại.
+- Thẻ gợi ý hiện lưu ý của công cụ. `rules/hoat-dong.md` v4, `rules/soan.md` v6. Kiểm thử `tests/cong-cu-so.test.ts`; tổng 249 đạt.

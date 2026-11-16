@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import KhungHoatDongMoi from '../sua/KhungHoatDongMoi';
+import { timCongCu } from '../../soan/cong-cu-so';
 import { ChuCT } from '../../thanh-phan/cong-thuc';
 import { The, HopBao, Nut, NhanAiLam } from '../../thanh-phan/chung';
 import { BieuTuong } from '../../thanh-phan/bieu-tuong';
@@ -103,6 +104,7 @@ export default function GoiYHoatDong({ k, hd, cu, ai, dong, dung }: {
                       {h.chotKienThuc && <p className="text-[13.5px] mt-1"><b>Chốt kiến thức:</b> <ChuCT t={h.chotKienThuc} /></p>}
                       <p className="text-[12.5px] text-muted mt-1 so" title="AI tự chấm, thang 1–5; chỉ để tham khảo và sắp xếp">AI tự chấm: {(Object.keys(TIEU_CHI_CHAM) as (keyof typeof TIEU_CHI_CHAM)[]).map((c) => `${TIEU_CHI_CHAM[c]} ${h.tuCham[c]}`).join(' · ')}</p>
                       {h.congNghe && <p className="text-[13.5px] mt-1"><b>Công nghệ/AI:</b> {h.congNghe}{h.canKiemTra && <span className="text-warn-fg"> · cần kiểm tra quyền truy cập, chi phí, tiếng Việt</span>}</p>}
+                      {h.congNghe && timCongCu(h.congNghe).filter((c) => c.luuY).map((c) => <p key={c.ten} className="text-[12.5px] text-muted mt-0.5">{c.ten}: {c.luuY}</p>)}
                       {h.khung5512 && h.khung5512.tichHopNls.length > 0 && <p className="text-[13.5px] mt-1"><b>Năng lực số bổ sung:</b> {h.khung5512.tichHopNls.map((n) => n.ma).join(', ')}</p>}
                       {loiHd.map((l) => <p key={l} className="text-[13px] text-warn-fg mt-1">! {l}</p>)}
                     </div>
