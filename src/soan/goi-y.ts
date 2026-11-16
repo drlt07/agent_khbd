@@ -53,8 +53,11 @@ export const GoiYOut = z.object({
     vaiTro: z.string().describe('Ai thao tác, ai suy luận, ai phản hồi'),
     cauHoiMau: z.string().describe('Ít nhất một câu hỏi/nhiệm vụ cụ thể gắn với bài'),
     sanPham: z.string(),
-    danhGia: z.string().describe('Dấu hiệu chứng minh học sinh hiểu'),
-    chotKienThuc: z.string(),
+    danhGia: z.string().describe('Cách đánh giá linh hoạt (quan sát, câu hỏi, bảng kiểm, nhận xét sản phẩm…) và dấu hiệu chứng minh học sinh đạt'),
+    chotKienThuc: z.string().describe('Kiến thức/kết luận được chốt, viết CỤ THỂ nội dung (vd "Tiếng cười bật ra từ mâu thuẫn giữa…"), không ghi chung chung "GV nhận xét, chốt kiến thức"'),
+    doiMoi: z.string().describe('Điểm đổi mới so với cách dạy thông thường (học sinh được làm gì mới, khác nghe giảng – trả lời)'),
+    nangLuc: z.array(z.object({ ten: z.string().describe('Năng lực đặc thù môn, năng lực chung hoặc năng lực số'), bieuHien: z.string().describe('Biểu hiện cụ thể của học sinh trong hoạt động') })).describe('Năng lực học sinh được phát triển qua hoạt động (1–3)'),
+    bamMucTieu: z.array(z.object({ yeuCau: z.string().describe('Một yêu cầu trong mục tiêu, vd "HS vận dụng được thông điệp…"'), cachDat: z.string().describe('Việc cụ thể trong hoạt động giúp học sinh đạt yêu cầu này') })).describe('Tách mục tiêu thành từng yêu cầu; mỗi yêu cầu có việc cụ thể để đạt'),
     duPhong: z.string().describe('Phương án khi không có công nghệ hoặc mất Internet'),
   })).describe('4–6 hoạt động đa dạng cơ chế'),
   uuTien: z.object({
@@ -65,13 +68,13 @@ export const GoiYOut = z.object({
   }),
 });
 /** Lối "Sửa KHBD cũ": phương án đổi mới trình bày theo khung CV 5512, giữ mục tiêu cũ, bổ sung năng lực số. */
-const BuocKhung = z.object({ viec: z.string().describe('Hoạt động của GV và HS ở bước này (GV làm gì, HS làm gì)'), sanPham: z.string().describe('Sản phẩm cần đạt ở bước này') });
+const BuocKhung = z.object({ viec: z.string().describe('Hoạt động của GV và HS ở bước này, CỤ THỂ: GV làm gì, nói gì (câu hỏi, nhiệm vụ cụ thể); HS làm gì, theo hình thức nào, bao lâu; bước 4 nêu rõ kiến thức được chốt'), sanPham: z.string().describe('Sản phẩm cần đạt ở bước này') });
 export const Khung5512Out = z.object({
   mucDich: z.string().describe('Mục đích của hoạt động cũ được giữ nguyên (vd "đánh thức thông điệp, sáng tạo")'),
   noiDung: z.string().describe('b) Nội dung: nhiệm vụ học sinh thực hiện, giữ chủ đề/kiến thức của hoạt động cũ'),
   sanPham: z.string().describe('c) Sản phẩm học sinh tạo ra'),
   buoc: z.object({ chuyenGiao: BuocKhung, thucHien: BuocKhung, baoCao: BuocKhung, ketLuan: BuocKhung }).describe('d) Tổ chức thực hiện theo 4 bước'),
-  tieuChi: z.array(z.object({ tieuChi: z.string(), yeuCau: z.string() })).describe('Bảng tiêu chí đánh giá; có dòng "Năng lực số" khi tích hợp năng lực số/AI'),
+  tieuChi: z.array(z.object({ tieuChi: z.string(), yeuCau: z.string() })).describe('Tiêu chí đánh giá nếu cần (hình thức linh hoạt; có thể rỗng khi đánh giá bằng quan sát, câu hỏi, nhận xét sản phẩm)'),
   tichHopNls: z.array(z.object({ ma: z.string().describe('Mã năng lực số/AI giáo viên đã chọn'), bieuHien: z.string().describe('Biểu hiện cụ thể của học sinh trong hoạt động này') })).describe('Năng lực số/AI bổ sung vào hoạt động; chỉ dùng mã giáo viên đã chọn'),
   promptMau: z.string().describe('Prompt AI mẫu giáo viên cung cấp cho học sinh (bối cảnh bài, nhiệm vụ, yêu cầu đầu ra; không xin đáp án, không nhờ làm hộ); học sinh không dùng AI thì chuỗi rỗng'),
 });
@@ -190,9 +193,21 @@ export function nhacGoiY(k: Khbd, hd?: MaHd, yeuCau = '', cu?: HoatDongCu): stri
     yeuCau.trim() ? `Yêu cầu thêm của giáo viên: ${yeuCau.trim()}` : '',
     TEN_VA_AI(k),
     'Mỗi hoạt động nêu rõ điểm tư duy khó nhất và tự chấm 4 tiêu chí (mục 8); bỏ phương án nhạt (mục 7) hoặc có tiêu chí dưới 3.',
+    YEU_CAU_HOAT_DONG,
     'Trả về: Phần A – phân tích bài học; Phần B và C – 4 đến 6 hoạt động (mỗi hoạt động đủ các mục triển khai, mỗi mục viết gọn 1–2 câu); Phần D – 3 đề xuất ưu tiên (dễ triển khai nhất, sáng tạo nhất, khai thác AI hoặc mô phỏng tốt nhất) kèm lí do ngắn.',
   ].filter(Boolean).join('\n\n');
 }
+
+/** Yêu cầu chất lượng chung cho mọi phương án (góp ý của tác giả 16/11/2026). */
+export const YEU_CAU_HOAT_DONG = [
+  'CHẤT LƯỢNG MỖI PHƯƠNG ÁN:',
+  '- Bám sát mục tiêu: tách mục tiêu thành từng yêu cầu (HS … được …); mỗi yêu cầu có một việc cụ thể trong hoạt động để học sinh đạt (bamMucTieu). Hoạt động linh hoạt, sáng tạo nhưng phải dẫn tới đúng các yêu cầu ấy.',
+  '- Triển khai cụ thể: mỗi bước nêu GV làm gì, nói gì (câu hỏi, nhiệm vụ cụ thể), HS làm gì, theo hình thức nào, bao lâu; viết sao cho giáo viên đọc là dạy được ngay.',
+  '- Chốt kiến thức cụ thể ở cuối hoạt động: viết rõ nội dung kiến thức, kết luận, thông điệp được chốt; không ghi chung chung "GV nhận xét, chốt kiến thức".',
+  '- Tính đổi mới: nêu điểm mới so với nghe giảng – trả lời (học sinh được làm, tạo, tranh luận, kiểm chứng gì).',
+  '- Phát triển năng lực: nêu 1–3 năng lực (đặc thù môn, năng lực chung, năng lực số nếu có) kèm biểu hiện cụ thể của học sinh.',
+  '- Đánh giá linh hoạt: chọn hình thức hợp hoạt động (quan sát, câu hỏi, bảng kiểm, nhận xét sản phẩm, tiêu chí…); không bắt buộc bảng tiêu chí cố định.',
+].join('\n');
 
 /** Lối Sửa KHBD cũ: phần GIỮ NGUYÊN và phần ĐƯỢC ĐỔI của hoạt động. */
 function nhacGiu(k: Khbd, cu: HoatDongCu): string {
@@ -203,12 +218,20 @@ function nhacGiu(k: Khbd, cu: HoatDongCu): string {
     p.mucTieu ? `Mục tiêu cũ (giữ nguyên văn): ${p.mucTieu}` : '',
     p.sanPham ? `Sản phẩm cũ (tham khảo; được đổi hình thức nhưng phải phục vụ cùng mục tiêu): ${p.sanPham}` : '',
     'ĐƯỢC ĐỔI: cách tổ chức (hình thức, vai trò, công cụ, sản phẩm cụ thể) và BỔ SUNG năng lực số.',
-    ma.length ? `Bổ sung năng lực số/AI: mỗi phương án gắn ít nhất 1 mã giáo viên đã chọn (${ma.join(', ')}) với biểu hiện cụ thể của học sinh; bảng tiêu chí có dòng "Năng lực số".` : 'Giáo viên chưa chọn mã năng lực số: không gắn mã.',
-    'Mỗi phương án điền khung5512 theo CV 5512: b) nội dung, c) sản phẩm, d) 4 bước (Chuyển giao nhiệm vụ – Thực hiện nhiệm vụ – Báo cáo, thảo luận – Kết luận, nhận định), mỗi bước có "hoạt động của GV và HS" và "sản phẩm cần đạt"; bảng tiêu chí đánh giá; prompt AI mẫu nếu học sinh dùng AI (bối cảnh bài, nhiệm vụ, yêu cầu đầu ra, không xin đáp án).',
+    p.mucTieu ? `Các yêu cầu trong mục tiêu cần bám (bamMucTieu phải đáp ứng đủ ${yeuCauMucTieu(p.mucTieu).length} yêu cầu): ${yeuCauMucTieu(p.mucTieu).map((y, i) => `(${i + 1}) ${y}`).join(' ')}` : '',
+    ma.length ? `Bổ sung năng lực số/AI: mỗi phương án gắn ít nhất 1 mã giáo viên đã chọn (${ma.join(', ')}) với biểu hiện cụ thể của học sinh; nêu cách đánh giá năng lực số (hình thức tùy chọn).` : 'Giáo viên chưa chọn mã năng lực số: không gắn mã.',
+    'Mỗi phương án điền khung5512 theo CV 5512: b) nội dung, c) sản phẩm, d) 4 bước (Chuyển giao nhiệm vụ – Thực hiện nhiệm vụ – Báo cáo, thảo luận – Kết luận, nhận định), mỗi bước có "hoạt động của GV và HS" viết cụ thể và "sản phẩm cần đạt"; bước 4 chốt kiến thức cụ thể; tiêu chí đánh giá nếu cần (linh hoạt); prompt AI mẫu nếu học sinh dùng AI (bối cảnh bài, nhiệm vụ, yêu cầu đầu ra, không xin đáp án).',
   ].filter(Boolean).join('\n');
 }
 
 /* ---------------- Luật ---------------- */
+
+const soTu = (t: string) => t.trim().split(/\s+/).filter(Boolean).length;
+export const SO_TU_CHOT = 6, SO_TU_BUOC = 5, SO_TU_BUOC_KHUNG = 12;
+/** Chốt kiến thức chung chung ("GV nhận xét, chốt kiến thức"), không nêu nội dung. Hàm thuần. */
+export const laChotChung = (t: string) => soTu(t) < SO_TU_CHOT || /^\s*(gv|giáo viên)?\s*(nhận xét|chốt|tổng kết|kết luận|khái quát)[^.]{0,40}(kiến thức|nội dung|bài học|hoạt động)?\.?\s*$/i.test(t);
+/** Các yêu cầu trong mục tiêu (tách theo dấu chấm phẩy, xuống dòng). */
+export const yeuCauMucTieu = (mucTieu: string) => mucTieu.split(/;|\n/).map((x) => x.trim()).filter((x) => soTu(x) >= 3);
 
 /** Lối Sửa KHBD cũ: khung CV 5512 đủ 4 bước; năng lực số đúng mã giáo viên chọn, có tiêu chí; học sinh dùng AI thì có prompt mẫu. Hàm thuần. */
 export function kiemTraKhung(h: HoatDongGoiY, maChon: string[]): string[] {
@@ -220,7 +243,8 @@ export function kiemTraKhung(h: HoatDongGoiY, maChon: string[]): string[] {
   const la = kh.tichHopNls.filter((n) => !maChon.includes(n.ma.trim())).map((n) => n.ma);
   if (la.length) loi.push(`Không hợp: dùng mã giáo viên không chọn (${la.join(', ')}).`);
   if (maChon.length && !kh.tichHopNls.some((n) => maChon.includes(n.ma.trim()) && n.bieuHien.trim())) loi.push(`Không hợp: chưa bổ sung năng lực số giáo viên đã chọn (${maChon.join(', ')}).`);
-  if (kh.tichHopNls.length && !kh.tieuChi.some((t) => /năng lực số|năng lực ai|\bAI\b|công nghệ số/i.test(`${t.tieuChi} ${t.yeuCau}`))) loi.push('Thiếu tiêu chí đánh giá năng lực số trong bảng tiêu chí.');
+  if (kh.tichHopNls.length && !/năng lực số|năng lực ai|\bAI\b|công nghệ số|kiểm chứng|chỉnh sửa/i.test([...kh.tieuChi.map((t) => `${t.tieuChi} ${t.yeuCau}`), h.danhGia, kh.buoc.ketLuan.viec].join(' '))) loi.push('Nên nêu cách đánh giá năng lực số (bảng kiểm, nhận xét, tiêu chí – hình thức tùy chọn).');
+  if (buoc.some((b) => soTu(b.viec) < SO_TU_BUOC_KHUNG)) loi.push(`Nhạt: tổ chức thực hiện chưa cụ thể (mỗi bước cần nêu rõ GV làm gì, HS làm gì; từ ${SO_TU_BUOC_KHUNG} chữ).`);
   if (coDungAi(h.nhom, h.congNghe, ...buoc.map((b) => b.viec)) && !kh.promptMau.trim()) loi.push('Thiếu prompt AI mẫu cho học sinh.');
   return loi;
 }
@@ -235,6 +259,8 @@ export interface KetQuaLuatGoiY { nghiem: string[]; nhac: string[]; theoHoatDong
 
 export function kiemTraGoiY(g: GoiY, k: Pick<Khbd, 'dieuKien'> & Partial<Pick<Khbd, 'bai' | 'lop' | 'yccd' | 'tichHop' | 'mon' | 'nguon' | 'theLoai'>>, phutToiDa?: number, cu?: HoatDongCu): KetQuaLuatGoiY {
   const maChon = [...(k.tichHop?.nls ?? []), ...(k.tichHop?.ai ?? [])];
+  const mtCu = cu ? tachHoatDongCu(cu).mucTieu : undefined;
+  const soYcMucTieu = mtCu ? yeuCauMucTieu(mtCu).length : 0;
   const tl = k.mon ? theLoaiCua({ mon: k.mon, bai: k.bai, lop: k.lop, theLoai: k.theLoai, nguon: k.nguon }) : undefined;
   const tk = tuKhoaBai([k.bai ?? '', ...(k.yccd ?? []).map((y) => y.noiDung), g.phanTich.trongTam, ...g.phanTich.khoKhan]);
   const batAi = k.tichHop ? coBatAi({ tichHop: k.tichHop }) : true;
@@ -255,6 +281,12 @@ export function kiemTraGoiY(g: GoiY, k: Pick<Khbd, 'dieuKien'> & Partial<Pick<Kh
     if (!h.cauHoiMau.trim()) loi.push('Thiếu câu hỏi hoặc nhiệm vụ mẫu.');
     if (!h.danhGia.trim() || !h.chotKienThuc.trim()) loi.push('Thiếu cách đánh giá hoặc chốt kiến thức.');
     if (!h.diemTuDuy.trim()) loi.push('Thiếu điểm tư duy khó nhất.');
+    if (h.chotKienThuc.trim() && laChotChung(h.chotKienThuc)) loi.push('Thiếu chốt kiến thức cụ thể (nêu rõ nội dung kiến thức, kết luận được chốt).');
+    if (!h.doiMoi.trim()) loi.push('Thiếu điểm đổi mới của hoạt động.');
+    if (!h.nangLuc.some((n) => n.ten.trim() && n.bieuHien.trim())) loi.push('Thiếu năng lực học sinh được phát triển (kèm biểu hiện).');
+    if (!h.bamMucTieu.some((m) => m.yeuCau.trim() && m.cachDat.trim())) loi.push('Thiếu đối chiếu mục tiêu: mỗi yêu cầu của mục tiêu cần một việc cụ thể để đạt.');
+    else if (soYcMucTieu && h.bamMucTieu.filter((m) => m.cachDat.trim()).length < soYcMucTieu) loi.push(`Thiếu đối chiếu mục tiêu: mục tiêu có ${soYcMucTieu} yêu cầu, phương án mới đáp ứng ${h.bamMucTieu.filter((m) => m.cachDat.trim()).length}.`);
+    if (h.kichBan.some((b) => soTu(b.buoc) < SO_TU_BUOC)) loi.push(`Nhạt: kịch bản chưa cụ thể (mỗi bước nêu rõ ai làm gì, từ ${SO_TU_BUOC} chữ).`);
     const thap = tieuChiThap(h.tuCham);
     if (thap.length) loi.push(`Nhạt: AI tự chấm thấp ở ${thap.join(', ')}.`);
     if (laChungChung(`${h.yTuong}\n${h.kichBan.map((b) => b.buoc).join('\n')}`)) loi.push('Nhạt: cách tổ chức chung chung (thảo luận rồi trình bày, hỏi – đáp, làm bài SGK).');
@@ -275,7 +307,7 @@ export function kiemTraGoiY(g: GoiY, k: Pick<Khbd, 'dieuKien'> & Partial<Pick<Kh
     if (h.kichBan.length && tongKichBan !== h.thoiLuong) loi.push(`Kịch bản cộng ${tongKichBan} phút, khác thời lượng ${h.thoiLuong} phút.`);
     return loi;
   });
-  if (theoHoatDong.some((l) => l.some((x) => /Thiếu/.test(x)))) nghiem.push('Có hoạt động thiếu mục bắt buộc (dự phòng, câu hỏi mẫu, đánh giá, chốt kiến thức, điểm tư duy, khung CV 5512, tiêu chí năng lực số, prompt mẫu).');
+  if (theoHoatDong.some((l) => l.some((x) => /Thiếu/.test(x)))) nghiem.push('Có hoạt động thiếu mục bắt buộc (dự phòng, câu hỏi mẫu, đánh giá, chốt kiến thức cụ thể, điểm tư duy, điểm đổi mới, năng lực, đối chiếu mục tiêu, khung CV 5512, prompt mẫu).');
   const soHay = theoHoatDong.filter((l) => !laNhatHoacKhongHop(l)).length;
   if (theoHoatDong.some((l) => l.some((x) => x.includes('trích dẫn không có trong KHBD gốc')))) nghiem.push('Có phương án tự viết câu trích không có trong giáo án (Ngữ văn): chỉ dùng câu trích có trong giáo án.');
   if (n >= 3 && soHay < 3) nghiem.push(`Chỉ có ${soHay} phương án không nhạt; cần ít nhất 3. Thay phương án nhạt bằng phương án có vấn đề thật, điểm tư duy rõ.`);
@@ -322,7 +354,10 @@ export function huongDanTuGoiY(h: HoatDongGoiY): string {
     h.congNghe ? `Công nghệ/AI: ${h.congNghe}${h.canKiemTra ? ' (cần kiểm tra quyền truy cập)' : ''}. Phương án dự phòng: ${h.duPhong}` : '',
     `Kịch bản gợi ý: ${h.kichBan.map((b) => `${b.buoc} (${b.phut}')`).join('; ')}`,
     `Câu hỏi/nhiệm vụ mẫu: ${h.cauHoiMau}`,
-    `Sản phẩm: ${h.sanPham}. Đánh giá: ${h.danhGia}. Chốt kiến thức: ${h.chotKienThuc}`,
+    `Sản phẩm: ${h.sanPham}. Đánh giá: ${h.danhGia}. Chốt kiến thức (ghi cụ thể ở bước kết luận): ${h.chotKienThuc}`,
+    h.doiMoi ? `Điểm đổi mới: ${h.doiMoi}` : '',
+    h.nangLuc?.length ? `Năng lực phát triển: ${h.nangLuc.map((n) => `${n.ten} – ${n.bieuHien}`).join('; ')}` : '',
+    h.bamMucTieu?.length ? `Bám mục tiêu: ${h.bamMucTieu.map((m) => `${m.yeuCau} → ${m.cachDat}`).join('; ')}` : '',
     h.khung5512 ? `Khung đã chọn – nội dung: ${h.khung5512.noiDung}; sản phẩm: ${h.khung5512.sanPham}; các bước: ${Object.values(h.khung5512.buoc).map((b) => b.viec).join(' | ')}; năng lực số: ${h.khung5512.tichHopNls.map((n) => `${n.ma} – ${n.bieuHien}`).join('; ') || 'không'}${h.khung5512.promptMau ? `; prompt mẫu: ${h.khung5512.promptMau}` : ''}` : '',
     'Giữ đúng thời lượng và cấu trúc bước của phương pháp đã chọn.',
   ].filter(Boolean).join('\n');

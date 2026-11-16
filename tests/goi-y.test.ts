@@ -10,7 +10,7 @@ const o4 = <T,>(b: T[]) => ({ chuyenGiao: b[0], thucHien: b[1], baoCao: b[2], ke
 
 const hd = (ten: string, nhom: HoatDongGoiY['nhom'], p: Partial<HoatDongGoiY> = {}): HoatDongGoiY => ({
   ten: `${ten} động năng`, nhom, yTuong: 'ý tưởng', congNghe: '', canKiemTra: false, thoiLuong: 10, mucChuanBi: 'thap', thoiDiem: 'hinh_thanh',
-  mucTieu: 'm', diemTuDuy: 'Dự đoán rồi kiểm chứng', tuCham: { tuDuy: 4, hapDan: 4, khaThi: 4, bamBai: 4 }, chuanBi: ['Máy chiếu'], kichBan: [{ buoc: 'b1', phut: 4 }, { buoc: 'b2', phut: 6 }], vaiTro: 'GV/HS', cauHoiMau: 'Câu hỏi mẫu', sanPham: 'sp', danhGia: 'đg', chotKienThuc: 'chốt', duPhong: 'Dùng phiếu in', ...p,
+  mucTieu: 'm', diemTuDuy: 'Dự đoán rồi kiểm chứng', tuCham: { tuDuy: 4, hapDan: 4, khaThi: 4, bamBai: 4 }, chuanBi: ['Máy chiếu'], kichBan: [{ buoc: 'Giáo viên nêu tình huống, học sinh dự đoán', phut: 4 }, { buoc: 'Nhóm kiểm chứng dự đoán rồi báo cáo', phut: 6 }], vaiTro: 'GV/HS', cauHoiMau: 'Câu hỏi mẫu', sanPham: 'sp', danhGia: 'đg', chotKienThuc: 'Tiếng cười bật ra từ mâu thuẫn giữa toan tính giữ của và hành động lộ liễu của nhân vật.', doiMoi: 'Học sinh tự tạo sản phẩm thay vì nghe giảng', nangLuc: [{ ten: 'Năng lực đọc hiểu văn bản', bieuHien: 'chỉ ra chi tiết làm cơ sở cho nhận định' }], bamMucTieu: [{ yeuCau: 'HS phân tích được nội dung', cachDat: 'nhóm hoàn thành nhiệm vụ chính' }], duPhong: 'Dùng phiếu in', ...p,
 });
 const goiY = (ds: HoatDongGoiY[]): GoiY => ({ phanTich: { trongTam: 't', khoKhan: ['k'], kieuHoatDong: 'x', coHoiAi: 'y' }, hoatDong: ds, uuTien: { deTrienKhai: 1, sangTao: 2, aiMoPhong: 3, lyDo: 'l' } });
 const k: Khbd = {

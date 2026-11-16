@@ -322,3 +322,14 @@ Yêu cầu của tác giả (kèm ví dụ HĐ3 Vận dụng "Đánh thức thô
 - Luật code `kiemTraKhung`: đủ khung 4 bước; phải gắn mã năng lực số/AI giáo viên đã chọn, không dùng mã lạ; có dòng tiêu chí Năng lực số; học sinh dùng AI thì phải có prompt mẫu. Thiếu → AI gợi ý lại.
 - Bản xem trước, thẻ gợi ý và file Word trình bày hoạt động mới đúng khung CV 5512 (bảng "Hoạt động của GV và HS | Sản phẩm cần đạt", "Tiêu chí đánh giá", "Prompt AI mẫu").
 - `rules/ngu-van.md` v3 mục E. Bộ AI mẫu (demo) có khung. Kiểm thử `tests/giu-hoat-dong.test.ts` dùng đúng ví dụ của tác giả.
+
+## Gợi ý hoạt động: chốt kiến thức cụ thể, triển khai cụ thể, đổi mới, phát triển năng lực, bám sát mục tiêu – 16/11/2026
+
+Góp ý của tác giả: mỗi hoạt động phải chốt kiến thức, triển khai cụ thể hơn, có tính đổi mới và phát triển năng lực; hoạt động linh hoạt nhưng bám sát mục tiêu (vd "HS vận dụng được…"); không cần fix cứng bảng đánh giá.
+
+- Schema gợi ý hoạt động (cả Soạn mới và Sửa KHBD) thêm `doiMoi`, `nangLuc` (tên + biểu hiện), `bamMucTieu` (từng yêu cầu của mục tiêu → việc cụ thể để đạt); mô tả `chotKienThuc`, `danhGia`, các bước khung CV 5512 đòi viết cụ thể.
+- Lời nhắc `YEU_CAU_HOAT_DONG`: bám mục tiêu, triển khai cụ thể, chốt kiến thức cụ thể, đổi mới, năng lực, đánh giá linh hoạt. Lối Sửa: liệt kê từng yêu cầu của mục tiêu cũ để AI bám đủ.
+- Luật code: chốt kiến thức chung chung (`laChotChung`) → thiếu; thiếu điểm đổi mới, năng lực, đối chiếu mục tiêu → thiếu (AI gợi ý lại); lối Sửa: số yêu cầu đáp ứng < số yêu cầu của mục tiêu cũ → thiếu; bước kịch bản dưới 5 chữ, bước khung dưới 12 chữ → nhạt.
+- Bỏ bắt buộc dòng "Năng lực số" trong bảng tiêu chí: đánh giá năng lực số hình thức tùy chọn, thiếu hẳn thì chỉ nhắc.
+- Thẻ gợi ý, bản xem trước, file Word hiện điểm đổi mới, năng lực phát triển, bám mục tiêu, chốt kiến thức. Dữ liệu mẫu demo viết lại cụ thể hơn.
+- Kiểm thử thêm trong `tests/giu-hoat-dong.test.ts`.

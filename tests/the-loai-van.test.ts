@@ -59,7 +59,7 @@ const k12 = (): Khbd => ({
 describe('Luật bám thể loại', () => {
   const pa = (ten: string, nhom: HoatDongGoiY['nhom'], yTuong: string): HoatDongGoiY => ({
     ten, nhom, yTuong, congNghe: '', canKiemTra: false, thoiLuong: 10, mucChuanBi: 'thap', thoiDiem: 'hinh_thanh',
-    mucTieu: 'm', diemTuDuy: 'd', tuCham: { tuDuy: 4, hapDan: 4, khaThi: 4, bamBai: 4 }, chuanBi: ['Máy chiếu'], kichBan: [{ buoc: 'b', phut: 10 }], vaiTro: 'v', cauHoiMau: 'c', sanPham: 's', danhGia: 'đg', chotKienThuc: 'chốt', duPhong: 'phiếu in',
+    mucTieu: 'm', diemTuDuy: 'd', tuCham: { tuDuy: 4, hapDan: 4, khaThi: 4, bamBai: 4 }, chuanBi: ['Máy chiếu'], kichBan: [{ buoc: 'Các nhóm thực hiện nhiệm vụ trên phiếu rồi trình bày', phut: 10 }], vaiTro: 'v', cauHoiMau: 'c', sanPham: 's', danhGia: 'đg', chotKienThuc: 'Học sinh nắm được ý chính của đoạn trích và bài học rút ra cho bản thân.', doiMoi: 'Học sinh tự tạo sản phẩm thay vì nghe giảng', nangLuc: [{ ten: 'Năng lực đọc hiểu văn bản', bieuHien: 'chỉ ra chi tiết làm cơ sở cho nhận định' }], bamMucTieu: [{ yeuCau: 'HS phân tích được nội dung', cachDat: 'nhóm hoàn thành nhiệm vụ chính' }], duPhong: 'phiếu in',
   });
   it('gợi ý hoạt động Văn không chạm yếu tố thể loại bị đánh Nhạt', () => {
     const g: GoiY = { phanTich: { trongTam: 'Giấu của', khoKhan: ['k'], kieuHoatDong: 'x', coHoiAi: 'không' }, hoatDong: [pa('Ghế đạo diễn Giấu của', 'A', 'Nhóm viết chỉ dẫn diễn xuất cho lời thoại'), pa('Kể chuyện Giấu của', 'D', 'Học sinh kể lại nội dung đoạn trích')], uuTien: { deTrienKhai: 1, sangTao: 2, aiMoPhong: 1, lyDo: 'l' } };

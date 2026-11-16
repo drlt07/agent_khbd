@@ -373,6 +373,13 @@ export function chiaLaiPhut(phut: number[], tong: number): number[] {
 }
 
 /** AI giả: trả nội dung dựng sẵn theo tên phần, có độ trễ nhỏ để thấy tiến trình. */
+/** Trường chất lượng của phương án mẫu: điểm đổi mới, năng lực, đối chiếu mục tiêu. */
+for (const h of ((TRA_LOI as Record<string, any>).goiY?.hoatDong ?? []) as Record<string, any>[]) {
+  h.doiMoi ??= `Học sinh tự ${h.thoiDiem === 'khoi_dong' ? 'dự đoán, đặt câu hỏi' : 'làm, kiểm chứng và trình bày'} thay vì nghe giáo viên giảng.`;
+  h.nangLuc ??= [{ ten: 'Năng lực đặc thù môn học', bieuHien: h.diemTuDuy }, { ten: 'Năng lực giao tiếp và hợp tác', bieuHien: h.vaiTro }];
+  h.bamMucTieu ??= [{ yeuCau: h.mucTieu, cachDat: h.yTuong }];
+}
+
 export const aiMau: GoiAi = async (y) => {
   await new Promise((r) => setTimeout(r, 350));
   const laCv5512 = y.he.includes('Dạy học thông thường theo mẫu Công văn 5512: Mở đầu');

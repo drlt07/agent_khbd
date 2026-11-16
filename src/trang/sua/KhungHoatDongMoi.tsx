@@ -26,6 +26,10 @@ export default function KhungHoatDongMoi({ tenCu, h }: { tenCu: string; h: HoatD
           </tbody>
         </table>
       </div>
+      {h.chotKienThuc && !kh.buoc.ketLuan.viec.includes(h.chotKienThuc) && <p className="text-[14px]"><b>Chốt kiến thức:</b> <ChuCT t={h.chotKienThuc} /></p>}
+      {h.bamMucTieu?.length > 0 && <div className="text-[14px]"><b>Bám mục tiêu:</b><ul className="list-disc pl-5">{h.bamMucTieu.map((m, i) => <li key={i}>{m.yeuCau} → <ChuCT t={m.cachDat} /></li>)}</ul></div>}
+      {h.nangLuc?.length > 0 && <p className="text-[14px]"><b>Năng lực phát triển:</b> {h.nangLuc.map((n) => `${n.ten} (${n.bieuHien})`).join('; ')}</p>}
+      {h.doiMoi && <p className="text-[14px]"><b>Điểm đổi mới:</b> <ChuCT t={h.doiMoi} /></p>}
       {kh.tieuChi.length > 0 && (
         <div className="overflow-x-auto mt-1">
           <table className="w-full text-[14px] border border-line">

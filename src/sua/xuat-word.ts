@@ -59,6 +59,10 @@ export function khoiHoatDongMoi(m: HoatDongMoi): (Paragraph | Table)[] {
       doan([chu('d) Tổ chức thực hiện:', { dam: true })], { nen: NEN_BO_SUNG }),
       bang([['Hoạt động của GV và HS', 'Sản phẩm cần đạt'], ...(Object.keys(TEN_BUOC_KHUNG) as (keyof typeof TEN_BUOC_KHUNG)[]).map((b) => [`${TEN_BUOC_KHUNG[b]}\n${kh.buoc[b].viec}`, kh.buoc[b].sanPham])], true),
     ];
+    if (h.chotKienThuc && !kh.buoc.ketLuan.viec.includes(h.chotKienThuc)) ra.push(p('Chốt kiến thức:', h.chotKienThuc));
+    if (h.bamMucTieu?.length) ra.push(p('Bám mục tiêu:', h.bamMucTieu.map((x) => `${x.yeuCau} → ${x.cachDat}`).join('; ')));
+    if (h.nangLuc?.length) ra.push(p('Năng lực phát triển:', h.nangLuc.map((n) => `${n.ten} (${n.bieuHien})`).join('; ')));
+    if (h.doiMoi) ra.push(p('Điểm đổi mới:', h.doiMoi));
     if (kh.tieuChi.length) { ra.push(doan([chu('TIÊU CHÍ ĐÁNH GIÁ', { dam: true })], { nen: NEN_BO_SUNG })); ra.push(bang([['Tiêu chí', 'Yêu cầu cần đạt'], ...kh.tieuChi.map((t) => [t.tieuChi, t.yeuCau])], true)); }
     if (kh.tichHopNls.length) ra.push(p('Năng lực số:', kh.tichHopNls.map((n) => `${n.ma} – ${n.bieuHien}`).join('; ')));
     if (kh.promptMau.trim()) ra.push(p('Prompt AI mẫu (GV cung cấp):', `“${kh.promptMau.trim()}”`));
@@ -79,6 +83,8 @@ export function khoiHoatDongMoi(m: HoatDongMoi): (Paragraph | Table)[] {
     p('Đánh giá:', h.danhGia),
     p('Chốt kiến thức:', h.chotKienThuc),
   ];
+  if (h.doiMoi) ds.push(p('Điểm đổi mới:', h.doiMoi));
+  if (h.nangLuc?.length) ds.push(p('Năng lực phát triển:', h.nangLuc.map((n) => `${n.ten} (${n.bieuHien})`).join('; ')));
   if (h.congNghe) ds.push(p('Công nghệ:', `${h.congNghe}${h.canKiemTra ? ' (cần kiểm tra quyền truy cập)' : ''}. Dự phòng: ${h.duPhong}`));
   return ds;
 }
