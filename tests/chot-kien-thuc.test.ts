@@ -34,7 +34,7 @@ describe('Chốt kiến thức bám giáo án', () => {
     expect(n).toContain('CHỐT KIẾN THỨC LẤY TỪ GIÁO ÁN');
     expect(n).toContain('- Nghệ thuật: Xây dựng tình huống trào phúng');
     expect(nhacChotGiaoAn({ ...k, mon: 'VAT_LI' })).toBe('');
-    expect(nhacChotGiaoAn({ mon: 'NGU_VAN', nguon: { tenTep: 'g', toanVan: 'GV chia nhóm.', hoatDong: [] } })).toContain('giáo viên bổ sung theo KHBD');
+    expect(nhacChotGiaoAn({ mon: 'NGU_VAN', nguon: { tenTep: 'g', toanVan: 'GV chia nhóm.', hoatDong: [] } })).toContain('không tự tạo, không ghi chú thêm');
   });
   it('gợi ý Văn chốt bằng ý ngoài giáo án bị loại; ô Bước 4 hiện chốt nhiều dòng', () => {
     const pa = (chot: string): HoatDongGoiY => ({ ten: 'Phiên tòa vợ chồng Đại Cát', nhom: 'D', yTuong: 'Hai phe tranh luận nhân vật đáng ghét hay đáng thương dựa vào lời thoại', congNghe: '', canKiemTra: false, thoiLuong: 10, mucChuanBi: 'thap', thoiDiem: 'van_dung', mucTieu: 'm', diemTuDuy: 'd', tuCham: { tuDuy: 4, hapDan: 4, khaThi: 4, bamBai: 4 }, chuanBi: [], kichBan: [{ buoc: 'Hai phe tranh luận dựa vào lời thoại trong đoạn trích', phut: 10 }], vaiTro: 'v', cauHoiMau: 'c', sanPham: 's', danhGia: 'đ', chotKienThuc: chot, doiMoi: 'd', nangLuc: [{ ten: 'n', bieuHien: 'b' }], bamMucTieu: [{ yeuCau: 'y', cachDat: 'c' }], duPhong: 'p' });
@@ -43,7 +43,7 @@ describe('Chốt kiến thức bám giáo án', () => {
     expect(kiemTraGoiY(g(pa('- Nội dung: Vở kịch ca ngợi tình yêu quê hương và tinh thần lao động sáng tạo.')), k).theoHoatDong[0].join(' ')).toContain('chốt kiến thức có ý không có trong giáo án');
     expect(kiemTraGoiY(g(pa('- Nội dung: Khắc họa tình huống trớ trêu, tâm lí mâu thuẫn của vợ chồng Đại Cát.')), k).theoHoatDong[0].join(' ')).not.toContain('không có trong giáo án');
     const h = { ...pa('- Nội dung: a b c d e f\n- Nghệ thuật: g h i k l m'), khung5512: { mucDich: 'm', noiDung: 'n', sanPham: 's', buoc: { chuyenGiao: { viec: 'v', sanPham: '' }, thucHien: { viec: 'v', sanPham: '' }, baoCao: { viec: 'v', sanPham: '' }, ketLuan: { viec: 'v', sanPham: '' } }, tieuChi: [], tichHopNls: [], promptMau: '' } };
-    expect(ganChot(h)!.buoc.ketLuan.sanPham).toBe(`${KIEN_THUC_CHOT}\n- Nội dung: a b c d e f\n- Nghệ thuật: g h i k l m`);
+    expect(ganChot(h)!.buoc.ketLuan.sanPham).toBe('- Nội dung: a b c d e f\n- Nghệ thuật: g h i k l m');
   });
 });
 

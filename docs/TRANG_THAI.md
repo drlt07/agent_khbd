@@ -399,3 +399,13 @@ Tác giả gặp "Kết quả không đúng khuôn (Gemini không trả JSON)" k
 - `tachJson` + `suaJson`: sửa lỗi hay gặp (gạch chéo LaTeX `\mathrm`, `\frac`; dấu phẩy thừa; xuống dòng trong chuỗi); bỏ phần "suy nghĩ" (thought) của câu trả lời.
 - Không đọc được JSON → tự gửi lại 1 lần; vẫn hỏng thì báo lỗi kèm lí do và độ dài câu trả lời để dễ dò.
 - Kiểm thử `tests/gemini.test.ts` (Gemini giả lập); tổng 270 đạt. Chưa thử với khóa Gemini thật trong phiên.
+
+## Chốt = cột "Sản phẩm cần đạt" của giáo án; chuyển giao nhiệm vụ rõ ràng; AI được báo lỗi cụ thể – 16/11/2026
+
+Góp ý của tác giả: kiến thức chốt lấy từ sản phẩm cần đạt của các hoạt động, không ghi chú, không tự tạo; bước chuyển giao "GV đóng vai Thẩm phán, yêu cầu các nhóm Công tố viên tìm 4 chứng cứ…" không rõ, "sao sao"; cả 4 phương án bị "Nhạt".
+
+- `sanPhamCanDat` (`src/sua/quy-trinh.ts`): tách cột "Sản phẩm cần đạt"/"Sản phẩm"/"Kết quả dự kiến" trong bảng của hoạt động (không bảng thì dòng "Sản phẩm cần đạt: …"). `hoatDongCu` mang theo. `giuHoatDongCu`: có nội dung này thì code chép nguyên văn làm chốt (`chotGoc`), thay hẳn ô "Sản phẩm cần đạt" Bước 4; luật "chốt chung chung", "chốt ngoài giáo án" bỏ qua chốt chép từ giáo án. Lời nhắc báo AI không viết chốt mới.
+- Bỏ nhãn "Kiến thức chốt:" và ghi chú "giáo viên bổ sung theo KHBD" (khía cạnh không có nguồn thì bỏ qua).
+- Chuyển giao (`thieuChuyenGiao`): phải có thời gian, hình thức (cá nhân/cặp/nhóm), nhiệm vụ cụ thể (câu hỏi, yêu cầu, phiếu); thiếu → nhạt. Mô tả schema Bước 1 đòi đủ 6 ý; lời nhắc: vai nhập chỉ là vỏ, nhiệm vụ gọi đúng thuật ngữ, không biến phân tích nghệ thuật thành buộc tội nhân vật.
+- Gợi ý lại: lời nhắc liệt kê lỗi cụ thể từng phương án (trước chỉ "0 phương án không nhạt").
+- Kiểm thử `tests/san-pham-can-dat.test.ts`; tổng 275 đạt.

@@ -83,7 +83,29 @@ export function hoatDongCu(k: SuaKhbd, h: SuaKhbd['hoatDong'][number]): HoatDong
   const a = k.doan.findIndex((d) => d.ma === h.tu), b = k.doan.findIndex((d) => d.ma === h.den);
   const ds = a >= 0 && b >= a ? k.doan.slice(a, b + 1) : [];
   const noiDung = ds.map((d) => (d.loai === 'bang' && d.hang ? d.hang.map((r) => r.join(' | ')).join('\n') : d.text)).join('\n').slice(0, 4000);
-  return { ten: h.ten, phut: h.phut, noiDung };
+  const sp = sanPhamCanDat(ds);
+  return { ten: h.ten, phut: h.phut, noiDung, ...(sp ? { sanPhamCanDat: sp } : {}) };
+}
+
+/**
+ * Nội dung cột "Sản phẩm cần đạt" (hoặc "Sản phẩm", "Dự kiến sản phẩm") trong các bảng của hoạt động; không có bảng thì các dòng
+ * "Sản phẩm cần đạt: …", "Dự kiến sản phẩm: …". Chép nguyên văn, bỏ ô rỗng và ô trùng. Hàm thuần.
+ */
+export function sanPhamCanDat(ds: Doan[]): string {
+  const ra: string[] = [];
+  const them = (t: string) => { const x = t.trim(); if (x && !ra.includes(x)) ra.push(x); };
+  for (const d of ds) {
+    if (d.loai !== 'bang' || !d.hang?.length) continue;
+    const dau = d.hang.findIndex((r) => r.some((c) => /sản phẩm|kết quả dự kiến/i.test(c)));
+    if (dau < 0) continue;
+    const cot = d.hang[dau].findIndex((c) => /sản phẩm|kết quả dự kiến/i.test(c));
+    for (const r of d.hang.slice(dau + 1)) them(r[cot] ?? '');
+  }
+  if (!ra.length) for (const d of ds) for (const dong of d.text.split('\n')) {
+    const m = dong.match(/^\s*[-–•]?\s*(?:sản phẩm cần đạt|dự kiến sản phẩm|sản phẩm dự kiến|kết quả dự kiến)\s*:\s*(.+)$/i);
+    if (m) them(m[1]);
+  }
+  return ra.join('\n');
 }
 
 /**

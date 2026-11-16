@@ -111,7 +111,7 @@ for (const h of ((TRA_LOI as Record<string, any>).goiY?.hoatDong ?? []) as Recor
       noiDung: h.yTuong,
       sanPham: h.sanPham,
       buoc: {
-        chuyenGiao: { viec: `${h.kichBan[0]?.buoc ?? ''}. Nhiệm vụ cụ thể: ${h.cauHoiMau}`, sanPham: '' },
+        chuyenGiao: { viec: `${h.kichBan[0]?.buoc ?? ''} (${h.kichBan[0]?.phut ?? 2} phút, theo nhóm 4–6 học sinh). Nhiệm vụ cụ thể: ${h.cauHoiMau}`, sanPham: '' },
         thucHien: b(1, `${h.vaiTro}`),
         baoCao: { viec: `${h.kichBan[2]?.buoc ?? 'Đại diện nhóm trình bày sản phẩm'}; các nhóm khác nhận xét, bổ sung, đặt câu hỏi.`, sanPham: `${h.sanPham.replace(/\.$/, '')}: ${h.danhGia}` },
         ketLuan: { viec: `GV nhận xét theo dấu hiệu: ${h.danhGia} Chốt kiến thức: ${h.chotKienThuc}`, sanPham: h.chotKienThuc },
