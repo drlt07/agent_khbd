@@ -289,3 +289,15 @@ Tác giả đưa tài liệu "Keynote 1 – Cơ sở lí luận, định hướn
 - Luật code `src/soan/hafa-vret.ts` (hàm thuần): hoạt động có học sinh dùng AI phải có bước học sinh tự làm trước. Soạn từng phần: thiếu → soạn lại ≤ 2 lượt; gợi ý hoạt động: phương án bị đánh "Không hợp"; đề xuất chèn mã AI: bị loại; bước Kiểm tra: chỉ nhắc (giáo viên có thể tự viết phần này, giáo viên quyết định). Thiếu minh chứng quá trình (phiếu lưu vết, giải trình, bản sửa) → nhắc.
 - Chờ: tài liệu nói "phiếu lưu vết 5 mục" nhưng không ghi tên từng mục; tạm dùng các bước HAFA–VRET (bài làm đầu, mức gợi ý đã dùng, kiểm chứng, bản sửa, giải trình) cho tới khi tác giả bổ sung.
 - Kiểm thử `tests/hafa-vret.test.ts`.
+
+## Tài liệu training SGV Ngữ văn 12 – 16/11/2026
+
+Tác giả đưa 4 file Sách giáo viên Ngữ văn 12 – Kết nối tri thức (tập một, tập hai, bản rà soát) làm tài liệu training môn Văn.
+
+- File PDF ở `tai-lieu-training/ngu-van/` nhưng nằm trong `.gitignore`: repo công khai, SGV có bản quyền. Chỉ dùng tên bài, văn bản, thể loại, YCCĐ và nguyên tắc diễn đạt lại.
+- `data/sgv_ngu_van_12.json`: 9 bài, 25 văn bản, thể loại, YCCĐ đọc hiểu từng văn bản, kiểu bài viết, nói và nghe, số tiết.
+- `src/soan/sgv-ngu-van.ts` (hàm thuần): tìm văn bản theo tên bài giáo viên nhập (không dấu, tên tác phẩm gốc; tên một âm tiết không dùng để tránh khớp nhầm); bài nhiều thể loại thì không đoán. Khi đọc giáo án, thể loại lấy theo SGV nếu tìm được, không theo AI.
+- Lời nhắc AI môn Văn thêm "Định hướng từ SGV" (YCCĐ đọc hiểu của văn bản, kiểu bài cùng bài học), ghi rõ không phải nguồn kiến thức; kiến thức vẫn chỉ từ KHBD tải lên.
+- `rules/ngu-van.md` v2: trọng tâm thể loại lớp 12; mục D tổ chức dạy học theo SGV (YCCĐ là gốc, câu hỏi đọc hiểu là nhiệm vụ chuyển giao, mạch Khởi động → Hình thành → Luyện tập → Vận dụng, không dồn câu hỏi vào Hình thành, tri thức ngữ văn không hàn lâm, không bắt chép lại thông tin có sẵn, kết nối bài đã học, đánh giá thường xuyên, giáo viên chủ động).
+- Màn "Sửa KHBD cũ": dưới ô thể loại hiện "Theo SGV Ngữ văn 12: Bài … · văn bản (tiểu loại)" và nút đổi thể loại cho khớp; giáo viên quyết định.
+- Kiểm thử `tests/sgv-ngu-van.test.ts`; tổng 227 đạt. Đã kiểm tra trên trình duyệt.

@@ -5,6 +5,7 @@
  */
 import LUAT_NGU_VAN from '../../rules/ngu-van.md?raw';
 import { boDau } from '../thu-vien';
+import { nhacSgv } from './sgv-ngu-van';
 
 export const THE_LOAI_VAN = {
   truyen: 'Truyện', tho: 'Thơ', kich: 'Kịch', ki: 'Kí', nghi_luan: 'Văn nghị luận', thong_tin: 'Văn bản thông tin', khac: 'Khác / nhiều thể loại',
@@ -16,10 +17,11 @@ export const PHIEN_BAN_LUAT_VAN = LUAT_NGU_VAN.match(/phien_ban:\s*([^\s·]+)/)?
 export const luatNguVan = () => LUAT_NGU_VAN.replace(/<!--.*?-->\s*/s, '');
 
 /** Dặn thêm cho lời nhắc khi soạn/sửa Ngữ văn từ KHBD tải lên. */
-export function nhacNguVan(theLoai?: TheLoaiVan): string {
+export function nhacNguVan(theLoai?: TheLoaiVan, bai?: string, lop?: number): string {
   return [
     luatNguVan(),
     theLoai && theLoai !== 'khac' ? `Văn bản chính của bài thuộc thể loại: ${THE_LOAI_VAN[theLoai]}. Thiết kế hoạt động đọc hiểu theo đúng đặc trưng thể loại này (mục B).` : '',
+    bai ? nhacSgv(bai, lop) : '',
   ].filter(Boolean).join('\n\n');
 }
 
@@ -48,8 +50,8 @@ export function trichDanKhongCo(vanBanAi: string, khbdGoc: string): string[] {
 export const LOI_TRICH_DAN = (ds: string[]) => `Ngữ văn: trích dẫn không có trong KHBD gốc (không được tự viết câu trích): ${ds.map((t) => `“${t.slice(0, 60)}${t.length > 60 ? '…' : ''}”`).join('; ')}.`;
 
 /** Phần dặn thêm cho mọi lời nhắc khi bài là Ngữ văn (rỗng với môn khác). */
-export const phanVan = (k: { mon: string; nguon?: { theLoai?: string } }) =>
-  k.mon === 'NGU_VAN' ? `\n\n${nhacNguVan(k.nguon?.theLoai as TheLoaiVan | undefined)}` : '';
+export const phanVan = (k: { mon: string; bai?: string; lop?: number; nguon?: { theLoai?: string } }) =>
+  k.mon === 'NGU_VAN' ? `\n\n${nhacNguVan(k.nguon?.theLoai as TheLoaiVan | undefined, k.bai, k.lop)}` : '';
 
 /** Ngữ văn có KHBD gốc: trích dẫn không có trong KHBD gốc (rỗng nếu không phải Ngữ văn hoặc không có KHBD gốc). */
 export const trichDanLa = (k: { mon: string; nguon?: { toanVan: string } }, vanBan: string) =>

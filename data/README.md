@@ -17,3 +17,7 @@ Mã môn dùng thống nhất: `NGU_VAN, TOAN, NGOAI_NGU, VAT_LI, HOA_HOC, SINH_
 Mục lục SGK lớp 10–12: 118 sách (Kết nối tri thức, Chân trời sáng tạo, Cánh diều, Cùng khám phá; 6 bộ Tiếng Anh), 4.836 mục. Chỉ tên chủ đề/chương và tên bài; **không có số tiết** (do kế hoạch dạy học của tổ quyết định).
 Nguồn: trang giải SGK theo bộ sách trên loigiaihay.com, lấy ngày 11/11/2026. Trạng thái: **chưa đối chiếu** với sách in (`da_doi_chieu: false`). Sách nguồn chưa đủ bài được gắn `chuaDu` (hiện có: Tin học 10 Cánh diều).
 Cách lấy lại: `scripts/muc-luc-sgk/README.md`.
+
+## sgv_ngu_van_12.json (16/11/2026)
+
+Tài liệu training: Sách giáo viên Ngữ văn 12 – Kết nối tri thức (tác giả cung cấp, `tai-lieu-training/ngu-van/`). 9 bài, 25 văn bản đọc: tên văn bản, tác phẩm gốc, tác giả, thể loại (mã `MA_THE_LOAI` do app gán), tiểu loại, yêu cầu cần đạt đọc hiểu (mục "Phân tích yêu cầu cần đạt" của SGV); mỗi bài có số tiết, phân bố, tên bài thực hành tiếng Việt, viết, nói và nghe. Không chép nội dung hướng dẫn hay gợi ý đáp án. Dùng để: nhận thể loại theo tên bài (code), định hướng hoạt động cho AI. Không phải nguồn kiến thức. Chưa có lớp 10, 11.

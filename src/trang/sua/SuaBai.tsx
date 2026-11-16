@@ -15,6 +15,7 @@ import { ChonMa } from '../soan/Buoc1ThongTin';
 import DoiMoiHoatDong from './DoiMoiHoatDong';
 import { NHOM_HINH_THUC } from '../../soan/goi-y';
 import { ChuCT } from '../../thanh-phan/cong-thuc';
+import { timTheoBai } from '../../soan/sgv-ngu-van';
 import { THE_LOAI_VAN, type TheLoaiVan } from '../../soan/ngu-van';
 
 const KHOA = 'khbd.sua-nhap';
@@ -160,6 +161,17 @@ function BuocXacNhan({ k, sua }: { k: SuaKhbd; sua: (f: (x: SuaKhbd) => SuaKhbd)
                 {Object.entries(THE_LOAI_VAN).map(([m, t]) => <option key={m} value={m}>{t}</option>)}
               </select>
               <p className="text-[13px] text-muted">Môn Ngữ văn: AI giữ nguyên kiến thức của giáo án, chỉ thiết kế hoạt động theo đặc trưng thể loại này. Câu trích không có trong giáo án sẽ bị luật loại.</p>
+              {(() => {
+                const r = timTheoBai(k.bai, k.lop);
+                if (!r) return null;
+                const tl = r.vanBan?.theLoai;
+                return (
+                  <p className="text-[13px]">
+                    <strong>Theo SGV Ngữ văn 12:</strong> Bài {r.bai.so}. {r.bai.ten}{r.vanBan ? ` · ${r.vanBan.ten} (${r.vanBan.tieuLoai})` : ''}. AI dùng yêu cầu cần đạt đọc hiểu của SGV để định hướng hoạt động.
+                    {tl && tl !== (k.theLoai ?? 'khac') && <> <button type="button" className="underline font-semibold" onClick={() => sua((x) => ({ ...x, theLoai: tl }))}>Đổi sang {THE_LOAI_VAN[tl]}</button></>}
+                  </p>
+                );
+              })()}
             </div>
           )}
           <h3 className="text-[15px] mt-5">Yêu cầu cần đạt</h3>

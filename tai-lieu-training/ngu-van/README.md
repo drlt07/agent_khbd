@@ -1,11 +1,14 @@
 # Tài liệu training – Ngữ văn
 
-Thư mục chứa tài liệu tham khảo môn Ngữ văn (KHBD mẫu, hướng dẫn dạy theo thể loại) dùng để chỉnh luật `rules/ngu-van.md` và lời nhắc AI.
+| File (chỉ có trên máy, không đưa lên GitHub) | Nội dung | Thành luật / dữ liệu |
+|---|---|---|
+| `sgv-ngu-van-12-tap-1-phan-1.pdf` | SGV Ngữ văn 12 – Kết nối tri thức, tập một: hướng dẫn chung; Bài 1–4 | `rules/ngu-van.md` v2 (mục B lớp 12, mục D); `data/sgv_ngu_van_12.json` |
+| `sgv-ngu-van-12-tap-1-phan-2.pdf` | Tập một (tiếp): Bài 4–5, ôn tập học kì I | như trên |
+| `sgv-ngu-van-12-tap-2-phan-1.pdf` | Tập hai: Bài 6–8 | như trên |
+| `sgv-ngu-van-12-tap-2-phan-2.pdf` | Tập hai (tiếp): Bài 9 | như trên |
 
-- Đặt file gốc (.docx/.pdf) vào đây, mỗi tài liệu một file, tên không dấu, ví dụ `khbd-giau-cua.docx`.
-- Ghi nguồn, ngày nhận và người cung cấp vào bảng dưới.
-- Không đưa vào thư mục này: dữ liệu cá nhân học sinh, văn bản SGK chép nguyên văn dài.
+Bản rà soát do tác giả cung cấp ngày 16/11/2026.
 
-| File | Nội dung | Nguồn | Ngày nhận |
-|---|---|---|---|
-| _(chờ 2 tài liệu của tác giả)_ | | | |
+**Vì sao PDF không lên GitHub:** repo công khai; SGV là sách có bản quyền của NXB Giáo dục Việt Nam. Các file PDF được bỏ qua trong `.gitignore`. App chỉ dùng: tên bài, tên văn bản, thể loại, phân bố tiết, tên kiểu bài viết/nói và nghe, yêu cầu cần đạt đọc hiểu, và các nguyên tắc tổ chức dạy học đã diễn đạt lại. Không chép nội dung hướng dẫn, gợi ý đáp án của SGV.
+
+Máy khác cần tài liệu gốc thì chép 4 file vào thư mục này với đúng tên trên.

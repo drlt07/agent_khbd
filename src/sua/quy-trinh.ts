@@ -11,6 +11,7 @@ import { TEN_HD, type DauVet, type Khbd, type MaHd } from '../soan/kieu';
 import { phanBoMacDinh } from '../soan/phan-bo';
 import { huongDanTuGoiY } from '../soan/goi-y';
 import { coDungAi, coLamTruoc, LOI_LAM_TRUOC, phanHafa } from '../soan/hafa-vret';
+import { theLoaiTheoSgv } from '../soan/sgv-ngu-van';
 import { LOI_TRICH_DAN, MA_THE_LOAI, nhacNguVan, THE_LOAI_VAN, trichDanKhongCo, type TheLoaiVan } from '../soan/ngu-van';
 import type { Doan } from './doc-docx';
 import type { HoatDongCu, HoatDongGoiY } from '../soan/goi-y';
@@ -144,9 +145,9 @@ function giaoAn(doan: Doan[]): string {
   return dong.join('\n');
 }
 
-const he = (k?: Pick<SuaKhbd, 'mon' | 'theLoai'> & Partial<Pick<SuaKhbd, 'tichHop'>>) => `${LUAT_SOAN.replace(/<!--.*?-->\s*/s, '')}
+const he = (k?: Pick<SuaKhbd, 'mon' | 'theLoai'> & Partial<Pick<SuaKhbd, 'tichHop' | 'bai' | 'lop'>>) => `${LUAT_SOAN.replace(/<!--.*?-->\s*/s, '')}
 
-Nhiệm vụ: NÂNG CẤP giáo án có sẵn của giáo viên, giữ bố cục gốc. Nội dung của giáo viên giữ nguyên văn; bạn chỉ đề xuất phần BỔ SUNG và chỉ ra vị trí chèn bằng mã đoạn (D001…). Không chép lại câu của giáo viên. Mã đoạn là mã nội bộ, không được xuất hiện trong câu văn bổ sung. Ưu tiên cải tiến hoạt động có sẵn thay vì thêm hoạt động mới; giữ thời lượng toàn tiết.${k && 'tichHop' in k ? phanHafa(k as Pick<SuaKhbd, 'tichHop'>) : ''}${k?.mon === 'NGU_VAN' ? `\n\n${nhacNguVan(k.theLoai)}` : ''}`;
+Nhiệm vụ: NÂNG CẤP giáo án có sẵn của giáo viên, giữ bố cục gốc. Nội dung của giáo viên giữ nguyên văn; bạn chỉ đề xuất phần BỔ SUNG và chỉ ra vị trí chèn bằng mã đoạn (D001…). Không chép lại câu của giáo viên. Mã đoạn là mã nội bộ, không được xuất hiện trong câu văn bổ sung. Ưu tiên cải tiến hoạt động có sẵn thay vì thêm hoạt động mới; giữ thời lượng toàn tiết.${k && 'tichHop' in k ? phanHafa(k as Pick<SuaKhbd, 'tichHop'>) : ''}${k?.mon === 'NGU_VAN' ? `\n\n${nhacNguVan(k.theLoai, k.bai, k.lop)}` : ''}`;
 
 export function nhacPhanTich(doan: Doan[]): string {
   return `Đọc giáo án dưới đây (mỗi dòng là một đoạn, có mã đoạn) và xác định: môn (mã: ${MA_MON.join(', ')}), lớp, tên bài, yêu cầu cần đạt, các hoạt động dạy học (đoạn bắt đầu, đoạn kết thúc, thời lượng), và mã đoạn cuối của phần mục tiêu.
@@ -199,7 +200,7 @@ export async function phanTich(k: SuaKhbd, ai: GoiAi): Promise<SuaKhbd> {
   const lop = ([10, 11, 12] as const).find((l) => l === Math.round(r.lop)) ?? k.lop;
   const coMa = (m: string) => k.doan.some((d) => d.ma === m);
   return {
-    ...k, mon: r.mon, lop, bai: r.bai.trim() || k.bai, theLoai: r.mon === 'NGU_VAN' ? r.theLoai : undefined,
+    ...k, mon: r.mon, lop, bai: r.bai.trim() || k.bai, theLoai: r.mon === 'NGU_VAN' ? theLoaiTheoSgv(r.bai.trim() || k.bai, lop) ?? r.theLoai : undefined,
     yccd: r.yccd.map((s) => s.replace(/^\s*(\d+[.)]|[-•–])\s*/, '').trim()).filter(Boolean).slice(0, 6).map((noiDung, i) => ({ ma: `YC${i + 1}`, noiDung })),
     yccdDaXacNhan: false,
     hoatDong: r.hoatDong.filter((h) => coMa(h.tu) && coMa(h.den)),

@@ -1,4 +1,4 @@
-<!-- phien_ban: 1 · 2026-11-16 · Luật riêng môn Ngữ văn khi sửa/soạn lại từ KHBD giáo viên tải lên (quyết định của tác giả) -->
+<!-- phien_ban: 2 · 2026-11-16 · Luật riêng môn Ngữ văn khi sửa/soạn lại từ KHBD giáo viên tải lên (quyết định của tác giả). v2: thêm trọng tâm thể loại lớp 12 và mục D theo tài liệu training SGV Ngữ văn 12 – Kết nối tri thức (tai-lieu-training/ngu-van/), diễn đạt lại, không chép nguyên văn -->
 LUẬT RIÊNG MÔN NGỮ VĂN
 
 A. KHÔNG TỰ SINH KIẾN THỨC (khi có KHBD/giáo án giáo viên tải lên)
@@ -16,7 +16,26 @@ Hoạt động đọc hiểu phải đưa học sinh vào đúng những yếu t
 - Kí (tùy bút, tản văn, hồi kí, du kí, phóng sự, nhật kí): tính xác thực, cái tôi người viết, sự kết hợp tự sự – trữ tình – nghị luận, chất liệu đời sống. Hoạt động hợp: bản đồ hành trình, đối chiếu sự thật – cảm xúc, viết đoạn theo cái tôi.
 - Văn nghị luận: luận đề, luận điểm, lí lẽ, bằng chứng, cách lập luận, mục đích – quan điểm người viết, yếu tố thuyết phục. Hoạt động hợp: sơ đồ lập luận, tranh biện, phản biện – bổ sung bằng chứng, đánh giá sức thuyết phục.
 - Văn bản thông tin: mục đích, cấu trúc, cách trình bày dữ liệu, phương tiện phi ngôn ngữ, độ tin cậy của thông tin. Hoạt động hợp: chuyển thông tin sang sơ đồ – bảng, kiểm chứng nguồn, so sánh hai văn bản.
+Trọng tâm thể loại ở lớp 12 (theo SGV Ngữ văn 12):
+- Tiểu thuyết hiện đại: khả năng bao quát hiện thực rộng lớn; góc nhìn đời tư, đời sống bên trong nhân vật; điểm nhìn trần thuật luân chuyển; ngôn ngữ nhân vật; với tiểu thuyết trào phúng: tính trào phúng, nói mỉa, nghịch ngữ.
+- Thơ trữ tình: dấu hiệu phong cách (cổ điển, lãng mạn), yếu tố biểu tượng, tượng trưng, siêu thực; với thơ trung đại, thơ chữ Hán: hoàn cảnh, cảm hứng, cấu tứ, bản dịch – nguyên tác.
+- Văn nghị luận: luận đề, luận điểm, nghệ thuật lập luận và sự phối hợp các thao tác nghị luận; phân biệt nghị luận xã hội và nghị luận văn học.
+- Truyện có yếu tố kì ảo (truyện truyền kì, truyện ngắn hiện đại): vai trò của yếu tố kì ảo (nhân vật, sự kiện, thủ pháp), điển cố; so sánh với truyện cùng loại đã học; vay mượn – cải biến – sáng tạo.
+- Hài kịch: nhân vật, tình huống, xung đột hài kịch, hành động và cử chỉ, ngôn ngữ đối thoại, thủ pháp trào phúng; nguồn gốc tiếng cười và tác động xã hội của tiếng cười.
+- Kí (phóng sự, hồi kí): tính phi hư cấu, sự thật đời sống; điểm nhìn, trải nghiệm, thái độ của người viết; kết hợp sự kiện thật với đánh giá.
+- Văn bản thông tin: dữ liệu sơ cấp – thứ cấp, độ tin cậy và tính mới của dữ liệu, cách chọn lọc – sắp xếp thông tin, bố cục – mạch lạc, phương tiện phi ngôn ngữ, quan điểm người viết.
 Không dùng hoạt động của thể loại này cho văn bản thể loại khác (ví dụ không "sơ đồ lập luận" cho bài thơ trữ tình, không "đọc diễn cảm nhịp thơ" cho văn bản thông tin).
 
 C. HOẠT ĐỘNG VIẾT, NÓI VÀ NGHE
 Bám kiểu bài và yêu cầu trong KHBD (ví dụ "viết đoạn văn phân tích một chi tiết", "thuyết trình so sánh hai tác phẩm"); có tiêu chí đánh giá; học sinh tự viết, tự nói (AI nếu được bật chỉ góp ý, không viết thay).
+
+D. TỔ CHỨC DẠY HỌC THEO ĐỊNH HƯỚNG SÁCH GIÁO VIÊN (SGV Ngữ văn 12 – Kết nối tri thức)
+1. Yêu cầu cần đạt đối với học sinh là gốc: mục tiêu chung của bài và mục tiêu riêng của từng hoạt động suy ra từ yêu cầu cần đạt (SGV có mục "Phân tích yêu cầu cần đạt" cho từng văn bản, kiểu bài; dùng để định hướng hoạt động, không thay kiến thức trong KHBD).
+2. Nòng cốt của hoạt động đọc là các câu hỏi – yêu cầu đọc hiểu của bài: đó là nhiệm vụ giáo viên chuyển giao cho học sinh (đưa vào nội dung hoạt động); gợi ý trả lời ghi ngắn gọn ở kết quả, sản phẩm dự kiến, lấy từ KHBD.
+3. Một giờ đọc đi theo mạch Khởi động → Hình thành kiến thức mới → Củng cố, luyện tập → Vận dụng. Không dồn mọi câu hỏi vào Hình thành kiến thức: các câu hỏi cuối chuỗi (đánh giá, liên hệ) dùng cho Luyện tập; bài viết ngắn kết nối đọc – viết dùng cho Vận dụng.
+4. Tri thức ngữ văn: trước văn bản đầu tiên chỉ tìm hiểu những khái niệm cần cho văn bản đó, bằng câu hỏi gợi mở nối với điều học sinh đã đọc, đã học; không mở rộng lí thuyết, tránh hàn lâm.
+5. Học sinh đã chuẩn bị bài ở nhà: không bắt cả lớp nhắc lại hay chép lại thông tin có sẵn trong sách; dành thời gian cho trọng điểm kiến thức, kĩ năng của bài.
+6. Kết nối với bài đã học (cùng thể loại ở lớp dưới, kiểu bài viết đã làm) để không dạy kiến thức cũ như mới.
+7. Đọc, viết, nói và nghe gắn với nhau: viết và nói tận dụng kết quả của phần đọc trong cùng bài.
+8. Đánh giá thường xuyên trong từng hoạt động bằng công cụ cụ thể (phiếu, bảng kiểm, rubric), đánh giá cả sản phẩm cá nhân và sản phẩm nhóm.
+9. Giáo viên chủ động, sáng tạo: được tổ chức khác SGV cho hợp lớp mình; app không ép theo SGV khi KHBD của giáo viên đã chọn cách khác.

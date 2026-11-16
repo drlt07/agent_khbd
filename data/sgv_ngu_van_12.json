@@ -1,0 +1,425 @@
+{
+ "_nguon": "Sách giáo viên Ngữ văn 12 – Kết nối tri thức với cuộc sống (NXB Giáo dục Việt Nam), tập một và tập hai, bản rà soát do tác giả cung cấp 16/11/2026. Chỉ ghi tên bài, tên văn bản, thể loại, phân bố tiết, kiểu bài viết/nói nghe và yêu cầu cần đạt đọc hiểu (mục \"Phân tích yêu cầu cần đạt\"); không chép nội dung hướng dẫn, đáp án. Thể loại (theLoai) và tiểu loại do app gán theo bài học.",
+ "mon": "NGU_VAN",
+ "lop": 12,
+ "bo": "Kết nối tri thức với cuộc sống",
+ "bai": [
+  {
+   "so": 1,
+   "ten": "Khả năng lớn lao của tiểu thuyết",
+   "tap": 1,
+   "soTiet": 11,
+   "phanBo": "6 đọc, 1 tiếng Việt, 3 viết, 1 nói và nghe",
+   "vanBan": [
+    {
+     "ten": "Xuân Tóc Đỏ cứu quốc",
+     "trich": "Số đỏ",
+     "tacGia": "Vũ Trọng Phụng",
+     "theLoai": "truyen",
+     "tieuLoai": "tiểu thuyết hiện đại (trào phúng)",
+     "yccdDoc": [
+      "nhận biết và phân tích được một số nét đặc trưng của tiểu thuyết hiện đại trên các phương diện: khả năng bao quát hiện thực đời sống; góc độ quan sát, thể hiện nhân vật và hệ thống sự kiện; cách miêu tả nét đặc thù của ngôn ngữ nhân vật;…",
+      "nhận biết và phân tích được tính chất trào phúng, giá trị hiện thực của tiểu thuyết Số đỏ thể hiện qua đoạn trích.",
+      "nhận biết và phân tích được hiệu quả nghệ thuật của các biện pháp nói mỉa, nghịch ngữ trong đoạn trích.",
+      "có thái độ phê phán tình trạng loạn chuẩn khi đánh giá các hiện tượng đời sống và nhìn nhận con người, hướng tới việc xây dựng một môi trường xã hội lành mạnh."
+     ]
+    },
+    {
+     "ten": "Nỗi buồn chiến tranh",
+     "trich": "Nỗi buồn chiến tranh",
+     "tacGia": "Bảo Ninh",
+     "theLoai": "truyen",
+     "tieuLoai": "tiểu thuyết hiện đại",
+     "yccdDoc": [
+      "nhận biết và phân tích được một số nét đặc trưng của tiểu thuyết hiện đại trên các phương diện: nhìn cuộc sống từ góc độ đời tư; khả năng soi tỏ tường tận đời sống bên trong của nhân vật; sự luân chuyển điểm nhìn trong nghệ thuật trần thuật;…",
+      "nhận biết và phân tích được cách nhìn nhận, đánh giá đa chiều về các sự kiện đời sống và về bản thân nghệ thuật tiểu thuyết.",
+      "nhận biết và phân tích được hiệu quả nghệ thuật của thủ pháp đồng hiện và bút pháp dòng ý thức trong đoạn trích (mặc dù có thể không trực tiếp sử dụng các thuật ngữ thủ pháp đồng hiện và bút pháp dòng ý thức).",
+      "biết chia sẻ với những chấn thương tinh thần của con người thời hậu chiến, biết quý trọng cuộc sống hoà bình vốn phải được đánh đổi bằng rất nhiều máu xương."
+     ]
+    }
+   ],
+   "tiengViet": "Biện pháp tu từ nói mỉa, nghịch ngữ: đặc điểm và tác dụng",
+   "viet": "Viết bài văn nghị luận so sánh, đánh giá hai tác phẩm truyện",
+   "noiNghe": "Trình bày kết quả so sánh, đánh giá hai tác phẩm truyện"
+  },
+  {
+   "so": 2,
+   "ten": "Những thế giới thơ",
+   "tap": 1,
+   "soTiet": 11,
+   "phanBo": "7 đọc, 1 tiếng Việt, 2 viết, 1 nói và nghe",
+   "vanBan": [
+    {
+     "ten": "Cảm hoài",
+     "trich": "Nỗi lòng",
+     "tacGia": "Đặng Dung",
+     "theLoai": "tho",
+     "tieuLoai": "thơ trung đại – phong cách cổ điển",
+     "yccdDoc": [
+      "nhận biết được một số đặc điểm của phong cách cổ điển được thể hiện trong bài thơ Cảm hoài.",
+      "phân tích được giá trị nội dung và đặc sắc nghệ thuật của bài thơ; qua đó rèn luyện năng lực đọc hiểu một văn bản thơ trung đại.",
+      "cảm nhận được nhiệt huyết cứu nước và vẻ đẹp tâm hồn của nhà thơ."
+     ]
+    },
+    {
+     "ten": "Tây Tiến",
+     "trich": "",
+     "tacGia": "Quang Dũng",
+     "theLoai": "tho",
+     "tieuLoai": "thơ trữ tình hiện đại – phong cách lãng mạn",
+     "yccdDoc": [
+      "nhận biết được một số đặc điểm của phong cách lãng mạn được thể hiện trong bài thơ Tây Tiến.",
+      "phân tích được giá trị nội dung và đặc sắc nghệ thuật của bài thơ; qua đó rèn luyện năng lực đọc hiểu một bài thơ trữ tình hiện đại.",
+      "cảm nhận được nhiệt huyết cứu nước và vẻ đẹp tâm hồn của một thế hệ, một thời đại; qua đó bồi đắp tình yêu quê hương xứ sở và mục đích sống cao đẹp."
+     ]
+    },
+    {
+     "ten": "Đàn ghi ta của Lor-ca",
+     "trich": "",
+     "tacGia": "Thanh Thảo",
+     "theLoai": "tho",
+     "tieuLoai": "thơ trữ tình hiện đại – yếu tố tượng trưng, siêu thực",
+     "yccdDoc": [
+      "nhận biết và phân tích được một số yếu tố nghệ thuật của thơ trữ tình hiện đại như: ngôn ngữ, hình tượng, biểu tượng, yếu tố tượng trưng, siêu thực,… được thể hiện trong bài thơ Đàn ghi ta của Lor-ca, qua đó cảm nhận được vẻ đẹp bi tráng của hình tượng Gác-xi-a Lor-ca và sự đồng cảm, thương tiếc, ngưỡng vọng sâu sắc của Thanh Thảo với cuộc đời, số phận và thơ ca của Lor-ca.",
+      "rèn luyện kĩ năng phân tích, bình giảng một bài thơ được viết theo phong cách thơ hiện đại, thuộc dòng thơ tượng trưng và siêu thực.",
+      "vận dụng được kinh nghiệm đọc, trải nghiệm về cuộc sống và kiến thức văn học để đánh giá, phê bình, thể hiện được suy nghĩ, cảm xúc của cá nhân khi tiếp nhận văn bản thơ."
+     ]
+    }
+   ],
+   "tiengViet": "Tác dụng của một số biện pháp tu từ trong thơ",
+   "viet": "Viết bài văn nghị luận so sánh, đánh giá hai tác phẩm thơ",
+   "noiNghe": "Trình bày kết quả so sánh, đánh giá hai tác phẩm thơ"
+  },
+  {
+   "so": 3,
+   "ten": "Lập luận trong văn bản nghị luận",
+   "tap": 1,
+   "soTiet": 10,
+   "phanBo": "6 đọc, 1 tiếng Việt, 2 viết, 1 nói và nghe",
+   "vanBan": [
+    {
+     "ten": "Nhìn về vốn văn hoá dân tộc",
+     "trich": "",
+     "tacGia": "Trần Đình Hượu",
+     "theLoai": "nghi_luan",
+     "tieuLoai": "nghị luận xã hội",
+     "yccdDoc": [
+      "nhận diện được một số mặt của vốn văn hoá dân tộc; nắm được những nét đặc thù của văn hoá Việt Nam; định hướng nghiên cứu mà tác giả gợi ý cho công việc tìm hiểu bản sắc văn hoá Việt Nam; nhận thức rõ tính cấp thiết của việc giữ gìn, phát huy, phát triển vốn văn hoá dân tộc trong bối cảnh hội nhập quốc tế.",
+      "nhận biết được luận đề, các luận điểm, cách thức lập luận của tác giả thể hiện trong từng luận điểm và cả đoạn trích; việc sử dụng phối hợp các thao tác trong bài nghị luận để tăng sức thuyết phục cho bài viết."
+     ]
+    },
+    {
+     "ten": "Năng lực sáng tạo",
+     "trich": "",
+     "tacGia": "Phan Đình Diệu",
+     "theLoai": "nghi_luan",
+     "tieuLoai": "nghị luận xã hội",
+     "yccdDoc": [
+      "hiểu được bản chất của hoạt động sáng tạo; tầm quan trọng của hoạt động sáng tạo đối với cuộc sống cá nhân và của đất nước trong bối cảnh kinh tế tri thức; tư tưởng của tác giả khi bàn về hoạt động sáng tạo.",
+      "nhận biết được mục đích của người viết, đánh giá được nội dung của văn bản; phân tích hiệu quả của việc phối hợp các thao tác nghị luận trong văn bản."
+     ]
+    },
+    {
+     "ten": "Mấy ý nghĩ về thơ",
+     "trich": "",
+     "tacGia": "Nguyễn Đình Thi",
+     "theLoai": "nghi_luan",
+     "tieuLoai": "nghị luận văn học",
+     "yccdDoc": [
+      "vận dụng những kiến thức về thơ, khả năng cảm thụ thơ để hiểu được quan điểm của tác giả thể hiện qua bài viết cũng như cách trình bày quan điểm trong một văn bản nghị luận văn học.",
+      "nhận biết luận đề, các luận điểm của văn bản; cách sử dụng lí lẽ, bằng chứng; cách phối hợp các thao tác nghị luận để văn bản có sức thuyết phục."
+     ]
+    }
+   ],
+   "tiengViet": "Lỗi logic, lỗi câu mơ hồ và cách sửa",
+   "viet": "Viết bài văn nghị luận về một vấn đề liên quan đến tuổi trẻ (những hoài bão, ước mơ)",
+   "noiNghe": "Thuyết trình về một vấn đề liên quan đến tuổi trẻ"
+  },
+  {
+   "so": 4,
+   "ten": "Yếu tố kì ảo trong truyện kể",
+   "tap": 1,
+   "soTiet": 9,
+   "phanBo": "5 đọc, 1 tiếng Việt, 2 viết, 1 nói và nghe",
+   "vanBan": [
+    {
+     "ten": "Hải khẩu linh từ",
+     "trich": "Đền thiêng cửa bể",
+     "tacGia": "Đoàn Thị Điểm",
+     "theLoai": "truyen",
+     "tieuLoai": "truyện truyền kì",
+     "yccdDoc": [
+      "xác định, nhận biết được đề tài của truyện, nội dung, nhân vật trong truyện.",
+      "Thông qua đọc bản dịch và tìm hiểu cước chú, HS phân tích được một số khía cạnh nghệ thuật cụ thể của truyện: ngôn ngữ, thủ pháp,…",
+      "nhận diện, đánh giá được vai trò của yếu tố kì ảo trong truyện (nhân vật, sự kiện, thủ pháp,…), so sánh với truyện cùng loại (Ví dụ: Chuyện chức Phán sự đền Tản Viên, SGK Ngữ văn 10, tập một).",
+      "vận dụng được kinh nghiệm đọc, trải nghiệm về cuộc sống và kiến thức văn học để đánh giá, phê bình, thể hiện cảm xúc, suy nghĩ của cá nhân về tác phẩm; phân tích, đánh giá nghệ thuật sử dụng điển cố trong tác phẩm."
+     ]
+    },
+    {
+     "ten": "Muối của rừng",
+     "trich": "",
+     "tacGia": "Nguyễn Huy Thiệp",
+     "theLoai": "truyen",
+     "tieuLoai": "truyện ngắn hiện đại có yếu tố kì ảo",
+     "yccdDoc": [
+      "nhận biết và phân tích, đánh giá được vai trò của yếu tố kì ảo trong truyện ngắn hiện đại.",
+      "vận dụng được kinh nghiệm đọc, trải nghiệm cuộc sống và tri thức văn học để đánh giá, phê bình, thể hiện cảm xúc, suy nghĩ của cá nhân về tác phẩm.",
+      "biết nhận xét nội dung bao quát của văn bản, phân tích được các chi tiết tiêu biểu trong văn bản.",
+      "biết so sánh, đánh giá các tác phẩm văn học có những mối liên hệ nhất định với nhau, làm rõ được những yếu tố vay mượn, cải biên,…",
+      "có ý thức trân trọng, bảo vệ thiên nhiên, có lối sống hoà hợp với thế giới tự nhiên."
+     ]
+    }
+   ],
+   "tiengViet": "Nghệ thuật sử dụng điển cố trong tác phẩm văn học",
+   "viet": "Viết bài văn nghị luận về việc vay mượn – cải biến – sáng tạo trong một tác phẩm văn học",
+   "noiNghe": "Trình bày về vay mượn – cải biến – sáng tạo trong một tác phẩm văn học"
+  },
+  {
+   "so": 5,
+   "ten": "Tiếng cười của hài kịch",
+   "tap": 1,
+   "soTiet": 8,
+   "phanBo": "5 đọc, 2 viết, 1 nói và nghe",
+   "vanBan": [
+    {
+     "ten": "Nhân vật quan trọng",
+     "trich": "Quan thanh tra",
+     "tacGia": "Ni-cô-lai Gô-gôn",
+     "theLoai": "kich",
+     "tieuLoai": "hài kịch",
+     "yccdDoc": [
+      "nhận biết và phân tích được một số yếu tố của hài kịch như: ngôn ngữ, xung đột, hành động, nhân vật, kết cấu, tình huống, thủ pháp trào phúng,… qua đoạn trích Nhân vật quan trọng.",
+      "nhận biết và phân tích được những đặc điểm của tiếng cười hài kịch thể hiện qua tình huống, tính cách nhân vật trong hài kịch Quan thanh tra, từ đó phân tích và đánh giá được khả năng tác động của hài kịch đối với người đọc và tiến bộ xã hội.",
+      "thấy được những thói tật đáng cười của các nhân vật trong vở hài kịch, từ đó biết ứng xử phù hợp với tình thế xã hội; biết sống có khát vọng, vui tươi, chân thực, tự nhiên."
+     ]
+    },
+    {
+     "ten": "Giấu của",
+     "trich": "Quẫn",
+     "tacGia": "Lộng Chương",
+     "theLoai": "kich",
+     "tieuLoai": "hài kịch",
+     "yccdDoc": [
+      "nhận biết và phân tích được một số yếu tố của hài kịch được thể hiện trong đoạn trích như: tình huống gây cười, ngôn ngữ đối thoại, cử chỉ và hành động của nhân vật,…",
+      "xác định và lí giải được nguồn gốc của tiếng cười trong đoạn trích.",
+      "Từ tiếng cười của hài kịch trong đoạn trích, HS đánh giá được ảnh hưởng của tác phẩm văn học trong sự phát triển của xã hội đương thời và kết nối được vấn đề mà tác phẩm văn học đặt ra với những vấn đề trong đời sống hiện tại."
+     ]
+    }
+   ],
+   "tiengViet": "",
+   "viet": "Viết báo cáo nghiên cứu về một vấn đề tự nhiên, xã hội",
+   "noiNghe": "Trình bày báo cáo kết quả nghiên cứu về một vấn đề tự nhiên hoặc xã hội"
+  },
+  {
+   "so": 6,
+   "ten": "Hồ Chí Minh – \"Văn hoá phải soi đường cho quốc dân đi\"",
+   "tap": 2,
+   "soTiet": 12,
+   "phanBo": "8 đọc, 1 tiếng Việt, 2 viết, 1 nói và nghe",
+   "vanBan": [
+    {
+     "ten": "Tác gia Hồ Chí Minh",
+     "trich": "",
+     "tacGia": "",
+     "theLoai": "thong_tin",
+     "tieuLoai": "văn bản thông tin về tác gia",
+     "yccdDoc": [
+      "nhận biết được sự thống nhất cao độ giữa cuộc đời hoạt động cách mạng của Hồ Chí Minh với nội dung các tác phẩm mà Người đã viết.",
+      "nhận biết được sự chi phối của quan niệm sáng tác hướng về đại chúng, hướng về cách mạng tới toàn bộ tác phẩm của tác giả, nhất là các tác phẩm xác định rõ mục đích vận động, tuyên truyền.",
+      "nhận biết được tính chất đa dạng của di sản văn học Hồ Chí Minh cùng những nét nổi bật trong phong cách nghệ thuật của tác giả.",
+      "biết học tập tấm gương đạo đức và tinh thần hi sinh cho đất nước, dân tộc của lãnh tụ Hồ Chí Minh."
+     ]
+    },
+    {
+     "ten": "Tuyên ngôn Độc lập",
+     "trich": "",
+     "tacGia": "Hồ Chí Minh",
+     "theLoai": "nghi_luan",
+     "tieuLoai": "văn nghị luận chính luận",
+     "yccdDoc": [
+      "nhận biết và đánh giá được giá trị lịch sử, văn hoá to lớn của Tuyên ngôn Độc lập.",
+      "nhận biết và phân tích được những đặc sắc nghệ thuật của văn bản.",
+      "biết trân trọng, bảo vệ, giữ gìn nền độc lập của nước Việt Nam – một thành quả vĩ đại mà nhiều thế hệ người Việt Nam đã đổ bao xương máu mới giành lại được."
+     ]
+    },
+    {
+     "ten": "Mộ",
+     "trich": "Chiều tối",
+     "tacGia": "Hồ Chí Minh",
+     "theLoai": "tho",
+     "tieuLoai": "thơ chữ Hán",
+     "yccdDoc": [
+      "vận dụng được những hiểu biết về cuộc đời của Hồ Chí Minh và phong cách thơ ca của tác giả để đọc hiểu các tác phẩm thơ chữ Hán của Người.",
+      "nhận diện, phân tích, đánh giá được một số yếu tố trong thơ trữ tình viết bằng chữ Hán của Hồ Chí Minh: hoàn cảnh và cảm hứng sáng tác, cấu tứ, biện pháp tu từ,…",
+      "trân trọng tài năng, đồng cảm với vẻ đẹp tâm hồn của nhà thơ đồng thời là người chiến sĩ."
+     ]
+    },
+    {
+     "ten": "Nguyên tiêu",
+     "trich": "Rằm tháng Giêng",
+     "tacGia": "Hồ Chí Minh",
+     "theLoai": "tho",
+     "tieuLoai": "thơ chữ Hán",
+     "yccdDoc": [
+      "vận dụng được những hiểu biết về cuộc đời của Hồ Chí Minh và phong cách thơ ca của tác giả để đọc hiểu các tác phẩm thơ chữ Hán của Người.",
+      "nhận diện, phân tích, đánh giá được một số yếu tố trong thơ trữ tình viết bằng chữ Hán của Hồ Chí Minh: hoàn cảnh và cảm hứng sáng tác, cấu tứ, biện pháp tu từ,…",
+      "trân trọng tài năng, đồng cảm với vẻ đẹp tâm hồn của nhà thơ đồng thời là người chiến sĩ."
+     ]
+    },
+    {
+     "ten": "Những trò lố hay là Va-ren và Phan Bội Châu",
+     "trich": "",
+     "tacGia": "Nguyễn Ái Quốc",
+     "theLoai": "truyen",
+     "tieuLoai": "truyện ngắn hiện đại",
+     "yccdDoc": [
+      "vận dụng được những hiểu biết về tác gia Hồ Chí Minh để đọc hiểu một truyện ngắn của Người; nhận biết và phân tích được quan điểm nghệ thuật của tác giả và những giá trị lịch sử văn hoá thể hiện trong tác phẩm.",
+      "vận dụng được kinh nghiệm đọc, trải nghiệm cuộc sống và tri thức văn học để đánh giá, phê bình, thể hiện cảm xúc, suy nghĩ của cá nhân về một truyện ngắn hiện đại.",
+      "biết nhận xét nội dung bao quát của văn bản, phân tích được các chi tiết tiêu biểu; biết đặt tác phẩm trong bối cảnh sáng tác và bối cảnh hiện tại để có đánh giá phù hợp.",
+      "có lòng ngưỡng mộ, học tập những con người biết xả thân vì đất nước, dân tộc."
+     ]
+    }
+   ],
+   "tiengViet": "Một số biện pháp làm tăng tính khẳng định, phủ định trong văn bản nghị luận",
+   "viet": "Viết báo cáo kết quả của bài tập dự án",
+   "noiNghe": "Trình bày kết quả của bài tập dự án"
+  },
+  {
+   "so": 7,
+   "ten": "Sự thật trong tác phẩm kí",
+   "tap": 2,
+   "soTiet": 11,
+   "phanBo": "6 đọc, 1 tiếng Việt, 3 viết, 1 nói và nghe",
+   "vanBan": [
+    {
+     "ten": "Nghệ thuật băm thịt gà",
+     "trich": "Việc làng",
+     "tacGia": "Ngô Tất Tố",
+     "theLoai": "ki",
+     "tieuLoai": "phóng sự",
+     "yccdDoc": [
+      "nhận biết được một số đặc điểm của thể loại phóng sự được thể hiện trong văn bản Nghệ thuật băm thịt gà.",
+      "phân tích được giá trị nội dung và đặc sắc nghệ thuật của tác phẩm; qua đó rèn luyện năng lực đọc hiểu một văn bản phóng sự.",
+      "có cách nhìn nhận, đánh giá đúng đắn về bản chất của các hiện tượng đời sống diễn ra xung quanh."
+     ]
+    },
+    {
+     "ten": "Bước vào đời",
+     "trich": "Nhớ nghĩ chiều hôm",
+     "tacGia": "Đào Duy Anh",
+     "theLoai": "ki",
+     "tieuLoai": "hồi kí",
+     "yccdDoc": [
+      "nhận biết được một số yếu tố của hồi kí như: tính phi hư cấu và một số thủ pháp nghệ thuật (miêu tả, trần thuật); sự kết hợp của các chi tiết, sự kiện hiện thực với trải nghiệm, thái độ và đánh giá của người viết,… được thể hiện trong văn bản Bước vào đời của tác giả Đào Duy Anh, qua đó nhận thức được bối cảnh chính trị, xã hội Việt Nam giữa thập niên hai mươi của thế kỉ XX và hoài bão của tầng lớp thanh niên trên hành trình đi tìm con đường sự nghiệp của cá nhân.",
+      "rèn luyện kĩ năng phân tích tác phẩm hồi kí (tính phi hư cấu, điểm nhìn của người viết, hiện thực được phản ánh, ý nghĩa của văn bản và bài học với người tiếp nhận,…).",
+      "vận dụng được kinh nghiệm đọc, trải nghiệm về cuộc sống để phân tích và đánh giá được khả năng tác động của tác phẩm kí đối với người đọc và tiến bộ xã hội."
+     ]
+    }
+   ],
+   "tiengViet": "Ngôn ngữ trang trọng và ngôn ngữ thân mật",
+   "viet": "Viết bài văn nghị luận bàn về một vấn đề liên quan đến tuổi trẻ (cách ứng xử trong các mối quan hệ gia đình, xã hội)",
+   "noiNghe": "Trình bày quan điểm về một vấn đề liên quan đến tuổi trẻ (cách ứng xử trong các mối quan hệ gia đình, xã hội)"
+  },
+  {
+   "so": 8,
+   "ten": "Dữ liệu trong văn bản thông tin",
+   "tap": 2,
+   "soTiet": 11,
+   "phanBo": "6 đọc, 1 tiếng Việt, 3 viết, 1 nói và nghe",
+   "vanBan": [
+    {
+     "ten": "Pa-ra-na",
+     "trich": "Nhiệt đới buồn",
+     "tacGia": "Cờ-lốt Lê-vi Xtơ-rốt",
+     "theLoai": "thong_tin",
+     "tieuLoai": "văn bản thông tin",
+     "yccdDoc": [
+      "phân tích và đánh giá được đề tài, thông tin cơ bản của văn bản; đánh giá được thái độ, quan điểm của người viết và nội dung của văn bản dựa trên trải nghiệm, quan điểm của người đọc.",
+      "nhận biết được bố cục, mạch lạc của văn bản.",
+      "biết phân tích mối liên hệ giữa các chi tiết, dữ liệu và vai trò của chúng trong việc thể hiện thông tin; đánh giá được cách chọn lọc, sắp xếp thông tin; phân biệt được dữ liệu sơ cấp và thứ cấp; nhận biết và đánh giá được tính mới mẻ, độ tin cậy của dữ liệu trong văn bản.",
+      "biết trân trọng và có ứng xử bình đẳng với những nền văn hoá khác biệt."
+     ]
+    },
+    {
+     "ten": "Giáo dục khai phóng ở Việt Nam nhìn từ Đông Kinh Nghĩa Thục",
+     "trich": "",
+     "tacGia": "Nguyễn Nam",
+     "theLoai": "thong_tin",
+     "tieuLoai": "văn bản thông tin",
+     "yccdDoc": [
+      "phân tích được thông tin cơ bản của văn bản, đánh giá được thái độ, quan điểm của người viết.",
+      "nhận biết được bố cục và mạch lạc của văn bản.",
+      "phân biệt được dữ liệu sơ cấp và dữ liệu thứ cấp, phân tích được vai trò của dữ liệu trong việc thể hiện thông tin, đánh giá được tính mới mẻ, độ tin cậy của dữ liệu trong văn bản.",
+      "so sánh được hiệu quả biểu đạt của văn bản thông tin chỉ dùng ngôn ngữ và văn bản thông tin có kết hợp các yếu tố phi ngôn ngữ.",
+      "có thái độ trân trọng đối với những di sản của quá khứ."
+     ]
+    },
+    {
+     "ten": "Đời muối",
+     "trich": "Đời muối: Lịch sử thế giới",
+     "tacGia": "Mác Kơ-len-xki",
+     "theLoai": "thong_tin",
+     "tieuLoai": "văn bản thông tin",
+     "yccdDoc": [
+      "vận dụng các kĩ năng đã có được từ việc đọc hai văn bản thông tin trước đó để tự phân tích được thông tin cơ bản của văn bản, đánh giá được thái độ, quan điểm của người viết, nhận biết được bố cục và mạch lạc của văn bản, phân biệt được dữ liệu sơ cấp và dữ liệu thứ cấp, phân tích được vai trò của dữ liệu trong việc thể hiện thông tin, đánh giá được tính mới mẻ, độ tin cậy của dữ liệu trong văn bản.",
+      "so sánh được hiệu quả biểu đạt của văn bản thông tin chỉ dùng ngôn ngữ và văn bản thông tin có kết hợp các yếu tố phi ngôn ngữ.",
+      "có cái nhìn đa chiều, sâu sắc về lịch sử."
+     ]
+    }
+   ],
+   "tiengViet": "Tôn trọng và bảo vệ quyền sở hữu trí tuệ",
+   "viet": "Viết thư trao đổi về công việc hoặc một vấn đề đáng quan tâm",
+   "noiNghe": "Tranh biện về một vấn đề đời sống"
+  },
+  {
+   "so": 9,
+   "ten": "Văn học và cuộc đời",
+   "tap": 2,
+   "soTiet": 11,
+   "phanBo": "7 đọc, 1 tiếng Việt, 2 viết, 1 nói và nghe",
+   "vanBan": [
+    {
+     "ten": "Vội vàng",
+     "trich": "",
+     "tacGia": "Xuân Diệu",
+     "theLoai": "tho",
+     "tieuLoai": "thơ trữ tình hiện đại",
+     "yccdDoc": [
+      "phân tích và đánh giá được chủ đề, tư tưởng, cảm hứng, thông điệp mà văn bản muốn gửi đến người đọc.",
+      "hiểu được các cách tân nghệ thuật đặc sắc của Xuân Diệu trong bài thơ.",
+      "phân tích và đánh giá được giá trị nhận thức, giáo dục và thẩm mĩ của văn học được thể hiện trong tác phẩm.",
+      "biết sống chủ động, tích cực, lạc quan, có niềm tin vào cuộc sống."
+     ]
+    },
+    {
+     "ten": "Trở về",
+     "trich": "Ông già và biển cả",
+     "tacGia": "Ơ-nít Hê-minh-uê",
+     "theLoai": "truyen",
+     "tieuLoai": "tiểu thuyết",
+     "yccdDoc": [
+      "nhận biết và đánh giá được thông điệp của đoạn trích văn bản, kết nối được thông điệp đó với chủ đề, tư tưởng và cảm hứng của tác phẩm Ông già và biển cả.",
+      "nhận biết và phân tích được những điểm đặc sắc nghệ thuật gắn liền với phong cách sáng tác của Hê-minh-uê thể hiện trong đoạn trích.",
+      "có lòng can đảm, tự tin, dám nghĩ dám làm, tôn trọng bản thân và tôn trọng sự khác biệt."
+     ]
+    },
+    {
+     "ten": "Hồn Trương Ba, da hàng thịt",
+     "trich": "",
+     "tacGia": "Lưu Quang Vũ",
+     "theLoai": "kich",
+     "tieuLoai": "kịch",
+     "yccdDoc": [
+      "phân tích được các yếu tố đặc trưng của kịch trong tác phẩm như sự kiện và cốt truyện, nhân vật, xung đột, lời thoại,…",
+      "phân tích và đánh giá được chủ đề, tư tưởng, thông điệp được truyền tải trong tác phẩm.",
+      "phân tích và đánh giá được giá trị nhận thức, giáo dục, thẩm mĩ của tác phẩm; phát hiện được giá trị văn hoá, triết lí nhân sinh từ văn bản.",
+      "biết sống một cách tích cực, có trách nhiệm, trung thực với bản thân và với người khác."
+     ]
+    }
+   ],
+   "tiengViet": "Giữ gìn sự trong sáng của tiếng Việt",
+   "viet": "Viết bài phát biểu trong lễ phát động một phong trào hoặc một hoạt động xã hội",
+   "noiNghe": "Thuyết trình về một vấn đề liên quan đến cơ hội và thách thức đối với đất nước"
+  }
+ ]
+}
