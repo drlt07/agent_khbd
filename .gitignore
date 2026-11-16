@@ -4,3 +4,6 @@ dist
 *.db-*
 dist-demo
 *.zip
+
+# Sách giáo viên có bản quyền (NXB Giáo dục Việt Nam): chỉ giữ trên máy, không đưa lên repo công khai
+tai-lieu-training/ngu-van/sgv-*.pdf

@@ -3,6 +3,10 @@
  * Luật không tự đổi mã, phương án, bố cục giáo viên đã chọn; chỉ tự sửa lỗi trình bày an toàn và liệt kê chỗ đã sửa.
  */
 import { canQuyTrinhAi, maTichHopHopLe } from '../thu-vien';
+import { kiemTraPhieu } from './phieu';
+import { LOI_TRICH_DAN, trichDanLa } from './ngu-van';
+import { kiemTraHafa } from './hafa-vret';
+import { loiTheLoai } from './the-loai-van';
 import { kiemTraPhanBo, phutTheoHoatDong } from './phan-bo';
 import type { Buoc, CauHoi, Khbd, MaHd, MaTichHop } from './kieu';
 import { loiCongThucTrong } from './cong-thuc';
@@ -182,12 +186,20 @@ export function kiemTraKhbd(k: Khbd): LoiLuat[] {
     if (!hs.thietBi.length && !hs.hocLieu.length) loi.push({ luat: '0.5', muc: 'nhac', viTri: 'Thiết bị dạy học', thongBao: 'Chưa ghi phần học sinh chuẩn bị.' });
   } else loi.push({ luat: '0.9', muc: 'nghiem', viTri: 'Mục tiêu', thongBao: 'Chưa soạn mục tiêu.' });
 
+  // Phiếu học tập được nhắc phải có ở phụ lục (chỉ kiểm khi đã soạn xong các hoạt động)
+  if (k.hoatDong.every((h) => h.noiDung)) loi.push(...kiemTraPhieu(k));
   const phut = phutTheoHoatDong(k.phanBo);
   for (const h of k.hoatDong) {
     if (!h.noiDung) { loi.push({ luat: '0.9', muc: 'nghiem', viTri: h.ten, thongBao: 'Chưa soạn hoạt động này.' }); continue; }
     loi.push(...kiemTraBuoc(h.noiDung.buoc, phut[h.ma], h.ten, k.phuongPhap));
     loi.push(...kiemTraCauHoi(h.noiDung.cauHoi, h.ma, k.phuongPhap, h.ten, k.hoatDong.find((x) => x.ma === 'HD2')?.noiDung?.cauHoi));
     loi.push(...kiemTraVanBan(vanBanHoatDong(h.noiDung), h.ten));
+    const la = trichDanLa(k, `${vanBanHoatDong(h.noiDung)}\n${h.noiDung.cauHoi.map((c) => `${c.cauHoi}\n${c.dapAn}`).join('\n')}`);
+    if (la.length) loi.push({ luat: 'NV', muc: 'nghiem', viTri: h.ten, thongBao: LOI_TRICH_DAN(la) });
+    // HAFA–VRET: chỉ nhắc (giáo viên có thể đã tự viết phần này; giáo viên quyết định)
+    const hf = kiemTraHafa(h.noiDung.buoc.map((b) => b.hs).join('\n'), vanBanHoatDong(h.noiDung));
+    for (const thongBao of [...hf.nghiem, ...hf.nhac]) loi.push({ luat: 'AI', muc: 'nhac', viTri: h.ten, thongBao });
+    loi.push(...loiTheLoai(k, h.ma, `${vanBanHoatDong(h.noiDung)}\n${h.noiDung.cauHoi.map((c) => `${c.cauHoi}\n${c.dapAn}`).join('\n')}`, h.ten, 'nhac'));
   }
   const hinhThuc = k.hoatDong.map((h) => h.noiDung?.buoc[0]?.ten).filter(Boolean);
   if (hinhThuc.length >= 3 && new Set(hinhThuc).size === 1) loi.push({ luat: '2.3', muc: 'nhac', viTri: 'Tiến trình', thongBao: `Cả ${hinhThuc.length} hoạt động mở đầu giống nhau (“${hinhThuc[0]}”); nên đổi cách tổ chức ở một hoạt động.` });

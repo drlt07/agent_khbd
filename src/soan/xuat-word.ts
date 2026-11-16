@@ -8,6 +8,7 @@ import { khoaDoThi, nhanHam, svgSangPng, veSvg, type DoThi } from './do-thi';
 import { laMaAi, moTaMa, vanBanGoc, TEN_MON } from '../thu-vien';
 import { phutTheoHoatDong } from './phan-bo';
 import { TEN_HD, type Khbd } from './kieu';
+import { tenPpdh } from './phuong-phap';
 import { tachDong } from './dinh-dang';
 import { dongPhuongAn, nhanCau, nhomCauHoi, tieuDeCauHoi } from './cau-hoi';
 
@@ -109,8 +110,9 @@ export function dungTaiLieu(k: Khbd, o: { dauVet?: boolean; anh?: Map<string, Ui
     if (!cb.thietBi.length && !cb.hocLieu.length) con.push(...gach('Không yêu cầu chuẩn bị riêng.'));
   });
 
-  // III. Tiến trình
+  // III. Tiến trình (ghi phương pháp dạy học giáo viên đã chọn ở bước 3)
   con.push(muc('III. TIẾN TRÌNH DẠY HỌC'));
+  if (tenPpdh(k).length) con.push(doan([chu('Phương pháp dạy học: ', { dam: true }), chu(`${tenPpdh(k).join('; ')}.`)], { canh: AlignmentType.LEFT }));
   if (k.phuongPhap === 'lhdn' && k.giaiDoan1) {
     con.push(muc('GIAI ĐOẠN 1: TỰ HỌC Ở NHÀ TRƯỚC TIẾT HỌC', MAU_GD[1]));
     con.push(doan([chu(`Nhiệm vụ của học sinh${k.nenTangTuHoc ? ` trên ${k.nenTangTuHoc}` : ''}:`, { dam: true })]));
@@ -176,6 +178,19 @@ export function dungTaiLieu(k: Khbd, o: { dauVet?: boolean; anh?: Map<string, Ui
     const dong = k.maTichHop.map((m) => [m.ma, m.hoatDong === 'GD1' ? 'Giai đoạn 1' : tenHd[m.hoatDong], m.minhChung, m.tieuChi]);
     if (k.clil) dong.push(['Tiếng Anh (CLIL)', tenHd[k.clil.hoatDong], k.clil.nhiemVu, k.clil.tieuChi]);
     con.push(bang(['Năng lực', 'Hoạt động', 'Minh chứng', 'Tiêu chí'], dong, [1500, 2500, 2500, 2500]));
+  }
+
+  // Phụ lục phiếu học tập: mỗi phiếu KHBD nhắc tới, in ra dùng được ngay
+  if (k.phieu?.length) {
+    con.push(muc('PHỤ LỤC: PHIẾU HỌC TẬP'));
+    for (const p of k.phieu) {
+      con.push(doan([chu(`PHIẾU HỌC TẬP SỐ ${p.so}: ${p.ten.toUpperCase()}`, { dam: true })], { truoc: 200 }));
+      con.push(doan([chu(`(${p.hoatDong === 'GD1' ? 'Giai đoạn 1' : tenHd[p.hoatDong]})`, { nghieng: true })]));
+      con.push(doan([chu('Họ và tên/Nhóm: ………………………………… Lớp: ………', {})], { canh: AlignmentType.LEFT }));
+      if (p.huongDan.trim()) con.push(...nhanGiaTri('Hướng dẫn:', p.huongDan));
+      p.noiDung.forEach((t, i) => con.push(...nhanGiaTri(`${i + 1}.`, t)));
+      if (p.bang?.cot.length) con.push(bang(p.bang.cot, Array.from({ length: p.bang.soDong }, () => p.bang!.cot.map(() => ' ')), p.bang.cot.map(() => Math.floor(9000 / p.bang!.cot.length))));
+    }
   }
 
   // Phụ lục Căn cứ (SPEC 6.10): dữ liệu lấy từ thư viện mã, không do AI viết

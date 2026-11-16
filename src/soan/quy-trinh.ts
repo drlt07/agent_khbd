@@ -4,14 +4,20 @@
  */
 import { z } from 'zod/v4';
 import { moTaMa, maTichHopHopLe } from '../thu-vien';
-import { GiaiDoan1Out, GiaiDoan3Out, HoatDongOut, HoatDong5512Out, tuHoatDong5512, MucTieuOut, TEN_HD, TichHopOut, YccdOut, type DauVet, type Khbd, type MaHd, type MaTichHop } from './kieu';
+import { GiaiDoan1Out, GiaiDoan3Out, HoatDongOut, HoatDong5512Out, tuHoatDong5512, MucTieuOut, TEN_HD, TichHopOut, YccdOut, type DauVet, type PhuongAnHd, type Khbd, type MaHd, type MaTichHop } from './kieu';
 import type { GoiAi } from './ai';
 import { heThong, nhacGiaiDoan1, nhacGiaiDoan3, nhacHoatDong, nhacMucTieu, nhacTichHop, nhacYccd } from './prompt';
 import { chamDiem, DIEM_DAT, kiemTraBuoc, kiemTraCauHoi, kiemTraVanBan, vanBanHoatDong, boChuNguHs } from './luat';
 import { phutTheoHoatDong } from './phan-bo';
+import { soanPhieu, VI_TRI_PHIEU } from './phieu';
+import { LOI_TRICH_DAN, trichDanLa } from './ngu-van';
+import { kiemTraHafa } from './hafa-vret';
+import { loiTheLoai } from './the-loai-van';
+import { chonTuDong, goiYNganHang, huongDanTuPhuongAn, keHoachTichHop, nganHangDu, type TuyChonNganHang } from './ngan-hang';
 
 export const SO_LUOT_SOAN_LAI = 2;
-export type MaPhan = 'mucTieu' | 'giaiDoan1' | MaHd | 'tichHop' | 'giaiDoan3';
+
+export type MaPhan = 'mucTieu' | 'giaiDoan1' | MaHd | 'tichHop' | 'giaiDoan3' | 'phieu';
 export interface PhanSoan { ma: MaPhan; ten: string; buoc: number }
 
 export function danhSachPhan(k: Khbd): PhanSoan[] {
@@ -20,6 +26,7 @@ export function danhSachPhan(k: Khbd): PhanSoan[] {
   (['HD1', 'HD2', 'HD3', 'HD4'] as MaHd[]).forEach((h) => ds.push({ ma: h, ten: TEN_HD[k.phuongPhap][h], buoc: 4 }));
   if (k.tichHop.nls.length || k.tichHop.ai.length || k.tichHop.tiengAnh === 'clil') ds.push({ ma: 'tichHop', ten: 'Năng lực số, AI, tiếng Anh', buoc: 5 });
   if (k.phuongPhap === 'lhdn') ds.push({ ma: 'giaiDoan3', ten: 'Giai đoạn 3 – Sau giờ học', buoc: 4 });
+  ds.push({ ma: 'phieu', ten: 'Phụ lục: phiếu học tập', buoc: 5 });
   return ds;
 }
 
@@ -28,6 +35,7 @@ export function phanCuaLoi(k: Khbd, viTri: string): MaPhan | null {
   if (viTri === 'Mục tiêu' || viTri.startsWith('Năng lực đặc thù') || viTri === 'Thiết bị' || viTri === 'Thiết bị dạy học') return 'mucTieu';
   if (viTri === 'Giai đoạn 1' && k.phuongPhap === 'lhdn') return 'giaiDoan1';
   if (viTri === 'Giai đoạn 3' && k.phuongPhap === 'lhdn') return 'giaiDoan3';
+  if (viTri === VI_TRI_PHIEU) return 'phieu';
   const hd = k.hoatDong.find((h) => viTri === h.ten || viTri.startsWith(`${h.ten},`));
   return hd ? hd.ma : null;
 }
@@ -62,10 +70,16 @@ export async function soanPhan(k: Khbd, phan: MaPhan, ai: GoiAi, huongDan = '', 
     return { ...k, giaiDoan3: r, dauVet };
   }
   if (phan === 'tichHop') return soanTichHop(k, ai);
+  if (phan === 'phieu') {
+    const phieu = await soanPhieu(k, ai, he);
+    dauVet.push(vet(5, VI_TRI_PHIEU, phieu.length ? 'dat' : 'dat', phieu.length ? `Soạn ${phieu.length} phiếu: số ${phieu.map((p) => p.so).join(', ')}` : 'KHBD không nhắc phiếu học tập nào'));
+    return { ...k, phieu, dauVet };
+  }
 
   // Hoạt động: luật 4.2 – 4.3 (nghiêm) → soạn lại tối đa 2 lượt
   const hd = phan;
-  huongDan = huongDan || k.nguon?.huongDan?.[hd] || '';
+  // Ưu tiên: phương án chọn từ "Gợi ý hoạt động" > giáo án cũ > phương án chọn ở bước Lập kế hoạch
+  huongDan = huongDan || k.nguon?.huongDan?.[hd] || (k.keHoachHd?.[hd] ? huongDanTuPhuongAn(k.keHoachHd[hd]!, k) : '');
   const ten = TEN_HD[k.phuongPhap][hd];
   const phut = phutTheoHoatDong(k.phanBo)[hd];
   // Soạn lại từ bước Kiểm tra: AI được biết bản hiện tại đang lỗi gì
@@ -77,9 +91,13 @@ export async function soanPhan(k: Khbd, phan: MaPhan, ai: GoiAi, huongDan = '', 
       ? tuHoatDong5512(await ai({ ten: hd, he, nhac, schema: HoatDong5512Out }))
       : await ai({ ten: hd, he, nhac, schema: HoatDongOut });
     r.buoc = r.buoc.map((b) => ({ ...b, phut: Math.round(b.phut) }));
-    const loi = [...kiemTraBuoc(r.buoc, phut, ten, k.phuongPhap), ...kiemTraCauHoi(r.cauHoi, hd, k.phuongPhap, ten, k.hoatDong.find((x) => x.ma === 'HD2')?.noiDung?.cauHoi), ...kiemTraVanBan(vanBanHoatDong(r), ten)].filter((l) => l.muc === 'nghiem');
+    const la = trichDanLa(k, `${vanBanHoatDong(r)}\n${r.cauHoi.map((c) => `${c.cauHoi}\n${c.dapAn}`).join('\n')}`);
+    const loi = [...kiemTraBuoc(r.buoc, phut, ten, k.phuongPhap), ...kiemTraCauHoi(r.cauHoi, hd, k.phuongPhap, ten, k.hoatDong.find((x) => x.ma === 'HD2')?.noiDung?.cauHoi), ...kiemTraVanBan(vanBanHoatDong(r), ten),
+      ...(la.length ? [{ luat: 'NV', muc: 'nghiem' as const, viTri: ten, thongBao: LOI_TRICH_DAN(la) }] : []),
+      ...kiemTraHafa(r.buoc.map((b) => b.hs).join('\n'), vanBanHoatDong(r)).nghiem.map((thongBao) => ({ luat: 'AI', muc: 'nghiem' as const, viTri: ten, thongBao })),
+      ...loiTheLoai(k, hd, `${vanBanHoatDong(r)}\n${r.cauHoi.map((c) => `${c.cauHoi}\n${c.dapAn}`).join('\n')}`, ten, 'nghiem')].filter((l) => l.muc === 'nghiem');
     ketQua = r;
-    if (!loi.length) { dauVet.push(vet(6, ten, 'dat', huongDan ? `Theo gợi ý GV chọn: ${huongDan.match(/"([^"]+)"/)?.[1] ?? ''}` : undefined, luot)); break; }
+    if (!loi.length) { dauVet.push(vet(6, ten, 'dat', huongDan ? `Theo gợi ý GV chọn: ${huongDan.match(/"([^"]+)"/)?.[1] ?? ''}` : k.yTuong ? `Theo ý tưởng xuyên suốt: ${k.yTuong.ten}` : undefined, luot)); break; }
     dauVet.push(vet(6, ten, luot < SO_LUOT_SOAN_LAI ? 'soan_lai' : 'loi', loi.map((l) => l.thongBao).join(' '), luot));
     nhac = `${nhacGoc}\n\nLần soạn trước bị luật bắt lỗi, sửa lại: ${loi.map((l) => l.thongBao).join(' ')}`;
   }
@@ -95,7 +113,8 @@ async function soanTichHop(k: Khbd, ai: GoiAi): Promise<Khbd> {
   const datDuoc = new Map<string, MaTichHop>();
   const lanCuoi = new Map<string, MaTichHop>();
   let clil: Khbd['clil'] = null;
-  let nhac = nhacTichHop(k);
+  const nhacGoc = [nhacTichHop(k), keHoachTichHop(k)].filter(Boolean).join('\n\n');
+  let nhac = nhacGoc;
 
   for (let luot = 0; luot <= SO_LUOT_SOAN_LAI; luot++) {
     const r = await ai({ ten: 'tichHop', he, nhac, schema: TichHopOut });
@@ -117,7 +136,7 @@ async function soanTichHop(k: Khbd, ai: GoiAi): Promise<Khbd> {
     if (!canSoan.length) break;
     if (luot < SO_LUOT_SOAN_LAI) {
       truot.forEach((t) => dauVet.push(vet(6, `Mã ${t.split(':')[0]}`, 'soan_lai', t, luot)));
-      nhac = `${nhacTichHop(k)}\n\nChỉ soạn lại các mã chưa đạt sau, sửa đúng chỗ bị trừ điểm:\n${truot.join('\n')}`;
+      nhac = `${nhacGoc}\n\nChỉ soạn lại các mã chưa đạt sau, sửa đúng chỗ bị trừ điểm:\n${truot.join('\n')}`;
     }
   }
   const maBo = canSoan.map((ma) => {
@@ -131,3 +150,65 @@ async function soanTichHop(k: Khbd, ai: GoiAi): Promise<Khbd> {
 }
 
 export const nguyenVan = moTaMa;
+
+/** Giáo viên chọn (hoặc bỏ) ý tưởng xuyên suốt: ghi dấu vết, không tự soạn lại hoạt động đã có. */
+/** Giáo viên chọn (hoặc bỏ chọn) phương án cho một hoạt động ở bước Lập kế hoạch; ghi dấu vết. */
+export function chonPhuongAn(k: Khbd, hd: MaHd, p: PhuongAnHd | undefined): Khbd {
+  const keHoachHd = { ...k.keHoachHd };
+  if (p) keHoachHd[hd] = p; else delete keHoachHd[hd];
+  return { ...k, keHoachHd, keHoachAi: (k.keHoachAi ?? []).filter((h) => h !== hd), dauVet: [...k.dauVet, vet(2, `Kế hoạch ${TEN_HD[k.phuongPhap][hd]}`, 'gv_sua', p ? `Giáo viên chọn phương án: ${p.ten}` : 'Giáo viên bỏ phương án đã chọn')] };
+}
+
+/**
+ * Trước khi soạn hoạt động: hoạt động nào giáo viên chưa chọn phương án thì AI nghĩ 3 phương án (nếu chưa có),
+ * luật lọc, app chọn phương án tốt nhất và ghi dấu vết. Không đụng phương án giáo viên đã chọn, không gọi AI nếu đã đủ.
+ */
+export async function chuanBiKeHoach(k: Khbd, ai: GoiAi, hds: MaHd[], tc: Pick<TuyChonNganHang, 'tienDo'> = {}): Promise<Khbd> {
+  const can = hds.filter((hd) => !k.keHoachHd?.[hd] && !k.nguon?.huongDan?.[hd]);
+  if (!can.length) return k;
+  let nganHang = k.nganHang?.bai === k.bai ? k.nganHang : undefined;
+  if (!nganHang || !nganHangDu(nganHang.ketQua)) {
+    const r = await goiYNganHang(k, ai, '', { daCo: nganHang?.ketQua, tienDo: tc.tienDo });
+    nganHang = { bai: k.bai, ketQua: r.ketQua, boQua: [...(nganHang?.boQua ?? []), ...r.boQua] };
+  }
+  const chon = chonTuDong(nganHang.ketQua, k, can);
+  const keHoachHd = { ...k.keHoachHd };
+  const dauVet = [...k.dauVet];
+  for (const c of chon) {
+    keHoachHd[c.hd] = c.phuongAn;
+    dauVet.push(vet(2, `Kế hoạch ${TEN_HD[k.phuongPhap][c.hd]}`, 'dat', `AI chọn phương án "${c.phuongAn.ten}" trong 3 phương án (${c.lyDo}); giáo viên đổi được`));
+  }
+  return { ...k, nganHang, keHoachHd, keHoachAi: [...new Set([...(k.keHoachAi ?? []), ...chon.map((c) => c.hd)])], dauVet };
+}
+
+/**
+ * Thứ tự soạn theo đợt; các phần trong một đợt soạn CÙNG LÚC vì không phụ thuộc nhau.
+ * Đợt 1 chạy cùng lúc với việc nghĩ phương án hoạt động. HD3, HD4 cần HD1, HD2 (giải tình huống mở đầu,
+ * không trùng câu luyện tập); phần gắn mã cần đủ 4 hoạt động.
+ */
+export const DOT_SOAN: MaPhan[][] = [['mucTieu', 'giaiDoan1', 'giaiDoan3'], ['HD1', 'HD2'], ['HD3', 'HD4'], ['tichHop', 'phieu']];
+
+/** Ghép kết quả của MỘT phần (soạn trên ảnh chụp `goc`, ra `moi`) vào bản hiện tại, không ghi đè phần khác soạn song song. Hàm thuần. */
+export function gopPhan(hienTai: Khbd, goc: Khbd, moi: Khbd, phan: MaPhan): Khbd {
+  const dauVet = [...hienTai.dauVet, ...moi.dauVet.slice(goc.dauVet.length)];
+  if (phan === 'mucTieu') return { ...hienTai, mucTieu: moi.mucTieu, dauVet };
+  if (phan === 'giaiDoan1') return { ...hienTai, giaiDoan1: moi.giaiDoan1, dauVet };
+  if (phan === 'giaiDoan3') return { ...hienTai, giaiDoan3: moi.giaiDoan3, dauVet };
+  if (phan === 'tichHop') return { ...hienTai, maTichHop: moi.maTichHop, maBo: moi.maBo, clil: moi.clil, dauVet };
+  if (phan === 'phieu') return { ...hienTai, phieu: moi.phieu, dauVet };
+  return { ...hienTai, hoatDong: hienTai.hoatDong.map((h) => (h.ma === phan ? moi.hoatDong.find((x) => x.ma === phan) ?? h : h)), dauVet };
+}
+
+/** Ghép kết quả chuanBiKeHoach vào bản hiện tại; phương án giáo viên vừa chọn trong lúc chờ được giữ. Hàm thuần. */
+export function gopKeHoach(hienTai: Khbd, goc: Khbd, moi: Khbd): Khbd {
+  if (moi === goc) return hienTai;
+  // Hoạt động giáo viên tự chọn/đổi trong lúc AI đang nghĩ: lựa chọn của giáo viên thắng
+  const gvDoi = (['HD1', 'HD2', 'HD3', 'HD4'] as MaHd[]).filter((hd) => hienTai.keHoachHd?.[hd] && hienTai.keHoachHd[hd] !== goc.keHoachHd?.[hd]);
+  const keHoachHd = { ...moi.keHoachHd };
+  for (const hd of gvDoi) keHoachHd[hd] = hienTai.keHoachHd![hd];
+  return { ...hienTai, nganHang: moi.nganHang, keHoachHd, keHoachAi: (moi.keHoachAi ?? []).filter((hd) => !gvDoi.includes(hd)), dauVet: [...hienTai.dauVet, ...moi.dauVet.slice(goc.dauVet.length)] };
+}
+
+export function chonYTuong(k: Khbd, y: Khbd['yTuong']): Khbd {
+  return { ...k, yTuong: y, dauVet: [...k.dauVet, vet(4, 'Ý tưởng cả bài', 'gv_sua', y ? `Giáo viên chọn ý tưởng: ${y.ten}` : 'Giáo viên bỏ ý tưởng xuyên suốt')] };
+}

@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { boSachCo, taiMucLucSgk, type MucLucSgk } from '../../soan/muc-luc-sgk';
 import { The, HopBao } from '../../thanh-phan/chung';
 import { BieuTuong } from '../../thanh-phan/bieu-tuong';
 import { CHI_BAO_MAC_DINH, MIEN_GOI_Y_THEO_MON, NANG_LUC_AI, NANG_LUC_DAC_THU, NGUON_AI_2422, layChiBao, layNangLucAi, layThanhPhan, moTaMa, timChiBao, type MaMon } from '../../thu-vien';
@@ -12,8 +13,16 @@ import { Nut, NhanAiLam } from '../../thanh-phan/chung';
 const BO_SACH = ['Kết nối tri thức với cuộc sống', 'Chân trời sáng tạo', 'Cánh diều'];
 const o = 'w-full px-3 py-2.5 rounded-xl border border-line-strong bg-surface focus:border-accent outline-none';
 
-export default function Buoc1ThongTin({ k, sua, ai }: { k: Khbd; sua: (f: (k: Khbd) => Khbd) => void; ai: GoiAi | null }) {
+/** phan 'bai': bước 1 Chọn bài (bài dạy, điều kiện lớp); phan 'tichHop': bước 4 Tích hợp (năng lực số, AI, tiếng Anh). */
+export default function Buoc1ThongTin({ k, sua, ai, phan }: { k: Khbd; sua: (f: (k: Khbd) => Khbd) => void; ai: GoiAi | null; phan: 'bai' | 'tichHop' }) {
   const deXuat = soTietDeXuat(k);
+  // Bộ sách có mục lục dựng sẵn cho môn – lớp này (Ngoại ngữ: các bộ Tiếng Anh)
+  const [sgk, setSgk] = useState<MucLucSgk | null>(null);
+  useEffect(() => { taiMucLucSgk().then(setSgk).catch(() => {}); }, []);
+  const dsBoSach = useMemo(() => {
+    const co = sgk ? boSachCo(sgk, k.mon, k.lop) : [];
+    return k.mon === 'NGOAI_NGU' && co.length ? co : [...new Set([...BO_SACH, ...co])];
+  }, [sgk, k.mon, k.lop]);
   const [timMa, setTimMa] = useState('');
   const [tbMoi, setTbMoi] = useState('');
   const goiY = useMemo(() => (MIEN_GOI_Y_THEO_MON[k.mon] ?? []).map((tp) => CHI_BAO_MAC_DINH[tp]).filter(Boolean), [k.mon]);
@@ -49,7 +58,7 @@ export default function Buoc1ThongTin({ k, sua, ai }: { k: Khbd; sua: (f: (k: Kh
   ) : null;
   const doiTb = (t: string) => sua((x) => ({ ...x, dieuKien: { ...x.dieuKien, thietBi: x.dieuKien.thietBi.includes(t) ? x.dieuKien.thietBi.filter((y) => y !== t) : [...x.dieuKien.thietBi, t] } }));
 
-  return (
+  if (phan === 'bai') return (
     <div className="grid grid-cols-1 gap-6 xl:grid-cols-2 items-start">
       <div className="flex flex-col gap-6 min-w-0">
         <The className="p-5">
@@ -66,12 +75,12 @@ export default function Buoc1ThongTin({ k, sua, ai }: { k: Khbd; sua: (f: (k: Kh
               </select>
             </Truong>
             <div className="col-span-2"><Truong nhan="Bộ sách" id="bo-sach">
-              <select id="bo-sach" value={BO_SACH.includes(k.boSach) ? k.boSach : k.boSach ? 'khac' : ''} onChange={(e) => sua((x) => ({ ...x, boSach: e.target.value === 'khac' ? ' ' : e.target.value, bai: '' }))} className={o}>
+              <select id="bo-sach" value={dsBoSach.includes(k.boSach) ? k.boSach : k.boSach ? 'khac' : ''} onChange={(e) => sua((x) => ({ ...x, boSach: e.target.value === 'khac' ? ' ' : e.target.value, bai: '' }))} className={o}>
                 <option value="">– Chọn bộ sách –</option>
-                {BO_SACH.map((b) => <option key={b} value={b}>{b}</option>)}
+                {dsBoSach.map((b) => <option key={b} value={b}>{b}</option>)}
                 <option value="khac">Bộ sách khác…</option>
               </select>
-              {k.boSach && !BO_SACH.includes(k.boSach) && <input aria-label="Tên bộ sách" value={k.boSach.trim()} onChange={(e) => sua((x) => ({ ...x, boSach: e.target.value || ' ' }))} placeholder="Tên bộ sách" className={`${o} mt-2`} />}
+              {k.boSach && !dsBoSach.includes(k.boSach) && <input aria-label="Tên bộ sách" value={k.boSach.trim()} onChange={(e) => sua((x) => ({ ...x, boSach: e.target.value || ' ' }))} placeholder="Tên bộ sách" className={`${o} mt-2`} />}
             </Truong></div>
             <div className="col-span-2">
               <div className="block text-sm font-semibold mb-1.5">Bài</div>
@@ -87,18 +96,8 @@ export default function Buoc1ThongTin({ k, sua, ai }: { k: Khbd; sua: (f: (k: Kh
           </div>
         </The>
 
-        <The className="p-5">
-          <h2 className="text-base mb-3">Phương pháp dạy học</h2>
-          <div className="grid sm:grid-cols-2 gap-2" role="radiogroup" aria-label="Phương pháp dạy học">
-            {([['lhdn', 'Lớp học đảo ngược', 'Tự học ở nhà, lên lớp luyện tập, vận dụng'], ['cv5512', 'Dạy học thông thường', 'Theo mẫu KHBD của CV 5512']] as const).map(([id, ten, mo]) => (
-              <label key={id} className={`bam bam-nhe flex gap-3 items-start rounded-xl border px-3 py-2.5 cursor-pointer ${k.phuongPhap === id ? 'border-accent bg-accent-soft' : 'border-line hover:border-line-strong'}`}>
-                <input type="radio" name="pp" checked={k.phuongPhap === id} onChange={() => sua((x) => ({ ...x, phuongPhap: id }))} className="mt-1 accent-[var(--accent)]" />
-                <span><span className="block font-semibold text-[15px]">{ten}</span><span className="block text-[13px] text-muted">{mo}</span></span>
-              </label>
-            ))}
-          </div>
-        </The>
-
+      </div>
+      <div className="flex flex-col gap-6 min-w-0">
         <The className="p-5">
           <h2 className="text-base">Điều kiện lớp</h2>
           <p className="text-sm text-muted mt-1">AI chỉ dùng thiết bị trong danh sách này.</p>
@@ -124,8 +123,11 @@ export default function Buoc1ThongTin({ k, sua, ai }: { k: Khbd; sua: (f: (k: Kh
           </div>
         </The>
       </div>
-
-      <div className="flex flex-col gap-6 min-w-0">
+    </div>
+  );
+  // Bước Tích hợp: năng lực số, năng lực AI, tiếng Anh (AI gợi ý mã dựa trên nội dung bài và phương pháp đã chọn)
+  return (
+    <div className="grid grid-cols-1 gap-6 xl:grid-cols-2 items-start">
         <The className="p-5">
           <div className="flex items-baseline justify-between gap-2"><h2 className="text-base">Năng lực số</h2><span className="text-sm text-muted">{k.tichHop.nls.length} mã · nên 1–3</span></div>
           <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -168,7 +170,6 @@ export default function Buoc1ThongTin({ k, sua, ai }: { k: Khbd; sua: (f: (k: Kh
         {k.tichHop.ai.length > 0 && !k.dieuKien.thietBi.some((t) => /ai|chatbot/i.test(t)) && (
           <HopBao kieu="warn">Đã chọn năng lực AI nhưng danh sách thiết bị chưa có chatbot AI. Thêm ở “Điều kiện lớp”, hoặc AI sẽ dùng bản in phản hồi AI mẫu.</HopBao>
         )}
-      </div>
     </div>
   );
 }

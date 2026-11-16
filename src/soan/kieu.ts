@@ -18,6 +18,15 @@ export const ChuanBiOut = z.object({
 });
 export type ChuanBi = z.infer<typeof ChuanBiOut>;
 
+/** AI gợi ý phương pháp dạy học (bước 3); mã phải có trong data/phuong_phap_day_hoc.json. */
+export const GoiYPpdhOut = z.object({
+  phuongPhap: z.array(z.object({
+    ma: z.string().describe('Mã phương pháp, chép đúng từ danh sách được giao'),
+    lyDo: z.string().describe('Vì sao hợp với nội dung bài này (nêu đơn vị kiến thức, YCCĐ cụ thể)'),
+    apDung: z.string().describe('Dùng ở hoạt động nào, học sinh làm gì'),
+  })).describe('3–4 phương pháp hợp nhất, xếp từ hợp nhất'),
+});
+
 export const MucTieuOut = z.object({
   nangLucDacThu: z.array(z.object({
     thanhPhan: z.string().describe('Tên thành phần năng lực đặc thù, chép đúng từ danh sách được cung cấp'),
@@ -118,6 +127,70 @@ export const TichHopOut = z.object({
 
 export const GiaiDoan3Out = z.object({ viec: z.array(z.string()) });
 
+/** AI tự chấm một phương án hoạt động (thang 1–5); chỉ dùng để sắp xếp, lọc phương án nhạt. */
+export const TuChamOut = z.object({
+  tuDuy: z.number().describe('1–5: mức học sinh phải suy luận, không chỉ nhớ lại'),
+  hapDan: z.number().describe('1–5: mức tò mò, thử thách'),
+  khaThi: z.number().describe('1–5: chuẩn bị đơn giản, đúng thời lượng, đúng thiết bị lớp'),
+  bamBai: z.number().describe('1–5: mức gắn với kiến thức trọng tâm, yêu cầu cần đạt'),
+}).describe('Tự chấm thẳng thắn, không chấm 5 hết');
+
+/** Cách tích hợp một mã năng lực số/AI vào một phương án hoạt động. */
+export const TichHopNlsOut = z.object({
+  ma: z.string().describe('Mã, chép đúng từ thư viện; ưu tiên mã giáo viên đã chọn'),
+  hanhVi: z.string().describe('Hành vi số quan sát được của học sinh: thao tác gì, trên công cụ nào, với nội dung bài; không bắt đầu bằng "HS"/"Học sinh"'),
+  congCu: z.string().describe('Công cụ số, chỉ trong danh sách thiết bị đã khai báo'),
+  minhChung: z.string().describe('Sản phẩm làm minh chứng'),
+  tieuChi: z.string().describe('Viết dạng "Đạt khi …", kiểm tra được trên sản phẩm'),
+});
+
+/** Một phương án trong "Hoạt động gợi ý cho bài" (src/soan/ngan-hang.ts). */
+export const PhuongAnHdOut = z.object({
+  hd: z.enum(['HD1', 'HD2', 'HD3', 'HD4']),
+  ten: z.string().describe('Tên ngắn, dễ nhớ, có bản sắc'),
+  nhom: z.enum(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']).describe('Nhóm hình thức A–J theo nguyên tắc thiết kế'),
+  yTuong: z.string().describe('Cơ chế tổ chức, 1–2 câu'),
+  hocSinhLam: z.string().describe('Học sinh làm gì, cụ thể với kiến thức bài (dữ liệu, câu hỏi, vai, thao tác)'),
+  diemTuDuy: z.string().describe('Điểm tư duy khó nhất học sinh phải vượt qua'),
+  sanPham: z.string(),
+  congCu: z.string().describe('Thiết bị, công cụ dùng; chỉ trong danh sách đã khai báo; không dùng thì chuỗi rỗng'),
+  thoiLuong: z.number().describe('Số phút, không vượt thời lượng của hoạt động'),
+  duPhong: z.string().describe('Phương án khi không có công nghệ hoặc mất Internet'),
+  nls: z.array(TichHopNlsOut).describe('0–2 mã năng lực số/AI tích hợp được trong phương án này; không có hành vi số thật thì mảng rỗng'),
+  tuCham: TuChamOut,
+});
+export type PhuongAnHd = z.infer<typeof PhuongAnHdOut>;
+
+export const NganHangOut = z.object({
+  phanTich: z.object({
+    trongTam: z.string().describe('Kiến thức trọng tâm của bài'),
+    khoKhan: z.array(z.string()).describe('2–4 khó khăn, lỗi hiểu thường gặp của học sinh'),
+  }),
+  phuongAn: z.array(PhuongAnHdOut).describe('Đúng 3 phương án cho mỗi hoạt động HD1, HD2, HD3, HD4 (12 phương án)'),
+});
+export type NganHang = z.infer<typeof NganHangOut>;
+
+/** Ý tưởng xuyên suốt cả bài (cốt truyện, vai, câu hỏi lớn) và việc của từng hoạt động. Xem src/soan/y-tuong.ts. */
+export const YTuongBaiOut = z.object({
+  ten: z.string().describe('Tên ý tưởng ngắn, gợi tò mò, ví dụ "Kĩ sư cầu vồng thép"'),
+  cotTruyen: z.string().describe('Tình huống, vai hoặc nhiệm vụ lớn xuyên suốt bài, gắn thực tế, 2–4 câu'),
+  vaiHocSinh: z.string().describe('Vai của học sinh trong cả bài'),
+  cauHoiLon: z.string().describe('Câu hỏi lớn học sinh trả lời được ở cuối bài'),
+  hoatDong: z.array(z.object({
+    hd: z.enum(['HD1', 'HD2', 'HD3', 'HD4']),
+    ten: z.string().describe('Tên hoạt động có bản sắc'),
+    nhom: z.enum(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']).describe('Nhóm hình thức A–J theo nguyên tắc thiết kế'),
+    viec: z.string().describe('Học sinh làm gì, nghĩ gì, tạo ra gì (1–3 câu, cụ thể với bài)'),
+    diemTuDuy: z.string().describe('Điểm tư duy khó nhất trong hoạt động'),
+    ketNoi: z.string().describe('Hoạt động nối với cốt truyện và hoạt động trước như thế nào'),
+    congNghe: z.string().describe('Công cụ dùng, chỉ trong danh sách thiết bị đã khai báo; không dùng thì chuỗi rỗng'),
+  })).describe('Đúng 4 phần tử HD1, HD2, HD3, HD4 theo thứ tự'),
+  sanPhamCuoi: z.string().describe('Sản phẩm cuối bài của học sinh'),
+  diemHay: z.string().describe('Vì sao học sinh hứng thú và phải tư duy'),
+  ruiRo: z.string().describe('Rủi ro khi triển khai và cách khắc phục; phương án khi mất Internet'),
+});
+export type YTuongBai = z.infer<typeof YTuongBaiOut>;
+
 export type MaTichHop = z.infer<typeof MaTichHopOut> & { diem?: number; truDiem?: string[] };
 export type Buoc = z.infer<typeof BuocOut>;
 
@@ -147,6 +220,8 @@ export interface NguonGiaoAnCu {
   hoatDong: { ten: string; phut: number; noiDung: string }[];
   /** Phương án hoạt động mới giáo viên đã chọn ở lối Sửa, theo hoạt động của KHBD mới */
   huongDan?: Partial<Record<MaHd, string>>;
+  /** Ngữ văn: thể loại văn bản chính (mã trong src/soan/ngu-van.ts) để hoạt động bám đặc trưng thể loại */
+  theLoai?: string;
 }
 
 export interface Khbd {
@@ -162,6 +237,10 @@ export interface Khbd {
   dieuKien: { thietBi: string[]; mucHs: 'yeu' | 'tb' | 'kha'; ghiChu: string };
   yccd: { ma: string; noiDung: string }[];
   yccdDaXacNhan: boolean;
+  /** Ngữ văn: thể loại văn bản chính giáo viên chọn (mã THE_LOAI_VAN); không có thì theo SGV hoặc giáo án cũ. */
+  theLoai?: string;
+  /** Ngữ văn: kiến thức SGK giáo viên dán vào (Tri thức ngữ văn, câu hỏi…) làm nguồn chốt; chỉ lưu trong bản nháp trên máy giáo viên. */
+  sgk?: string;
   phanBo: PhanBo[];
   mucTieu?: z.infer<typeof MucTieuOut>;
   giaiDoan1?: z.infer<typeof GiaiDoan1Out>;
@@ -174,6 +253,22 @@ export interface Khbd {
   dauVet: DauVet[];
   capNhat: string;
   nguon?: NguonGiaoAnCu;
+  /** Không dùng nữa (bước 2 chỉ còn YCCĐ); giữ để đọc bản nháp cũ. */
+  donVi?: { ten: string; yc: string[] }[];
+  khoKhan?: string[];
+  /** Bước 3: phương pháp dạy học giáo viên chọn (mã trong data/phuong_phap_day_hoc.json), và gợi ý của AI. */
+  ppdh?: string[];
+  goiYPpdh?: { ma: string; lyDo: string; apDung: string }[];
+  /** Phụ lục phiếu học tập (src/soan/phieu.ts): mỗi phiếu KHBD nhắc tới một phần tử. undefined = chưa soạn. */
+  phieu?: { so: number; ten: string; hoatDong: 'GD1' | MaHd; huongDan: string; noiDung: string[]; bang: { cot: string[]; soDong: number } | null }[];
+  /** Ý tưởng xuyên suốt giáo viên đã chọn; mọi hoạt động soạn bám theo. */
+  yTuong?: YTuongBai;
+  /** "Hoạt động gợi ý cho bài" ở bước Lập kế hoạch: kết quả AI (theo tên bài lúc gợi ý) và mã bị luật loại. */
+  nganHang?: { bai: string; ketQua: NganHang; boQua: string[] };
+  /** Phương án giáo viên chọn cho từng hoạt động; AI soạn hoạt động bám theo. */
+  keHoachHd?: Partial<Record<MaHd, PhuongAnHd>>;
+  /** Hoạt động mà phương án do AI tự chọn khi soạn (giáo viên chưa chọn); giáo viên đổi được bất cứ lúc nào. */
+  keHoachAi?: MaHd[];
 }
 
 export const TEN_HD: Record<PhuongPhap, Record<MaHd, string>> = {
@@ -193,6 +288,6 @@ export const TEN_HD: Record<PhuongPhap, Record<MaHd, string>> = {
 
 export const THIET_BI_GOI_Y = [
   'Máy chiếu', 'Máy tính của giáo viên', 'Bảng phụ, bút dạ', 'Phiếu học tập in',
-  'Điện thoại/máy tính bảng (1 máy/nhóm)', 'Phòng máy (1 máy/HS)', 'Internet',
-  'Google Forms', 'Padlet', 'Canva', 'GeoGebra', 'Bảng tính (Excel/Google Sheets)', 'Chatbot AI (Gemini/ChatGPT)',
+  'Điện thoại/máy tính bảng (1 máy/nhóm)', 'Phòng máy (1 máy/HS)', 'Internet', 'Loa, micro', 'Webcam',
+  'Chatbot AI (Gemini/ChatGPT)',
 ];

@@ -8,13 +8,17 @@ import { DIEM_DAT } from '../../soan/luat';
 import { THIET_BI_GOI_Y } from '../../soan/kieu';
 import { docDocx, kiemTraTep } from '../../sua/doc-docx';
 import { luuTep } from '../../thanh-phan/luu-tep';
-import { deXuat, kiemTraChen, kiemTraCuoi, phanTich, taoKhbdTuGiaoAnCu, type Chen, type SuaKhbd } from '../../sua/quy-trinh';
+import { boiCanhGoiY, deXuat, hoatDongCu, kiemTraChen, kiemTraCuoi, phanTich, taoKhbdTuGiaoAnCu, type Chen, type SuaKhbd } from '../../sua/quy-trinh';
+import { goiYMa, type KetQuaGoiYMa, type MaDuocGoiY } from '../../soan/goi-y-ma';
 import { taiWordSua, tenTepSua } from '../../sua/xuat-word';
 import { aiMauSua, doanMau, TEN_TEP_MAU, THIET_LAP_MAU } from '../../sua/mau';
 import { ChonMa } from '../soan/Buoc1ThongTin';
 import DoiMoiHoatDong from './DoiMoiHoatDong';
 import { NHOM_HINH_THUC } from '../../soan/goi-y';
 import { ChuCT } from '../../thanh-phan/cong-thuc';
+import { timTheoBai } from '../../soan/sgv-ngu-van';
+import KhungHoatDongMoi from './KhungHoatDongMoi';
+import { THE_LOAI_VAN, type TheLoaiVan } from '../../soan/ngu-van';
 
 const KHOA = 'khbd.sua-nhap';
 const BUOC = ['Tải giáo án', 'Xác nhận, chọn tích hợp', 'AI đề xuất, đổi mới', 'Xem trước', 'Tải về'];
@@ -86,7 +90,7 @@ export default function SuaBai() {
 
       {buoc === 0 && <BuocTai k={k} dang={dang} docTep={docTep} dungMau={() => { setK(moi(doanMau(), TEN_TEP_MAU, [], true)); setLaMau(true); setLoi(null); }}
         docGiaoAn={() => chay('phanTich', async () => { const r = await phanTich(k!, ai!); setK(r); setBuoc(1); })} coAi={!!ai} />}
-      {buoc === 1 && k && <BuocXacNhan k={k} sua={sua} />}
+      {buoc === 1 && k && <BuocXacNhan k={k} sua={sua} ai={ai} />}
       {buoc === 2 && k && <BuocDeXuat k={k} sua={sua} ai={ai} dang={dang === 'deXuat'} coAi={!!ai} chayDeXuat={() => chay('deXuat', async () => setK(await deXuat(k, ai!)))} />}
       {buoc === 3 && k && <BuocXem k={k} kiemTra={kiemTra} />}
       {buoc === 4 && k && <BuocTaiVe k={k} chan={kiemTra.nghiem.length > 0} />}
@@ -136,8 +140,30 @@ function BuocTai({ k, dang, docTep, dungMau, docGiaoAn, coAi }: { k: SuaKhbd | n
   );
 }
 
-function BuocXacNhan({ k, sua }: { k: SuaKhbd; sua: (f: (x: SuaKhbd) => SuaKhbd) => void }) {
+function BuocXacNhan({ k, sua, ai }: { k: SuaKhbd; sua: (f: (x: SuaKhbd) => SuaKhbd) => void; ai: GoiAi | null }) {
   const [tim, setTim] = useState('');
+  // AI đọc giáo án, gợi ý mã năng lực số/AI gắn vào hoạt động có sẵn; giáo viên tự tích chọn (app không tích hộ)
+  const [gy, setGy] = useState<KetQuaGoiYMa | null>(null);
+  const [dangGy, setDangGy] = useState(false);
+  const [loiGy, setLoiGy] = useState('');
+  const xinGoiYMa = async () => {
+    if (!ai) return;
+    setDangGy(true); setLoiGy('');
+    try { setGy(await goiYMa(boiCanhGoiY(k), ai, k.hoatDong.map((h) => hoatDongCu(k, h)))); }
+    catch (e) { setLoiGy(e instanceof LoiAi ? `${e.loi.thongBao} ${e.loi.cachXuLy}` : 'Không lấy được gợi ý.'); }
+    finally { setDangGy(false); }
+  };
+  const khoiGoiY = (ds: MaDuocGoiY[], loai: 'nls' | 'ai') => ds.length ? (
+    <div className="vao mt-3 rounded-xl border border-accent-line bg-accent-soft/40 p-3 flex flex-col gap-2">
+      <div className="flex items-center justify-between gap-2"><span className="text-[13px] font-semibold">AI gợi ý theo giáo án</span><NhanAiLam ai="ai" /></div>
+      {ds.map((m) => (
+        <div key={m.ma} className="flex flex-col gap-1">
+          <ChonMa ma={m.ma} chon={k.tichHop[loai].includes(m.ma)} doi={() => doiMa(loai, m.ma)} />
+          <p className="text-[13px] text-muted pl-2"><b className="text-fg">Lí do:</b> {m.lyDo}</p>
+        </div>
+      ))}
+    </div>
+  ) : null;
   const goiY = (MIEN_GOI_Y_THEO_MON[k.mon] ?? []).map((tp) => CHI_BAO_MAC_DINH[tp]).filter(Boolean);
   const kq = tim.trim() ? timChiBao(tim).slice(0, 6) : [];
   const doiMa = (loai: 'nls' | 'ai', ma: string) => sua((x) => ({ ...x, chen: [], maBo: [], tichHop: { ...x.tichHop, [loai]: x.tichHop[loai].includes(ma) ? x.tichHop[loai].filter((m) => m !== ma) : [...x.tichHop[loai], ma] } }));
@@ -152,6 +178,31 @@ function BuocXacNhan({ k, sua }: { k: SuaKhbd; sua: (f: (x: SuaKhbd) => SuaKhbd)
             <select aria-label="Lớp" value={k.lop} onChange={(e) => sua((x) => ({ ...x, lop: +e.target.value as 10 | 11 | 12 }))} className={o}>{[10, 11, 12].map((l) => <option key={l} value={l}>Lớp {l}</option>)}</select>
             <input aria-label="Tên bài" value={k.bai} onChange={(e) => sua((x) => ({ ...x, bai: e.target.value }))} className={`${o} col-span-2`} />
           </div>
+          {k.mon === 'NGU_VAN' && (
+            <div className="mt-3 rounded-xl border border-accent-line bg-accent-soft/40 p-3 flex flex-col gap-2">
+              <label className="text-sm font-semibold" htmlFor="the-loai">Thể loại văn bản chính</label>
+              <select id="the-loai" value={k.theLoai ?? 'khac'} onChange={(e) => sua((x) => ({ ...x, theLoai: e.target.value as TheLoaiVan }))} className={o}>
+                {Object.entries(THE_LOAI_VAN).map(([m, t]) => <option key={m} value={m}>{t}</option>)}
+              </select>
+              <p className="text-[13px] text-muted">Môn Ngữ văn: AI giữ nguyên kiến thức của giáo án, chỉ thiết kế hoạt động theo đặc trưng thể loại này. Câu trích không có trong giáo án sẽ bị luật loại.</p>
+            <label className="text-sm font-semibold mt-2" htmlFor="sgk-chot">Kiến thức SGK để chốt (không bắt buộc)</label>
+            <textarea id="sgk-chot" rows={5} value={k.sgk ?? ''} onChange={(e) => sua((x) => ({ ...x, sgk: e.target.value || undefined }))}
+              placeholder="Dán phần Tri thức ngữ văn, câu hỏi sau văn bản, nội dung SGK của bài (từ sách của thầy/cô)…"
+              className="px-3 py-2 rounded-xl border border-line-strong bg-surface text-[14.5px] focus:border-accent outline-none" />
+            <p className="text-[13px] text-muted">AI chốt kiến thức theo khía cạnh (Nội dung, Nghệ thuật…) dựa vào giáo án và phần SGK này, dùng đúng thuật ngữ; ý ngoài nguồn bị luật loại. Phần dán chỉ lưu trong bản nháp trên máy thầy/cô và gửi cho AI khi soạn.</p>
+              {(() => {
+                const r = timTheoBai(k.bai, k.lop);
+                if (!r) return null;
+                const tl = r.vanBan?.theLoai;
+                return (
+                  <p className="text-[13px]">
+                    <strong>Theo SGV Ngữ văn 12:</strong> Bài {r.bai.so}. {r.bai.ten}{r.vanBan ? ` · ${r.vanBan.ten} (${r.vanBan.tieuLoai})` : ''}. AI dùng yêu cầu cần đạt đọc hiểu của SGV để định hướng hoạt động.
+                    {tl && tl !== (k.theLoai ?? 'khac') && <> <button type="button" className="underline font-semibold" onClick={() => sua((x) => ({ ...x, theLoai: tl }))}>Đổi sang {THE_LOAI_VAN[tl]}</button></>}
+                  </p>
+                );
+              })()}
+            </div>
+          )}
           <h3 className="text-[15px] mt-5">Yêu cầu cần đạt</h3>
           <div className="mt-2 flex flex-col gap-2">
             {k.yccd.map((y, i) => (
@@ -176,13 +227,23 @@ function BuocXacNhan({ k, sua }: { k: SuaKhbd; sua: (f: (x: SuaKhbd) => SuaKhbd)
       <div className="flex flex-col gap-6 min-w-0">
         <The className="p-5">
           <div className="flex items-baseline justify-between"><h2 className="text-base">Năng lực số</h2><span className="text-sm text-muted">{k.tichHop.nls.length} mã · nên 1–3</span></div>
-          <div className="flex flex-col gap-1.5 mt-3">{[...new Set([...goiY, ...k.tichHop.nls])].map((m) => <ChonMa key={m} ma={m} chon={k.tichHop.nls.includes(m)} doi={() => doiMa('nls', m)} />)}</div>
+          <div className="flex flex-wrap gap-2 mt-3">
+            <Nut kieu={gy ? 'phu' : 'chinh'} dang={dangGy} disabled={!ai || dangGy || !k.hoatDong.length} onClick={xinGoiYMa}>{dangGy ? 'AI đang đọc giáo án…' : gy ? 'Gợi ý lại' : 'AI gợi ý mã theo giáo án'}</Nut>
+          </div>
+          {!ai && <p className="text-[13px] text-warn-fg mt-1.5">Cần khóa AI để gợi ý mã. Thầy/cô vẫn chọn được trong danh sách dưới.</p>}
+          {loiGy && <HopBao kieu="err" className="mt-2">{loiGy}</HopBao>}
+          {gy && !gy.nls.length && !gy.ai.length && <p className="text-[13px] text-muted mt-1.5">AI chưa tìm được mã phù hợp; thầy/cô chọn trong danh sách dưới.</p>}
+          {gy && khoiGoiY(gy.nls, 'nls')}
+          {gy && gy.ai.length > 0 && <p className="text-[12.5px] text-muted mt-1.5">Có {gy.ai.length} mã năng lực AI được gợi ý ở thẻ “Năng lực AI”.</p>}
+          <p className="text-sm text-muted mt-3">{gy ? 'Mã khác thường dùng cho môn này:' : 'Gợi ý cho môn này:'}</p>
+          <div className="flex flex-col gap-1.5 mt-2">{[...new Set([...goiY, ...k.tichHop.nls])].filter((m) => !gy?.nls.some((x) => x.ma === m)).map((m) => <ChonMa key={m} ma={m} chon={k.tichHop.nls.includes(m)} doi={() => doiMa('nls', m)} />)}</div>
           <input value={tim} onChange={(e) => setTim(e.target.value)} placeholder="Tìm mã khác…" aria-label="Tìm mã năng lực số" className={`${o} mt-3`} />
           {kq.length > 0 && <div className="flex flex-col gap-1.5 mt-2">{kq.map((r) => <ChonMa key={r.chiBao.ma} ma={r.chiBao.ma} chon={k.tichHop.nls.includes(r.chiBao.ma)} doi={() => doiMa('nls', r.chiBao.ma)} />)}</div>}
         </The>
         <The className="p-5">
           <h2 className="text-base">Năng lực AI</h2>
-          <div className="flex flex-col gap-1.5 mt-3">{NANG_LUC_AI.map((c) => <ChonMa key={c.ma} ma={c.ma} chon={k.tichHop.ai.includes(c.ma)} doi={() => doiMa('ai', c.ma)} />)}</div>
+          {gy && khoiGoiY(gy.ai, 'ai')}
+          <div className="flex flex-col gap-1.5 mt-3">{NANG_LUC_AI.filter((c) => !gy?.ai.some((m) => m.ma === c.ma)).map((c) => <ChonMa key={c.ma} ma={c.ma} chon={k.tichHop.ai.includes(c.ma)} doi={() => doiMa('ai', c.ma)} />)}</div>
         </The>
         {k.mon !== 'NGOAI_NGU' && (
           <The className="p-5">
@@ -287,12 +348,14 @@ function BuocXem({ k, kiemTra }: { k: SuaKhbd; kiemTra: { nghiem: string[]; nhac
             {d.ma === k.mucTieuDen && dung.map((c) => <p key={`mt${c.id}`} className="mt-1 rounded-md bg-[var(--bo-sung)] px-2 py-1">{c.loai === 'clil' ? <><b>Tiếng Anh (CLIL):</b> dùng key words {c.keyWords.map((w) => w.en).join(', ')}.</> : <><b>{/^NL[a-d]$/.test(c.ma) ? 'Năng lực AI' : 'Năng lực số'} {c.ma}:</b> HS {c.bieuHien}.</>}</p>)}
             {(k.hoatDongMoi ?? []).filter((m) => m.chenSau === d.ma).map((m) => (
               <div key={m.id} className="my-2 rounded-lg bg-[var(--bo-sung)] px-3 py-2 border-l-4 border-accent">
+                {m.goiY.khung5512 ? <KhungHoatDongMoi tenCu={m.hoatDong} h={m.goiY} /> : <>
                 <div className="font-semibold">Đề xuất hoạt động mới (thay thế hoặc làm mới “{m.hoatDong}”): {m.goiY.ten}</div>
                 <p className="text-[14px] text-muted">{NHOM_HINH_THUC[m.goiY.nhom]} · {m.goiY.thoiLuong} phút</p>
                 <p><b>Ý tưởng:</b> <ChuCT t={m.goiY.yTuong} /></p>
                 {m.goiY.kichBan.map((b, i) => <p key={i}>Bước {i + 1}: <ChuCT t={b.buoc} /> ({b.phut} phút)</p>)}
                 <p><b>Câu hỏi/nhiệm vụ mẫu:</b> <ChuCT t={m.goiY.cauHoiMau} /></p>
                 <p className="text-[14px]"><b>Sản phẩm:</b> <ChuCT t={m.goiY.sanPham} /> <b>Đánh giá:</b> <ChuCT t={m.goiY.danhGia} /></p>
+                </>}
               </div>
             ))}
             {dung.filter((c) => c.chenSau === d.ma).map((c) => (

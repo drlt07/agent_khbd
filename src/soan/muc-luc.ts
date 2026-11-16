@@ -8,7 +8,8 @@ import { TEN_MON, type MaMon } from '../thu-vien';
 import type { GoiAi } from './ai';
 
 export interface BaiHoc { ten: string; soTiet?: number; chuDe?: string }
-export interface MucLuc { nguon: 'ppct' | 'ai'; bai: BaiHoc[]; capNhat: string }
+/** nguon: 'ppct' tổ/giáo viên tải lên, 'ai' AI gợi ý, 'sgk' mục lục SGK dựng sẵn (data/muc_luc_sgk.json). */
+export interface MucLuc { nguon: 'ppct' | 'ai' | 'sgk'; bai: BaiHoc[]; capNhat: string }
 
 const KHOA = 'khbd.muc-luc';
 export const khoaMucLuc = (mon: MaMon, lop: number, boSach: string) => `${mon}|${lop}|${boSach.trim().toLowerCase()}`;

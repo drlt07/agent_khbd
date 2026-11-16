@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import KhungHoatDongMoi from '../sua/KhungHoatDongMoi';
+import { timCongCu } from '../../soan/cong-cu-so';
 import { ChuCT } from '../../thanh-phan/cong-thuc';
 import { The, HopBao, Nut, NhanAiLam } from '../../thanh-phan/chung';
 import { BieuTuong } from '../../thanh-phan/bieu-tuong';
 import { LoiAi, type GoiAi } from '../../soan/ai';
-import { goiYHoatDong, huongDanTuGoiY, MUC_CHUAN_BI, NHOM_HINH_THUC, THOI_DIEM, type GoiY, type HoatDongCu, type HoatDongGoiY, type KetQuaLuatGoiY } from '../../soan/goi-y';
+import { goiYHoatDong, huongDanTuGoiY, maMoiCuaPhuongAn, MUC_CHUAN_BI, NHOM_HINH_THUC, THOI_DIEM, TIEU_CHI_CHAM, tongDiemGoiY, laNhatHoacKhongHop, type GoiY, type HoatDongCu, type HoatDongGoiY, type KetQuaLuatGoiY } from '../../soan/goi-y';
 import { TEN_HD, type Khbd, type MaHd } from '../../soan/kieu';
 
 const YEU_CAU_NHANH = ['Cách tổ chức khác', 'Lớp yếu', 'Chỉ có 1 máy tính và máy chiếu', 'Không cần Internet', 'Thêm năng lực số', 'Rút ngắn thời gian'];
@@ -41,6 +43,10 @@ export default function GoiYHoatDong({ k, hd, cu, ai, dong, dung }: {
     return [u?.deTrienKhai === i + 1 && 'Dễ triển khai nhất', u?.sangTao === i + 1 && 'Sáng tạo nhất', u?.aiMoPhong === i + 1 && 'Khai thác AI/mô phỏng tốt nhất'].filter(Boolean) as string[];
   };
 
+  const laNhat = (i: number) => laNhatHoacKhongHop(kq?.luat.theoHoatDong[i] ?? []);
+  /** Phương án không nhạt lên trước, điểm tự chấm cao lên trước; giữ số thứ tự gốc để khớp Phần D. */
+  const thuTu = kq ? kq.goiY.hoatDong.map((h, i) => ({ h, i })).sort((a, b) => Number(laNhat(a.i)) - Number(laNhat(b.i)) || tongDiemGoiY(b.h) - tongDiemGoiY(a.h)) : [];
+
   return (
     <The className="p-5 border-accent-line">
       <div className="flex flex-wrap items-start justify-between gap-2">
@@ -73,11 +79,12 @@ export default function GoiYHoatDong({ k, hd, cu, ai, dong, dung }: {
 
           {/* PHẦN B + C */}
           <div className="flex flex-col gap-3">
-            {kq.goiY.hoatDong.map((h, i) => {
+            {thuTu.map(({ h, i }, viTri) => {
               const u = uuTien(i);
+              const nhat = laNhat(i);
               const loiHd = kq.luat.theoHoatDong[i] ?? [];
               return (
-                <div key={`${h.ten}-${i}`} style={{ ['--i' as string]: i }} className="vao-lan rounded-xl border border-line p-4">
+                <div key={`${h.ten}-${i}`} style={{ ['--i' as string]: viTri }} className={`vao-lan rounded-xl border border-line p-4 ${nhat ? 'opacity-70' : ''}`}>
                   <div className="flex flex-wrap items-start gap-2">
                     <span className="so text-muted w-5">{i + 1}.</span>
                     <div className="flex-1 min-w-0">
@@ -88,15 +95,24 @@ export default function GoiYHoatDong({ k, hd, cu, ai, dong, dung }: {
                         <span className="px-2 py-0.5 rounded-full bg-surface-2 border border-line so">{h.thoiLuong} phút</span>
                         <span className={`px-2 py-0.5 rounded-full border ${h.mucChuanBi === 'cao' ? 'bg-warn-bg text-warn-fg border-warn-line' : 'bg-surface-2 border-line'}`}>Chuẩn bị: {MUC_CHUAN_BI[h.mucChuanBi]}</span>
                         {u.map((x) => <span key={x} className="px-2 py-0.5 rounded-full bg-ok-bg text-ok-fg">★ {x}</span>)}
+                        {nhat && <span className="px-2 py-0.5 rounded-full bg-warn-bg text-warn-fg">Nhạt</span>}
                       </div>
                       <p className="text-[14.5px] mt-2"><ChuCT t={h.yTuong} /></p>
+                      {h.diemTuDuy && <p className="text-[13.5px] mt-1"><b>Điểm tư duy:</b> <ChuCT t={h.diemTuDuy} /></p>}
+                      {h.doiMoi && <p className="text-[13.5px] mt-1"><b>Điểm đổi mới:</b> <ChuCT t={h.doiMoi} /></p>}
+                      {h.nangLuc?.length > 0 && <p className="text-[13.5px] mt-1"><b>Năng lực phát triển:</b> {h.nangLuc.map((n) => n.ten).join('; ')}</p>}
+                      {h.chotKienThuc && <p className="text-[13.5px] mt-1"><b>Chốt kiến thức:</b> <ChuCT t={h.chotKienThuc} /></p>}
+                      <p className="text-[12.5px] text-muted mt-1 so" title="AI tự chấm, thang 1–5; chỉ để tham khảo và sắp xếp">AI tự chấm: {(Object.keys(TIEU_CHI_CHAM) as (keyof typeof TIEU_CHI_CHAM)[]).map((c) => `${TIEU_CHI_CHAM[c]} ${h.tuCham[c]}`).join(' · ')}</p>
                       {h.congNghe && <p className="text-[13.5px] mt-1"><b>Công nghệ/AI:</b> {h.congNghe}{h.canKiemTra && <span className="text-warn-fg"> · cần kiểm tra quyền truy cập, chi phí, tiếng Việt</span>}</p>}
+                      {h.congNghe && timCongCu(h.congNghe).filter((c) => c.luuY).map((c) => <p key={c.ten} className="text-[12.5px] text-muted mt-0.5">{c.ten}: {c.luuY}</p>)}
+                      {h.khung5512 && h.khung5512.tichHopNls.length > 0 && <p className="text-[13.5px] mt-1"><b>Năng lực số cho hoạt động này:</b> {h.khung5512.tichHopNls.map((n) => <span key={n.ma} className="mr-2"><span className="ma">{n.ma}</span>{maMoiCuaPhuongAn(h, k.tichHop).includes(n.ma.trim()) && <span className="text-accent"> (mã mới, thêm khi chèn)</span>} {n.bieuHien}</span>)}</p>}
                       {loiHd.map((l) => <p key={l} className="text-[13px] text-warn-fg mt-1">! {l}</p>)}
                     </div>
                   </div>
-                  {mo === i && (
+                  {mo === i && h.khung5512 && cu && <div className="mt-3 rounded-lg bg-[var(--bo-sung)] px-3 py-2 text-[14.5px]"><KhungHoatDongMoi tenCu={cu.ten} h={h} /></div>}
+                  {mo === i && !h.khung5512 && (
                     <dl className="mt-3 grid gap-2 text-[14px] sm:grid-cols-[150px_1fr]">
-                      {([['Mục tiêu', h.mucTieu], ['Chuẩn bị', h.chuanBi.join('; ')], ['Kịch bản', h.kichBan.map((b) => `${b.buoc} (${b.phut}')`).join('\n')], ['Vai trò GV – HS', h.vaiTro], ['Câu hỏi/nhiệm vụ mẫu', h.cauHoiMau], ['Sản phẩm', h.sanPham], ['Cách đánh giá', h.danhGia], ['Chốt kiến thức', h.chotKienThuc], ['Dự phòng (không Internet)', h.duPhong]] as const).map(([dt, dd]) => (
+                      {([['Mục tiêu', h.mucTieu], ['Chuẩn bị', h.chuanBi.join('; ')], ['Kịch bản', h.kichBan.map((b) => `${b.buoc} (${b.phut}')`).join('\n')], ['Vai trò GV – HS', h.vaiTro], ['Câu hỏi/nhiệm vụ mẫu', h.cauHoiMau], ['Sản phẩm', h.sanPham], ['Cách đánh giá', h.danhGia], ['Chốt kiến thức', h.chotKienThuc], ['Bám mục tiêu', (h.bamMucTieu ?? []).map((m) => `${m.yeuCau} → ${m.cachDat}`).join('\n')], ['Năng lực phát triển', (h.nangLuc ?? []).map((n) => `${n.ten}: ${n.bieuHien}`).join('\n')], ['Dự phòng (không Internet)', h.duPhong]] as const).map(([dt, dd]) => (
                         <div key={dt} className="contents"><dt className="font-semibold">{dt}</dt><dd className="whitespace-pre-line">{String(dd).split("\n").map((x, j) => <span key={j} className="block"><ChuCT t={x} /></span>)}</dd></div>
                       ))}
                     </dl>

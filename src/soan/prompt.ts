@@ -4,6 +4,10 @@ import { laMaAi, moTaMa, NANG_LUC_DAC_THU, TEN_MON } from '../thu-vien';
 import { phutTheoHoatDong, tietCuaHoatDong } from './phan-bo';
 import { TEN_HD, type Khbd, type MaHd } from './kieu';
 import { nguyenTacHoatDong } from './goi-y';
+import { huongDanTuYTuong, tomTatYTuong } from './y-tuong';
+import { layPpdh, MA_LHDN } from './phuong-phap';
+import { phanVan } from './ngu-van';
+import { phanHafa } from './hafa-vret';
 
 export const PHIEN_BAN_LUAT = (LUAT_SOAN.match(/phien_ban:\s*([^\s·]+)/)?.[1] ?? '?');
 
@@ -20,15 +24,20 @@ function boiCanh(k: Khbd): string {
     `Mức học sinh: ${MUC_HS[k.dieuKien.mucHs]}.${k.dieuKien.ghiChu.trim() ? ` Ghi chú của giáo viên: ${k.dieuKien.ghiChu.trim()}` : ''}`,
     `Thiết bị, công cụ giáo viên khai báo (chỉ được dùng các thứ này): ${k.dieuKien.thietBi.join('; ') || 'không có'}.`,
   ];
+  const pp = (k.ppdh ?? []).filter((m) => m !== MA_LHDN).map(layPpdh).filter(Boolean);
+  if (pp.length) dong.push(`Phương pháp dạy học giáo viên đã chọn (thiết kế hoạt động theo các phương pháp này; tự chọn kĩ thuật dạy học tích cực phù hợp cho từng hoạt động):\n${pp.map((p) => `- ${p!.ten}: ${p!.mo_ta}`).join('\n')}`);
+  if (k.yTuong) dong.push(tomTatYTuong(k.yTuong));
   if (k.yccd.length) dong.push(`Yêu cầu cần đạt đã được giáo viên xác nhận:\n${k.yccd.map((y) => `${y.ma}: ${y.noiDung}`).join('\n')}`);
   if (k.nguon) dong.push([
     `KHBD này được soạn lại từ giáo án cũ của giáo viên (${k.nguon.tenTep}). Giữ đúng nội dung kiến thức, yêu cầu cần đạt, ví dụ và bài tập cốt lõi của giáo án cũ; THIẾT KẾ HOẠT ĐỘNG MỚI: cách tổ chức khác, học sinh tích cực hơn, không chép lại câu chữ và cách tổ chức cũ.`,
-    `Giáo án cũ (chỉ để tham khảo kiến thức):\n<<<\n${k.nguon.toanVan}\n>>>`,
-  ].join('\n'));
+    k.mon === 'NGU_VAN' ? `NGỮ VĂN – KHÔNG TỰ SINH KIẾN THỨC: mục tiêu, yêu cầu cần đạt, nội dung chốt, nhận định về tác phẩm, đáp án và gợi ý trả lời CHỈ lấy từ giáo án cũ dưới đây${k.sgk?.trim() ? ' và kiến thức SGK giáo viên cung cấp' : ''}; câu trích chép đúng nguồn. Bạn chỉ thiết kế hoạt động theo đặc trưng thể loại.` : '',
+    `Giáo án cũ (${k.mon === 'NGU_VAN' ? 'nguồn kiến thức DUY NHẤT' : 'chỉ để tham khảo kiến thức'}):\n<<<\n${k.nguon.toanVan}\n>>>`,
+  ].filter(Boolean).join('\n'));
+  if (k.mon === 'NGU_VAN' && k.sgk?.trim()) dong.push(`KIẾN THỨC SGK GIÁO VIÊN CUNG CẤP (nguồn để chốt kiến thức ở bước Kết luận, nhận định và đáp án; chốt theo khía cạnh "- Nội dung: …", "- Nghệ thuật: …", dùng đúng thuật ngữ; không thêm ý ngoài nguồn):\n<<<\n${k.sgk.trim().slice(0, 8000)}\n>>>`);
   return dong.join('\n');
 }
 
-export const heThong = (k: Khbd) => `${LUAT_SOAN.replace(/<!--.*?-->\s*/s, '')}\n\nThông tin bài dạy:\n${boiCanh(k)}`;
+export const heThong = (k: Khbd) => `${LUAT_SOAN.replace(/<!--.*?-->\s*/s, '')}${phanVan(k)}${phanHafa(k)}\n\nThông tin bài dạy:\n${boiCanh(k)}`;
 
 const maDaChon = (k: Khbd) => [...k.tichHop.nls, ...k.tichHop.ai].map((m) => `${m}${laMaAi(m) ? ' (năng lực AI, QĐ 2422/QĐ-BGDĐT)' : ' (năng lực số, TT 02/2025)'}: ${moTaMa(m)}`);
 
@@ -58,7 +67,7 @@ export function nhacGiaiDoan1(k: Khbd): string {
   ].join('\n');
 }
 
-const HUONG_DAN_HD: Record<'lhdn' | 'cv5512', Record<MaHd, string>> = {
+export const HUONG_DAN_HD: Record<'lhdn' | 'cv5512', Record<MaHd, string>> = {
   lhdn: {
     HD1: 'Nêu tình huống mở đầu gắn thực tế (sẽ được giải trọn ở HĐ III) và 2–3 nhận định dễ nhầm ứng với lỗi hay gặp ở phần tự học, kèm kết luận đúng. Không giảng lại toàn bộ lí thuyết.',
     HD2: 'Luyện tập phân hóa: ghép nhóm cùng mức (Nắm tốt / Cần củng cố / Cần hỗ trợ), học sinh làm câu theo dạng của môn, nhận phản hồi và sửa lỗi ngay trong hoạt động, có sản phẩm ghi lại được.',
@@ -98,6 +107,13 @@ function hoatDongCuTuongUng(k: Khbd, hd: MaHd): string {
   return cu ? `Hoạt động tương ứng trong giáo án cũ: "${cu.ten}" (${cu.phut} phút). Giữ kiến thức, đổi mới cách tổ chức:\n<<<\n${cu.noiDung}\n>>>` : '';
 }
 
+/** Phương án của các hoạt động CHƯA soạn (đang soạn song song): để hoạt động này nối đúng mạch cả bài. */
+function keHoachKhac(k: Khbd, hd: MaHd): string {
+  const ds = (['HD1', 'HD2', 'HD3', 'HD4'] as MaHd[]).filter((h) => h !== hd && k.keHoachHd?.[h] && !k.hoatDong.find((x) => x.ma === h)?.noiDung)
+    .map((h) => `${TEN_HD[k.phuongPhap][h]}: "${k.keHoachHd![h]!.ten}" – ${k.keHoachHd![h]!.yTuong}`);
+  return ds.length ? `Kế hoạch các hoạt động khác của bài (đang được soạn riêng; giữ mạch liên kết, không lặp nội dung của chúng):\n${ds.join('\n')}` : '';
+}
+
 export function nhacHoatDong(k: Khbd, hd: MaHd, huongDan = ''): string {
   const phut = phutTheoHoatDong(k.phanBo)[hd];
   const tiet = tietCuaHoatDong(k.phanBo, hd);
@@ -111,10 +127,12 @@ export function nhacHoatDong(k: Khbd, hd: MaHd, huongDan = ''): string {
       : `Chia ${phut < 10 ? '2–3' : '2–5'} bước, mỗi bước có số phút nguyên ≥ 1; tổng số phút các bước đúng bằng ${phut}. Nếu hoạt động trải qua nhiều tiết, có bước nhắc lại đầu tiết sau và chốt, giao nhiệm vụ cuối tiết trước.`,
     ma.length ? `Năng lực số/AI giáo viên đã chọn (chỉ thiết kế hành vi số trong hoạt động này nếu thật sự phù hợp, có thao tác cụ thể trên công cụ đã khai báo):\n${ma.join('\n')}` : '',
     truoc.length ? `Các hoạt động đã soạn (giữ mạch liên kết):\n${truoc.join('\n')}` : '',
+    keHoachKhac(k, hd),
     hoatDongCuTuongUng(k, hd),
       `Câu hỏi, bài tập (viết ĐẦY ĐỦ, không chỉ ghi "câu 1–4"): ${YEU_CAU_CAU_HOI[k.phuongPhap][hd]}`,
     k.phuongPhap === 'lhdn' && hd === 'HD4' && cauHd2(k).length ? `Câu HĐ II đã có (exit ticket không được trùng):\n${cauHd2(k).map((c) => `- ${c.cauHoi}`).join('\n')}` : '',
-    huongDan ? `PHƯƠNG ÁN GIÁO VIÊN ĐÃ CHỌN (bám sát):\n${huongDan}` : '',
+    k.yTuong ? huongDanTuYTuong(k.yTuong, hd) : '',
+    huongDan ? `PHƯƠNG ÁN GIÁO VIÊN ĐÃ CHỌN (bám sát${k.yTuong ? '; phương án này được ưu tiên hơn phần ý tưởng xuyên suốt ở trên, lồng vào cốt truyện nếu hợp' : ''}):\n${huongDan}` : '',
     nguyenTacHoatDong(),
   ].filter(Boolean).join('\n');
 }

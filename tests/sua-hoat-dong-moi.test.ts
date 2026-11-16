@@ -36,7 +36,9 @@ describe('Sửa KHBD cũ: AI đọc hoạt động cũ và gợi ý hoạt độ
     const k: SuaKhbd = { ...k0, hoatDongMoi: [{ id: 'm1', hoatDong: h.ten, chenSau: h.den, goiY: g }] };
     const xml = await (await JSZip.loadAsync(await Packer.toBuffer(dungTaiLieuSua(k)))).file('word/document.xml')!.async('string');
     const chu = xml.replace(/<[^>]+>/g, '');
-    const viTriMoi = chu.indexOf(`Đề xuất hoạt động mới (thay thế hoặc làm mới “${h.ten}”): ${g.ten}`);
+    const viTriMoi = chu.indexOf(`Đề xuất thay thế “${h.ten}”:`);
+    expect(chu).toContain('d) Tổ chức thực hiện:');
+    expect(chu).toContain('Hoạt động của GV và HS');
     expect(viTriMoi).toBeGreaterThan(0);
     const cuoiHdCu = k.doan.find((d) => d.ma === h.den)!.text.trim().slice(0, 25);
     const hdSau = k.doan[k.doan.findIndex((d) => d.ma === h.den) + 1].text.trim().slice(0, 25);
@@ -44,5 +46,22 @@ describe('Sửa KHBD cũ: AI đọc hoạt động cũ và gợi ý hoạt độ
     expect(chu.indexOf(hdSau, viTriMoi)).toBeGreaterThan(viTriMoi);
     // Mọi đoạn gốc vẫn còn
     for (const d of k.doan) if (d.loai !== 'bang' && d.text.trim()) expect(chu).toContain(d.text.trim().split('\n')[0].slice(0, 20).replace(/&/g, '&amp;'));
+  });
+});
+
+import { goiYMa, nhacGoiYMa } from '../src/soan/goi-y-ma';
+
+describe('Sửa KHBD cũ: AI gợi ý mã năng lực số theo giáo án', () => {
+  it('lời nhắc có các hoạt động của giáo án và yêu cầu gắn mã vào hoạt động có sẵn; mã gợi ý mẫu đều có trong thư viện', async () => {
+    const k = { ...(await phanTich(moi(), aiMauSua)), yccdDaXacNhan: true };
+    const ds = k.hoatDong.map((h) => hoatDongCu(k, h));
+    const n = nhacGoiYMa(boiCanhGoiY(k), ds);
+    expect(n).toContain('Giáo viên đang SỬA giáo án có sẵn');
+    for (const h of k.hoatDong) expect(n).toContain(h.ten);
+    expect(nhacGoiYMa(boiCanhGoiY(k))).not.toContain('SỬA giáo án');
+    const r = await goiYMa(boiCanhGoiY(k), aiMauSua, ds);
+    expect(r.boQua).toEqual([]);
+    expect(r.nls.map((m) => m.ma)).toEqual(['5.3.5.1', '1.2.5.1']);
+    expect(r.ai.map((m) => m.ma)).toEqual(['NLa']);
   });
 });

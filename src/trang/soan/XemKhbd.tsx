@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react';
+import { tenPpdh } from '../../soan/phuong-phap';
+import { soPhieu } from '../../soan/phieu';
 import { moTaMa, vanBanGoc, TEN_MON } from '../../thu-vien';
 import { phutTheoHoatDong } from '../../soan/phan-bo';
 import { TEN_HD, type Khbd, type MaHd } from '../../soan/kieu';
@@ -13,7 +15,7 @@ const Nhieu = ({ t }: { t: string }) => <>{tachDong(t).map((d, i) => <span key={
 const TEN_MUC = { LT: 'Lý thuyết', CB: 'Cơ bản', NC: 'Nâng cao' } as const;
 
 /** Xem KHBD như văn bản. suaDuoc = true: sửa trực tiếp việc GV/HS, số phút (ghi dấu vết "GV sửa"). */
-export default function XemKhbd({ k, sua, suaDuoc = false, dangSoan = null }: { k: Khbd; sua?: (f: (k: Khbd) => Khbd) => void; suaDuoc?: boolean; dangSoan?: MaPhan | null }) {
+export default function XemKhbd({ k, sua, suaDuoc = false, dangSoan = [] }: { k: Khbd; sua?: (f: (k: Khbd) => Khbd) => void; suaDuoc?: boolean; dangSoan?: MaPhan[] }) {
   const phut = phutTheoHoatDong(k.phanBo);
   const tenHd = TEN_HD[k.phuongPhap];
   const suaBuoc = (hd: MaHd, i: number, truong: 'gv' | 'hs' | 'phut', giaTri: string) => sua?.((x) => ({
@@ -42,7 +44,7 @@ export default function XemKhbd({ k, sua, suaDuoc = false, dangSoan = null }: { 
             {k.clil && <Nho ten="5. Tiếng Anh (CLIL)"><Dong>Key words: {k.clil.keyWords.map((w) => `${w.en} (${w.vi})`).join(', ')}.</Dong></Nho>}
             <Nho ten={k.phuongPhap === 'cv5512' ? '3. Về phẩm chất' : 'Phẩm chất'}>{k.mucTieu.phamChat.map((t) => <Dong key={t}>{t}</Dong>)}</Nho>
           </div>
-        ) : <ChuaSoan dang={dangSoan === 'mucTieu'} />}
+        ) : <ChuaSoan dang={dangSoan.includes('mucTieu')} />}
       </Muc>
 
       <Muc ten="II. Thiết bị dạy học và học liệu">
@@ -52,10 +54,11 @@ export default function XemKhbd({ k, sua, suaDuoc = false, dangSoan = null }: { 
             {cb.hocLieu.map((t) => <Dong key={t}><ChuCT t={t} /></Dong>)}
             {!cb.thietBi.length && !cb.hocLieu.length && <Dong><span className="text-muted">Không yêu cầu chuẩn bị riêng.</span></Dong>}
           </Nho>
-        )) : <ChuaSoan dang={dangSoan === 'mucTieu'} />}
+        )) : <ChuaSoan dang={dangSoan.includes('mucTieu')} />}
       </Muc>
 
       <Muc ten="III. Tiến trình dạy học">
+        {tenPpdh(k).length > 0 && <p className="text-[15px] mb-2"><b>Phương pháp dạy học:</b> {tenPpdh(k).join('; ')}.</p>}
         {k.phuongPhap === 'lhdn' && (
           <GiaiDoan so={1} ten="Giai đoạn 1: Tự học ở nhà trước tiết học">
             {k.giaiDoan1 ? (
@@ -64,7 +67,7 @@ export default function XemKhbd({ k, sua, suaDuoc = false, dangSoan = null }: { 
                 <Nho ten="Câu hỏi trọng tâm">{k.giaiDoan1.cauHoi.map((c, i) => <Dong key={i}><b>{TEN_MUC[c.muc]}:</b> <Nhieu t={c.cauHoi} /><span className="text-muted">Đáp án: <ChuCT t={c.dapAn} /></span></Dong>)}</Nho>
                 <Nho ten="Công việc của giáo viên">{k.giaiDoan1.congViecGv.map((t) => <Dong key={t}>{t}</Dong>)}</Nho>
               </div>
-            ) : <ChuaSoan dang={dangSoan === 'giaiDoan1'} />}
+            ) : <ChuaSoan dang={dangSoan.includes('giaiDoan1')} />}
           </GiaiDoan>
         )}
         <GiaiDoan so={2} ten={k.phuongPhap === 'lhdn' ? 'Giai đoạn 2: Hoạt động trên lớp' : 'Các hoạt động'}>
@@ -124,16 +127,34 @@ export default function XemKhbd({ k, sua, suaDuoc = false, dangSoan = null }: { 
                     <p className="mt-2 rounded-lg bg-ai-soft px-3 py-2 text-[14.5px]"><b>CLIL:</b> {k.clil.keyWords.map((w) => `${w.en} – ${w.vi}`).join('; ')}. {k.clil.nhiemVu} <b>Tiêu chí:</b> {k.clil.tieuChi}</p>
                   )}
                 </div>
-              ) : <ChuaSoan dang={dangSoan === h.ma} />}
+              ) : <ChuaSoan dang={dangSoan.includes(h.ma)} />}
             </section>
           ))}
         </GiaiDoan>
         {k.phuongPhap === 'lhdn' && (
           <GiaiDoan so={3} ten="Giai đoạn 3: Kiểm soát, đánh giá và điều chỉnh sau giờ học">
-            {k.giaiDoan3 ? <ul className="vao mt-1 flex flex-col gap-1">{k.giaiDoan3.viec.map((t) => <Dong key={t}>{t}</Dong>)}</ul> : <ChuaSoan dang={dangSoan === 'giaiDoan3'} />}
+            {k.giaiDoan3 ? <ul className="vao mt-1 flex flex-col gap-1">{k.giaiDoan3.viec.map((t) => <Dong key={t}>{t}</Dong>)}</ul> : <ChuaSoan dang={dangSoan.includes('giaiDoan3')} />}
           </GiaiDoan>
         )}
       </Muc>
+
+      {(k.phieu?.length || (k.hoatDong.every((h) => h.noiDung) && soPhieu(k).length > 0)) ? (
+        <Muc ten="Phụ lục: Phiếu học tập">
+          {k.phieu?.length ? k.phieu.map((p) => (
+            <Nho key={p.so} ten={`Phiếu học tập số ${p.so}: ${p.ten}`}>
+              <Dong><span className="text-muted">{p.hoatDong === 'GD1' ? 'Giai đoạn 1' : TEN_HD[k.phuongPhap][p.hoatDong]}</span></Dong>
+              {p.huongDan && <Dong><b>Hướng dẫn:</b> <ChuCT t={p.huongDan} /></Dong>}
+              {p.noiDung.map((t, i) => <Dong key={i}><b>{i + 1}.</b> <ChuCT t={t} /></Dong>)}
+              {p.bang && p.bang.cot.length > 0 && (
+                <div className="overflow-x-auto mt-1"><table className="w-full text-[14px] border border-line">
+                  <thead><tr>{p.bang.cot.map((c) => <th key={c} className="border border-line bg-surface-2 px-2 py-1 text-left font-semibold">{c}</th>)}</tr></thead>
+                  <tbody>{Array.from({ length: p.bang.soDong }, (_, r) => <tr key={r}>{p.bang!.cot.map((c) => <td key={c} className="border border-line px-2 py-3" />)}</tr>)}</tbody>
+                </table></div>
+              )}
+            </Nho>
+          )) : <ChuaSoan dang={dangSoan.includes('phieu')} />}
+        </Muc>
+      ) : null}
 
       {k.maTichHop.length > 0 && (
         <Muc ten="Phụ lục: Căn cứ">
