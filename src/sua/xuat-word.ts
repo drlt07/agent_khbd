@@ -7,6 +7,7 @@ import { chuCongThuc } from '../soan/word-cong-thuc';
 import { laMaAi, moTaMa, vanBanGoc } from '../thu-vien';
 import type { Chen, HoatDongMoi, SuaKhbd } from './quy-trinh';
 import { NHOM_HINH_THUC } from '../soan/goi-y';
+import { TEN_BUOC_KHUNG, tieuDeHoatDongMoi } from '../soan/giu-hoat-dong';
 import { tachDong } from '../soan/dinh-dang';
 
 const FONT = 'Times New Roman';
@@ -44,8 +45,26 @@ function khoiBoSung(c: Chen): Paragraph[] {
 }
 
 /** Hoạt động mới đề xuất (giáo viên đã chọn): đặt ngay sau hoạt động cũ, tô nền xanh nhạt. */
-export function khoiHoatDongMoi(m: HoatDongMoi): Paragraph[] {
+export function khoiHoatDongMoi(m: HoatDongMoi): (Paragraph | Table)[] {
   const h = m.goiY;
+  const kh = h.khung5512;
+  if (kh) {
+    const p = (nhan: string, giaTri: string) => doan([chu(`${nhan} `, { dam: true }), ...chuCT(giaTri)], { nen: NEN_BO_SUNG });
+    const ra: (Paragraph | Table)[] = [
+      doan([chu(`Đề xuất thay thế “${m.hoatDong}”:`, { dam: true })], { nen: NEN_BO_SUNG }),
+      doan([chu(tieuDeHoatDongMoi(m.hoatDong, h.ten, h.thoiLuong), { dam: true })], { nen: NEN_BO_SUNG }),
+      p('a) Mục tiêu:', h.mucTieu),
+      p('b) Nội dung:', kh.noiDung),
+      p('c) Sản phẩm:', kh.sanPham),
+      doan([chu('d) Tổ chức thực hiện:', { dam: true })], { nen: NEN_BO_SUNG }),
+      bang([['Hoạt động của GV và HS', 'Sản phẩm cần đạt'], ...(Object.keys(TEN_BUOC_KHUNG) as (keyof typeof TEN_BUOC_KHUNG)[]).map((b) => [`${TEN_BUOC_KHUNG[b]}\n${kh.buoc[b].viec}`, kh.buoc[b].sanPham])], true),
+    ];
+    if (kh.tieuChi.length) { ra.push(doan([chu('TIÊU CHÍ ĐÁNH GIÁ', { dam: true })], { nen: NEN_BO_SUNG })); ra.push(bang([['Tiêu chí', 'Yêu cầu cần đạt'], ...kh.tieuChi.map((t) => [t.tieuChi, t.yeuCau])], true)); }
+    if (kh.tichHopNls.length) ra.push(p('Năng lực số:', kh.tichHopNls.map((n) => `${n.ma} – ${n.bieuHien}`).join('; ')));
+    if (kh.promptMau.trim()) ra.push(p('Prompt AI mẫu (GV cung cấp):', `“${kh.promptMau.trim()}”`));
+    if (h.congNghe) ra.push(p('Dự phòng khi không có Internet:', h.duPhong));
+    return ra;
+  }
   const p = (nhan: string, giaTri: string) => doan([chu(`${nhan} `, { dam: true }), ...chuCT(giaTri)], { nen: NEN_BO_SUNG });
   const ds = [
     doan([chu(`Đề xuất hoạt động mới (thay thế hoặc làm mới “${m.hoatDong}”): ${h.ten}`, { dam: true })], { nen: NEN_BO_SUNG }),

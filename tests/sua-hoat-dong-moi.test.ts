@@ -36,7 +36,9 @@ describe('Sửa KHBD cũ: AI đọc hoạt động cũ và gợi ý hoạt độ
     const k: SuaKhbd = { ...k0, hoatDongMoi: [{ id: 'm1', hoatDong: h.ten, chenSau: h.den, goiY: g }] };
     const xml = await (await JSZip.loadAsync(await Packer.toBuffer(dungTaiLieuSua(k)))).file('word/document.xml')!.async('string');
     const chu = xml.replace(/<[^>]+>/g, '');
-    const viTriMoi = chu.indexOf(`Đề xuất hoạt động mới (thay thế hoặc làm mới “${h.ten}”): ${g.ten}`);
+    const viTriMoi = chu.indexOf(`Đề xuất thay thế “${h.ten}”:`);
+    expect(chu).toContain('d) Tổ chức thực hiện:');
+    expect(chu).toContain('Hoạt động của GV và HS');
     expect(viTriMoi).toBeGreaterThan(0);
     const cuoiHdCu = k.doan.find((d) => d.ma === h.den)!.text.trim().slice(0, 25);
     const hdSau = k.doan[k.doan.findIndex((d) => d.ma === h.den) + 1].text.trim().slice(0, 25);

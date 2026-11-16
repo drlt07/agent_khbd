@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import KhungHoatDongMoi from '../sua/KhungHoatDongMoi';
 import { ChuCT } from '../../thanh-phan/cong-thuc';
 import { The, HopBao, Nut, NhanAiLam } from '../../thanh-phan/chung';
 import { BieuTuong } from '../../thanh-phan/bieu-tuong';
@@ -99,10 +100,12 @@ export default function GoiYHoatDong({ k, hd, cu, ai, dong, dung }: {
                       {h.diemTuDuy && <p className="text-[13.5px] mt-1"><b>Điểm tư duy:</b> <ChuCT t={h.diemTuDuy} /></p>}
                       <p className="text-[12.5px] text-muted mt-1 so" title="AI tự chấm, thang 1–5; chỉ để tham khảo và sắp xếp">AI tự chấm: {(Object.keys(TIEU_CHI_CHAM) as (keyof typeof TIEU_CHI_CHAM)[]).map((c) => `${TIEU_CHI_CHAM[c]} ${h.tuCham[c]}`).join(' · ')}</p>
                       {h.congNghe && <p className="text-[13.5px] mt-1"><b>Công nghệ/AI:</b> {h.congNghe}{h.canKiemTra && <span className="text-warn-fg"> · cần kiểm tra quyền truy cập, chi phí, tiếng Việt</span>}</p>}
+                      {h.khung5512 && h.khung5512.tichHopNls.length > 0 && <p className="text-[13.5px] mt-1"><b>Năng lực số bổ sung:</b> {h.khung5512.tichHopNls.map((n) => n.ma).join(', ')}</p>}
                       {loiHd.map((l) => <p key={l} className="text-[13px] text-warn-fg mt-1">! {l}</p>)}
                     </div>
                   </div>
-                  {mo === i && (
+                  {mo === i && h.khung5512 && cu && <div className="mt-3 rounded-lg bg-[var(--bo-sung)] px-3 py-2 text-[14.5px]"><KhungHoatDongMoi tenCu={cu.ten} h={h} /></div>}
+                  {mo === i && !h.khung5512 && (
                     <dl className="mt-3 grid gap-2 text-[14px] sm:grid-cols-[150px_1fr]">
                       {([['Mục tiêu', h.mucTieu], ['Chuẩn bị', h.chuanBi.join('; ')], ['Kịch bản', h.kichBan.map((b) => `${b.buoc} (${b.phut}')`).join('\n')], ['Vai trò GV – HS', h.vaiTro], ['Câu hỏi/nhiệm vụ mẫu', h.cauHoiMau], ['Sản phẩm', h.sanPham], ['Cách đánh giá', h.danhGia], ['Chốt kiến thức', h.chotKienThuc], ['Dự phòng (không Internet)', h.duPhong]] as const).map(([dt, dd]) => (
                         <div key={dt} className="contents"><dt className="font-semibold">{dt}</dt><dd className="whitespace-pre-line">{String(dd).split("\n").map((x, j) => <span key={j} className="block"><ChuCT t={x} /></span>)}</dd></div>

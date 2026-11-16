@@ -62,6 +62,7 @@ describe('Lối "Sửa KHBD cũ" môn Ngữ văn', () => {
     const pa = (ten: string, nhom: HoatDongGoiY['nhom'], cauHoiMau: string): HoatDongGoiY => ({
       ten: `${ten} Giấu của`, nhom, yTuong: 'Nhóm dựng cảnh và giải mã tiếng cười', congNghe: '', canKiemTra: false, thoiLuong: 10, mucChuanBi: 'thap', thoiDiem: 'hinh_thanh',
       mucTieu: 'm', diemTuDuy: 'd', tuCham: { tuDuy: 4, hapDan: 4, khaThi: 4, bamBai: 4 }, chuanBi: ['Máy chiếu'], kichBan: [{ buoc: 'b', phut: 10 }], vaiTro: 'v', cauHoiMau, sanPham: 's', danhGia: 'đg', chotKienThuc: 'chốt', duPhong: 'phiếu in',
+      khung5512: { mucDich: 'm', noiDung: 'Nhóm dựng cảnh', sanPham: 's', buoc: { chuyenGiao: { viec: 'GV giao', sanPham: '' }, thucHien: { viec: 'HS làm', sanPham: 's' }, baoCao: { viec: 'HS báo cáo', sanPham: '' }, ketLuan: { viec: 'GV chốt', sanPham: '' } }, tieuChi: [], tichHopNls: [], promptMau: '' },
     });
     const goi = (cau: string): GoiY => ({ phanTich: { trongTam: 'Giấu của', khoKhan: ['k'], kieuHoatDong: 'dựng cảnh', coHoiAi: 'không' }, hoatDong: [pa('Đạo diễn', 'A', cau), pa('Phiên tòa', 'D', 'Ai đáng cười hơn?'), pa('Thám tử', 'C', 'Chỗ nào gây cười?'), pa('Trò chơi', 'G', 'Ghép thủ pháp')], uuTien: { deTrienKhai: 1, sangTao: 2, aiMoPhong: 3, lyDo: 'l' } });
     let lan = 0, nhac = '', he = '';

@@ -1,4 +1,4 @@
-<!-- phien_ban: 2 · 2026-11-16 · Luật riêng môn Ngữ văn khi sửa/soạn lại từ KHBD giáo viên tải lên (quyết định của tác giả). v2: thêm trọng tâm thể loại lớp 12 và mục D theo tài liệu training SGV Ngữ văn 12 – Kết nối tri thức (tai-lieu-training/ngu-van/), diễn đạt lại, không chép nguyên văn -->
+<!-- phien_ban: 3 · 2026-11-16 · v3: thêm mục E (sửa KHBD: giữ kiến thức, năng lực môn học, tiến trình; chỉ bổ sung năng lực số; đổi mới hoạt động giữ mục đích).  Luật riêng môn Ngữ văn khi sửa/soạn lại từ KHBD giáo viên tải lên (quyết định của tác giả). v2: thêm trọng tâm thể loại lớp 12 và mục D theo tài liệu training SGV Ngữ văn 12 – Kết nối tri thức (tai-lieu-training/ngu-van/), diễn đạt lại, không chép nguyên văn -->
 LUẬT RIÊNG MÔN NGỮ VĂN
 
 A. KHÔNG TỰ SINH KIẾN THỨC (khi có KHBD/giáo án giáo viên tải lên)
@@ -39,3 +39,10 @@ D. TỔ CHỨC DẠY HỌC THEO ĐỊNH HƯỚNG SÁCH GIÁO VIÊN (SGV Ngữ v�
 7. Đọc, viết, nói và nghe gắn với nhau: viết và nói tận dụng kết quả của phần đọc trong cùng bài.
 8. Đánh giá thường xuyên trong từng hoạt động bằng công cụ cụ thể (phiếu, bảng kiểm, rubric), đánh giá cả sản phẩm cá nhân và sản phẩm nhóm.
 9. Giáo viên chủ động, sáng tạo: được tổ chức khác SGV cho hợp lớp mình; app không ép theo SGV khi KHBD của giáo viên đã chọn cách khác.
+
+E. SỬA KHBD CỦA GIÁO VIÊN (lối "Sửa KHBD cũ")
+1. Giữ nguyên kiến thức, mục tiêu về năng lực đặc thù môn Ngữ văn, phẩm chất, yêu cầu cần đạt và tiến trình (thứ tự, giai đoạn các hoạt động) của giáo án. Không viết lại, không thêm, không bớt mục tiêu môn học.
+2. Chỉ BỔ SUNG năng lực số (và năng lực AI, tiếng Anh nếu giáo viên chọn): dùng đúng mã giáo viên đã chọn, nêu biểu hiện cụ thể của học sinh trong hoạt động, minh chứng và tiêu chí đánh giá năng lực số.
+3. Đổi mới một hoạt động: mục tiêu (a) giữ nguyên văn (app tự chép); giữ mục đích ghi ở tên hoạt động (vd "Đánh thức thông điệp, sáng tạo") và giữ giai đoạn (Vận dụng vẫn là Vận dụng). Chỉ đổi cách tổ chức: hình thức, vai trò, công cụ, dạng sản phẩm.
+4. Trình bày theo CV 5512: tên hoạt động; a) Mục tiêu; b) Nội dung; c) Sản phẩm; d) Tổ chức thực hiện (bảng Hoạt động của GV và HS – Sản phẩm cần đạt, 4 bước); bảng tiêu chí đánh giá có dòng Năng lực số; prompt AI mẫu giáo viên cung cấp nếu học sinh dùng AI.
+5. Học sinh dùng AI: tự làm bản nháp trước, sau đó dùng AI để góp ý; học sinh lựa chọn, kiểm chứng, chỉnh sửa và giải thích lựa chọn (khung HAFA–VRET).

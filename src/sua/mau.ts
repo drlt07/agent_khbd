@@ -85,9 +85,29 @@ const TRA_LOI: Record<string, unknown> = {
   uuTien: { deTrienKhai: 1, sangTao: 3, aiMoPhong: 2, lyDo: 'Thả bóng không cần chuẩn bị; Thám tử động năng va chạm gắn bài học với đời sống; mô phỏng PhET giúp học sinh tự rút ra biểu thức.' },
 };
 
+/** Lối Sửa: mỗi phương án mẫu có khung CV 5512 (giữ mục tiêu cũ, bổ sung năng lực số 5.3.5.1 giáo viên chọn ở giáo án mẫu). */
+{
+  type Hd = { ten: string; nhom: string; yTuong: string; sanPham: string; danhGia: string; chotKienThuc: string; vaiTro: string; kichBan: { buoc: string; phut: number }[]; khung5512?: unknown };
+  for (const h of (TRA_LOI as { goiY: { hoatDong: Hd[] } }).goiY.hoatDong) {
+    const b = (i: number, gv: string) => ({ viec: `${gv} ${h.kichBan[i]?.buoc ?? ''}`.trim(), sanPham: i === 1 ? h.sanPham : i === 3 ? h.chotKienThuc : '' });
+    h.khung5512 = {
+      mucDich: 'Giữ mục tiêu của hoạt động trong giáo án cũ, đổi cách tổ chức.',
+      noiDung: h.yTuong,
+      sanPham: h.sanPham,
+      buoc: { chuyenGiao: b(0, 'GV giao nhiệm vụ và tiêu chí.'), thucHien: b(1, 'HS thực hiện theo nhóm; GV theo dõi, hỗ trợ.'), baoCao: b(2, 'Đại diện nhóm báo cáo, các nhóm nhận xét.'), ketLuan: { viec: 'GV nhận xét, chốt kiến thức theo giáo án.', sanPham: h.chotKienThuc } },
+      tieuChi: [{ tieuChi: 'Nội dung', yeuCau: h.danhGia }, { tieuChi: 'Năng lực số', yeuCau: 'Dùng công cụ số đúng cách, ghi và chia sẻ kết quả, kiểm chứng thông tin.' }],
+      tichHopNls: [{ ma: '5.3.5.1', bieuHien: 'dùng công cụ số (mô phỏng, phiếu số, bảng tính) để thu thập và trình bày kết quả của nhóm' }],
+      promptMau: h.nhom === 'I' ? 'Em là trợ lí học Vật lí 10. Đây là lời giải bài động năng nhóm em đã tự làm: […]. Đừng đưa đáp án; hãy hỏi một câu gợi ý để nhóm tự kiểm tra bước đổi đơn vị.' : '',
+    };
+  }
+}
+
 export const aiMauSua: GoiAi = async (y) => {
   await new Promise((r) => setTimeout(r, 350));
-  return y.schema.parse(structuredClone(TRA_LOI[y.ten]));
+  const kq = structuredClone(TRA_LOI[y.ten]) as Record<string, any>;
+  // Giáo viên chưa chọn mã năng lực số: phương án mẫu không gắn mã
+  if (y.ten === 'goiY' && y.nhac.includes('Giáo viên chưa chọn mã năng lực số')) for (const h of kq.hoatDong) if (h.khung5512) { h.khung5512.tichHopNls = []; h.khung5512.tieuChi = h.khung5512.tieuChi.filter((t: { tieuChi: string }) => t.tieuChi !== 'Năng lực số'); }
+  return y.schema.parse(kq);
 };
 
 /** Thiết lập tích hợp, thiết bị đi kèm giáo án mẫu. */

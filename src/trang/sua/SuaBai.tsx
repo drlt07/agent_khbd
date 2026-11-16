@@ -16,6 +16,7 @@ import DoiMoiHoatDong from './DoiMoiHoatDong';
 import { NHOM_HINH_THUC } from '../../soan/goi-y';
 import { ChuCT } from '../../thanh-phan/cong-thuc';
 import { timTheoBai } from '../../soan/sgv-ngu-van';
+import KhungHoatDongMoi from './KhungHoatDongMoi';
 import { THE_LOAI_VAN, type TheLoaiVan } from '../../soan/ngu-van';
 
 const KHOA = 'khbd.sua-nhap';
@@ -309,12 +310,14 @@ function BuocXem({ k, kiemTra }: { k: SuaKhbd; kiemTra: { nghiem: string[]; nhac
             {d.ma === k.mucTieuDen && dung.map((c) => <p key={`mt${c.id}`} className="mt-1 rounded-md bg-[var(--bo-sung)] px-2 py-1">{c.loai === 'clil' ? <><b>Tiếng Anh (CLIL):</b> dùng key words {c.keyWords.map((w) => w.en).join(', ')}.</> : <><b>{/^NL[a-d]$/.test(c.ma) ? 'Năng lực AI' : 'Năng lực số'} {c.ma}:</b> HS {c.bieuHien}.</>}</p>)}
             {(k.hoatDongMoi ?? []).filter((m) => m.chenSau === d.ma).map((m) => (
               <div key={m.id} className="my-2 rounded-lg bg-[var(--bo-sung)] px-3 py-2 border-l-4 border-accent">
+                {m.goiY.khung5512 ? <KhungHoatDongMoi tenCu={m.hoatDong} h={m.goiY} /> : <>
                 <div className="font-semibold">Đề xuất hoạt động mới (thay thế hoặc làm mới “{m.hoatDong}”): {m.goiY.ten}</div>
                 <p className="text-[14px] text-muted">{NHOM_HINH_THUC[m.goiY.nhom]} · {m.goiY.thoiLuong} phút</p>
                 <p><b>Ý tưởng:</b> <ChuCT t={m.goiY.yTuong} /></p>
                 {m.goiY.kichBan.map((b, i) => <p key={i}>Bước {i + 1}: <ChuCT t={b.buoc} /> ({b.phut} phút)</p>)}
                 <p><b>Câu hỏi/nhiệm vụ mẫu:</b> <ChuCT t={m.goiY.cauHoiMau} /></p>
                 <p className="text-[14px]"><b>Sản phẩm:</b> <ChuCT t={m.goiY.sanPham} /> <b>Đánh giá:</b> <ChuCT t={m.goiY.danhGia} /></p>
+                </>}
               </div>
             ))}
             {dung.filter((c) => c.chenSau === d.ma).map((c) => (

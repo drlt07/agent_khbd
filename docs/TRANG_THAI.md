@@ -312,3 +312,13 @@ Yêu cầu của tác giả: đảm bảo kiến thức đặc trưng thể lo�
 - Luật code: gợi ý hoạt động, ngân hàng hoạt động (HĐ2, HĐ3) không chạm yếu tố nào → "Nhạt: chưa bám đặc trưng thể loại" (bị đẩy xuống, AI phải gợi ý lại nếu thiếu phương án hay); soạn HĐ2 Hình thành kiến thức mới khai thác dưới 2 yếu tố → soạn lại ≤ 2 lượt; bước Kiểm tra → nhắc.
 - Bước 2 "Nội dung bài" (luồng Soạn mới): ô "Thể loại văn bản chính" cho Ngữ văn, mặc định theo SGV; hiện các yếu tố đặc trưng AI sẽ khai thác. `Khbd.theLoai` mới.
 - Kiểm thử `tests/the-loai-van.test.ts` (kể cả: mọi hoạt động mẫu trong kho tự qua luật bám thể loại); tổng 234 đạt.
+
+## Sửa KHBD môn Văn: giữ kiến thức, năng lực môn học, tiến trình; chỉ bổ sung năng lực số; đổi mới hoạt động giữ mục đích – 16/11/2026
+
+Yêu cầu của tác giả (kèm ví dụ HĐ3 Vận dụng "Đánh thức thông điệp, sáng tạo cùng AI", bài Giấu của).
+
+- `src/soan/giu-hoat-dong.ts` (hàm thuần): tách a) Mục tiêu, b) Nội dung, c) Sản phẩm, d) Tổ chức thực hiện của hoạt động cũ; giai đoạn và mục đích theo tên hoạt động; tiêu đề hoạt động mới dạng "HOẠT ĐỘNG 3. VẬN DỤNG – … (5 PHÚT)".
+- Gợi ý đổi mới trong lối Sửa dùng schema `GoiYGiuOut` (thêm `khung5512`: mục đích, nội dung, sản phẩm, 4 bước GV–HS/sản phẩm, bảng tiêu chí, mã năng lực số + biểu hiện, prompt AI mẫu). Code chép nguyên văn mục tiêu cũ và giữ giai đoạn (`giuHoatDongCu`), AI không viết lại.
+- Luật code `kiemTraKhung`: đủ khung 4 bước; phải gắn mã năng lực số/AI giáo viên đã chọn, không dùng mã lạ; có dòng tiêu chí Năng lực số; học sinh dùng AI thì phải có prompt mẫu. Thiếu → AI gợi ý lại.
+- Bản xem trước, thẻ gợi ý và file Word trình bày hoạt động mới đúng khung CV 5512 (bảng "Hoạt động của GV và HS | Sản phẩm cần đạt", "Tiêu chí đánh giá", "Prompt AI mẫu").
+- `rules/ngu-van.md` v3 mục E. Bộ AI mẫu (demo) có khung. Kiểm thử `tests/giu-hoat-dong.test.ts` dùng đúng ví dụ của tác giả.
