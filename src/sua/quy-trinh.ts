@@ -10,6 +10,7 @@ import type { GoiAi } from '../soan/ai';
 import { TEN_HD, type DauVet, type Khbd, type MaHd } from '../soan/kieu';
 import { phanBoMacDinh } from '../soan/phan-bo';
 import { huongDanTuGoiY } from '../soan/goi-y';
+import { coDungAi, coLamTruoc, LOI_LAM_TRUOC, phanHafa } from '../soan/hafa-vret';
 import { LOI_TRICH_DAN, MA_THE_LOAI, nhacNguVan, THE_LOAI_VAN, trichDanKhongCo, type TheLoaiVan } from '../soan/ngu-van';
 import type { Doan } from './doc-docx';
 import type { HoatDongCu, HoatDongGoiY } from '../soan/goi-y';
@@ -143,9 +144,9 @@ function giaoAn(doan: Doan[]): string {
   return dong.join('\n');
 }
 
-const he = (k?: Pick<SuaKhbd, 'mon' | 'theLoai'>) => `${LUAT_SOAN.replace(/<!--.*?-->\s*/s, '')}
+const he = (k?: Pick<SuaKhbd, 'mon' | 'theLoai'> & Partial<Pick<SuaKhbd, 'tichHop'>>) => `${LUAT_SOAN.replace(/<!--.*?-->\s*/s, '')}
 
-Nhiệm vụ: NÂNG CẤP giáo án có sẵn của giáo viên, giữ bố cục gốc. Nội dung của giáo viên giữ nguyên văn; bạn chỉ đề xuất phần BỔ SUNG và chỉ ra vị trí chèn bằng mã đoạn (D001…). Không chép lại câu của giáo viên. Mã đoạn là mã nội bộ, không được xuất hiện trong câu văn bổ sung. Ưu tiên cải tiến hoạt động có sẵn thay vì thêm hoạt động mới; giữ thời lượng toàn tiết.${k?.mon === 'NGU_VAN' ? `\n\n${nhacNguVan(k.theLoai)}` : ''}`;
+Nhiệm vụ: NÂNG CẤP giáo án có sẵn của giáo viên, giữ bố cục gốc. Nội dung của giáo viên giữ nguyên văn; bạn chỉ đề xuất phần BỔ SUNG và chỉ ra vị trí chèn bằng mã đoạn (D001…). Không chép lại câu của giáo viên. Mã đoạn là mã nội bộ, không được xuất hiện trong câu văn bổ sung. Ưu tiên cải tiến hoạt động có sẵn thay vì thêm hoạt động mới; giữ thời lượng toàn tiết.${k && 'tichHop' in k ? phanHafa(k as Pick<SuaKhbd, 'tichHop'>) : ''}${k?.mon === 'NGU_VAN' ? `\n\n${nhacNguVan(k.theLoai)}` : ''}`;
 
 export function nhacPhanTich(doan: Doan[]): string {
   return `Đọc giáo án dưới đây (mỗi dòng là một đoạn, có mã đoạn) và xác định: môn (mã: ${MA_MON.join(', ')}), lớp, tên bài, yêu cầu cần đạt, các hoạt động dạy học (đoạn bắt đầu, đoạn kết thúc, thời lượng), và mã đoạn cuối của phần mục tiêu.
@@ -184,6 +185,7 @@ export function kiemTraChen(c: Omit<Chen, 'id' | 'dung'>, k: Pick<SuaKhbd, 'doan
     return { diem: 100 - 50 * tru.length, truDiem: tru, loiLuat };
   }
   if (k.mon === 'NGU_VAN') { const ds = trichDanKhongCo(vanBan, toanVanGiaoAn(k)); if (ds.length) loiLuat.push(LOI_TRICH_DAN(ds)); }
+  if (c.loai === 'ai' && coDungAi('', vanBan) && !coLamTruoc(vanBan)) loiLuat.push(LOI_LAM_TRUOC);
   if (!maTichHopHopLe(c.ma)) loiLuat.push('Mã không có trong thư viện.');
   else if (![...k.tichHop.nls, ...k.tichHop.ai].includes(c.ma)) loiLuat.push('Mã này giáo viên không chọn.');
   const d = chamDiem({ ...c, hoatDong: 'HD1' }, { dieuKien: k.dieuKien, phanBo: [] }, c.phut);

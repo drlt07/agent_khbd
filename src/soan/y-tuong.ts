@@ -11,6 +11,7 @@ import { coBatAi, coDungAi, coTrongDanhSach, ganVoiBai, laChungChung, LOI_AI, ng
 import { phutTheoHoatDong } from './phan-bo';
 import { TEN_HD, YTuongBaiOut, type Khbd, type MaHd, type YTuongBai } from './kieu';
 import { phanVan } from './ngu-van';
+import { phanHafa } from './hafa-vret';
 
 export const YTuongOut = z.object({
   kichBan: z.array(YTuongBaiOut).describe('Đúng 3 ý tưởng khác hẳn nhau về cốt truyện và cách tổ chức'),
@@ -96,7 +97,7 @@ export function chuanHoaYTuong(y: YTuong): YTuong {
 }
 
 export async function deXuatYTuong(k: Khbd, ai: GoiAi, yeuCau = ''): Promise<{ yTuong: YTuong; luat: KetQuaLuatYTuong; luot: number }> {
-  const he = `Bạn là chuyên gia thiết kế bài học THPT theo Chương trình GDPT 2018, giỏi biến một bài học thành một trải nghiệm có cốt truyện mà vẫn đúng kiến thức. Viết tiếng Việt, cụ thể, dùng được ngay. Công thức, kí hiệu toán, lí, hóa viết LaTeX trong cặp $…$.\n\n${nguyenTacHoatDong()}${phanVan(k)}`;
+  const he = `Bạn là chuyên gia thiết kế bài học THPT theo Chương trình GDPT 2018, giỏi biến một bài học thành một trải nghiệm có cốt truyện mà vẫn đúng kiến thức. Viết tiếng Việt, cụ thể, dùng được ngay. Công thức, kí hiệu toán, lí, hóa viết LaTeX trong cặp $…$.\n\n${nguyenTacHoatDong()}${phanVan(k)}${phanHafa(k)}`;
   let nhac = nhacYTuong(k, yeuCau);
   let cuoi: { yTuong: YTuong; luat: KetQuaLuatYTuong; luot: number } | null = null;
   for (let luot = 0; luot <= 2; luot++) {

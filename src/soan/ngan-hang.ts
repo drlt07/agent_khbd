@@ -16,6 +16,7 @@ import { coBatAi, coDungAi, coTrongDanhSach, ganVoiBai, HAP_DAN_HINH_THANH, kepT
 import { phutTheoHoatDong } from './phan-bo';
 import { HUONG_DAN_HD } from './prompt';
 import { phanVan } from './ngu-van';
+import { phanHafa } from './hafa-vret';
 import { layPpdh, MA_LHDN } from './phuong-phap';
 import { NganHangOut, PhuongAnHdOut, TEN_HD, type Khbd, type MaHd, type NganHang, type PhuongAnHd } from './kieu';
 
@@ -188,7 +189,7 @@ const RONG: NganHang['phanTich'] = { trongTam: '', khoKhan: [] };
  * với đầy đủ bối cảnh. Một hoạt động lỗi không làm mất các hoạt động khác (giữ qua moiHd, sau đó báo lỗi).
  */
 export async function goiYNganHang(k: Khbd, ai: GoiAi, yeuCau = '', tc: TuyChonNganHang = {}): Promise<{ ketQua: NganHang; boQua: string[]; luat: KetQuaLuatNganHang; luot: number }> {
-  const he = `Bạn là chuyên gia thiết kế hoạt động dạy học THPT theo Chương trình GDPT 2018 và chuyên gia tích hợp năng lực số (Thông tư 02/2025), năng lực AI (QĐ 2422/QĐ-BGDĐT). Giáo viên đang bí ý tưởng: hãy đưa những phương án đa dạng, cụ thể, dùng được ngay. Viết tiếng Việt. Công thức viết LaTeX trong cặp $…$.\n\n${nguyenTacHoatDong()}${phanVan(k)}`;
+  const he = `Bạn là chuyên gia thiết kế hoạt động dạy học THPT theo Chương trình GDPT 2018 và chuyên gia tích hợp năng lực số (Thông tư 02/2025), năng lực AI (QĐ 2422/QĐ-BGDĐT). Giáo viên đang bí ý tưởng: hãy đưa những phương án đa dạng, cụ thể, dùng được ngay. Viết tiếng Việt. Công thức viết LaTeX trong cặp $…$.\n\n${nguyenTacHoatDong()}${phanVan(k)}${phanHafa(k)}`;
   let phanTich = tc.daCo?.phanTich.trongTam.trim() ? tc.daCo.phanTich : undefined;
   let ds = tc.daCo ? [...tc.daCo.phuongAn] : [];
   const boQua: string[] = [];

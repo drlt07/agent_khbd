@@ -11,6 +11,7 @@ import type { GoiAi } from './ai';
 import { phutTheoHoatDong } from './phan-bo';
 import { TEN_HD, TuChamOut, type Khbd, type MaHd } from './kieu';
 import { LOI_TRICH_DAN, phanVan, trichDanLa } from './ngu-van';
+import { coBatAi, coDungAi, coLamTruoc, LOI_LAM_TRUOC, phanHafa } from './hafa-vret';
 
 export const NHOM_HINH_THUC = {
   A: 'Nhập vai và mô phỏng xã hội', B: 'Thí nghiệm và mô phỏng khoa học', C: 'Điều tra, phá án và giải quyết vấn đề',
@@ -117,12 +118,7 @@ export function ganVoiBai(ten: string, tk: TuKhoaBai): boolean {
 }
 export const LOI_TEN = 'Nhạt: tên chưa gắn với nội dung bài (cần có khái niệm, nhân vật, tác phẩm, hiện tượng của bài).';
 
-/** Giáo viên có bật năng lực AI không (mã NLa–NLd, hoặc miền 6 "AI" của TT 02/2025). */
-export const coBatAi = (k: Pick<Khbd, 'tichHop'>) => k.tichHop.ai.length > 0 || k.tichHop.nls.some((m) => m.startsWith('6.'));
-/** Hoạt động có cho học sinh dùng AI không (nhóm I, nhắc tới chatbot/AI). */
-export const coDungAi = (nhom: string, ...vanBan: string[]) =>
-  // "AI" viết hoa mới tính (chữ "ai" thường là đại từ tiếng Việt)
-  nhom === 'I' || vanBan.some((t) => /\bAI\b/.test(t) || /chatbot|chat\s?gpt|gemini|claude|copilot|trí tuệ nhân tạo/i.test(t));
+export { coBatAi, coDungAi };
 export const LOI_AI = 'Không hợp: học sinh dùng AI nhưng giáo viên chưa bật năng lực AI.';
 /** Hoạt động hình thành kiến thức phải sinh động: AI tự chấm Hấp dẫn từ mức này. */
 export const HAP_DAN_HINH_THANH = 4;
@@ -212,6 +208,8 @@ export function kiemTraGoiY(g: GoiY, k: Pick<Khbd, 'dieuKien'> & Partial<Pick<Kh
     if (h.thoiDiem === 'hinh_thanh' && h.tuCham.hapDan < HAP_DAN_HINH_THANH) loi.push(`Nhạt: hoạt động hình thành kiến thức chưa đủ sinh động (Hấp dẫn ${h.tuCham.hapDan}/5, cần từ ${HAP_DAN_HINH_THANH}).`);
     if (!ganVoiBai(h.ten, tk)) loi.push(LOI_TEN);
     if (!batAi && coDungAi(h.nhom, h.congNghe, h.yTuong, ...h.kichBan.map((b) => b.buoc))) loi.push(LOI_AI);
+    // HAFA–VRET: học sinh dùng AI thì phải tự làm trước
+    else if (coDungAi(h.nhom, h.yTuong, ...h.kichBan.map((b) => b.buoc)) && !coLamTruoc([h.yTuong, h.vaiTro, ...h.kichBan.map((b) => b.buoc)].join('\n'))) loi.push(`Không hợp: ${LOI_LAM_TRUOC}`);
     // Ngữ văn có giáo án gốc: không được tự viết câu trích
     const la = k.mon ? trichDanLa({ mon: k.mon, nguon: k.nguon }, [h.yTuong, h.mucTieu, h.cauHoiMau, h.sanPham, h.danhGia, h.chotKienThuc, h.diemTuDuy, ...h.kichBan.map((b) => b.buoc)].join('\n')) : [];
     if (la.length) loi.push(`Không hợp: ${LOI_TRICH_DAN(la)}`);
@@ -244,7 +242,7 @@ export function chuanHoaGoiY(g: GoiY, k: Pick<Khbd, 'dieuKien'>): GoiY {
 }
 
 export async function goiYHoatDong(k: Khbd, ai: GoiAi, hd?: MaHd, yeuCau = '', cu?: HoatDongCu): Promise<{ goiY: GoiY; luat: KetQuaLuatGoiY; luot: number }> {
-  const he = `Bạn là chuyên gia thiết kế hoạt động dạy học THPT theo Chương trình GDPT 2018. Viết tiếng Việt, cụ thể, dùng được ngay. Công thức, kí hiệu toán, lí, hóa viết LaTeX trong cặp $…$ (vd $y = x^2$, $\\mathrm{H_2O}$).\n\n${nguyenTacHoatDong()}${phanVan(k)}`;
+  const he = `Bạn là chuyên gia thiết kế hoạt động dạy học THPT theo Chương trình GDPT 2018. Viết tiếng Việt, cụ thể, dùng được ngay. Công thức, kí hiệu toán, lí, hóa viết LaTeX trong cặp $…$ (vd $y = x^2$, $\\mathrm{H_2O}$).\n\n${nguyenTacHoatDong()}${phanVan(k)}${phanHafa(k)}`;
   const phutToiDa = cu ? cu.phut : hd ? phutTheoHoatDong(k.phanBo)[hd] : undefined;
   let nhac = nhacGoiY(k, hd, yeuCau, cu);
   let cuoi: { goiY: GoiY; luat: KetQuaLuatGoiY; luot: number } | null = null;

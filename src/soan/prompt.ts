@@ -7,6 +7,7 @@ import { nguyenTacHoatDong } from './goi-y';
 import { huongDanTuYTuong, tomTatYTuong } from './y-tuong';
 import { layPpdh, MA_LHDN } from './phuong-phap';
 import { phanVan } from './ngu-van';
+import { phanHafa } from './hafa-vret';
 
 export const PHIEN_BAN_LUAT = (LUAT_SOAN.match(/phien_ban:\s*([^\s·]+)/)?.[1] ?? '?');
 
@@ -35,7 +36,7 @@ function boiCanh(k: Khbd): string {
   return dong.join('\n');
 }
 
-export const heThong = (k: Khbd) => `${LUAT_SOAN.replace(/<!--.*?-->\s*/s, '')}${phanVan(k)}\n\nThông tin bài dạy:\n${boiCanh(k)}`;
+export const heThong = (k: Khbd) => `${LUAT_SOAN.replace(/<!--.*?-->\s*/s, '')}${phanVan(k)}${phanHafa(k)}\n\nThông tin bài dạy:\n${boiCanh(k)}`;
 
 const maDaChon = (k: Khbd) => [...k.tichHop.nls, ...k.tichHop.ai].map((m) => `${m}${laMaAi(m) ? ' (năng lực AI, QĐ 2422/QĐ-BGDĐT)' : ' (năng lực số, TT 02/2025)'}: ${moTaMa(m)}`);
 

@@ -278,3 +278,14 @@ Yêu cầu của tác giả: với Ngữ văn, bám sát kiến thức của KHB
 - Soạn lại cả KHBD từ giáo án Ngữ văn: giữ toàn văn giáo án tới 40 000 ký tự (môn khác 12 000), ghi rõ là "nguồn kiến thức DUY NHẤT".
 - Thư mục `tai-lieu-training/ngu-van/` để chứa tài liệu tham khảo; 2 tài liệu tác giả nhắc chưa nhận được trong phiên.
 - Kiểm thử `tests/ngu-van.test.ts`; tổng 216 đạt. Đã kiểm tra ô thể loại trên trình duyệt.
+
+## Tài liệu training Keynote 1: nguyên tắc dùng AI (HAFA–VRET) – 16/11/2026
+
+Tác giả đưa tài liệu "Keynote 1 – Cơ sở lí luận, định hướng ứng dụng AI trong thiết kế bài dạy và cá nhân hóa học tập" (TS. Kiều Phương Thùy) vào mục training để agent bám theo.
+
+- Lưu ở `tai-lieu-training/chung/`; `tai-lieu-training/README.md` ghi tài liệu nào thành luật nào.
+- Luật prompt `rules/ai-hafa-vret.md` (phiên bản 1). Phần A (luôn áp): AI đề xuất – giáo viên quyết định; neo yêu cầu cần đạt; cùng chuẩn khác con đường, nhiệm vụ 3 phiên bản Hỗ trợ – Chuẩn – Mở rộng; cá nhân hóa có dữ liệu; minh chứng quá trình; phản hồi theo tiêu chí. Phần B (chỉ khi giáo viên bật năng lực AI): học sinh làm trước; trình tự HAFA–VRET; 3 mức hỗ trợ; 5 nguyên tắc chatbot trợ giảng; vị trí trong KHBD (mục II trợ lý AI + phiếu lưu vết, HĐ1 chẩn đoán nhanh, HĐ3 HAFA–VRET, HĐ4 nhiệm vụ chuyển giao); 6 nhóm rủi ro và nguyên tắc vàng.
+- Gắn vào mọi lời nhắc hệ thống: soạn từng phần, ý tưởng bài, ngân hàng hoạt động, gợi ý đổi mới hoạt động, đề xuất chèn ở "Sửa KHBD cũ".
+- Luật code `src/soan/hafa-vret.ts` (hàm thuần): hoạt động có học sinh dùng AI phải có bước học sinh tự làm trước. Soạn từng phần: thiếu → soạn lại ≤ 2 lượt; gợi ý hoạt động: phương án bị đánh "Không hợp"; đề xuất chèn mã AI: bị loại; bước Kiểm tra: chỉ nhắc (giáo viên có thể tự viết phần này, giáo viên quyết định). Thiếu minh chứng quá trình (phiếu lưu vết, giải trình, bản sửa) → nhắc.
+- Chờ: tài liệu nói "phiếu lưu vết 5 mục" nhưng không ghi tên từng mục; tạm dùng các bước HAFA–VRET (bài làm đầu, mức gợi ý đã dùng, kiểm chứng, bản sửa, giải trình) cho tới khi tác giả bổ sung.
+- Kiểm thử `tests/hafa-vret.test.ts`.
