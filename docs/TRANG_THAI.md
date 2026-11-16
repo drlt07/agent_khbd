@@ -333,3 +333,11 @@ Góp ý của tác giả: mỗi hoạt động phải chốt kiến thức, tri�
 - Bỏ bắt buộc dòng "Năng lực số" trong bảng tiêu chí: đánh giá năng lực số hình thức tùy chọn, thiếu hẳn thì chỉ nhắc.
 - Thẻ gợi ý, bản xem trước, file Word hiện điểm đổi mới, năng lực phát triển, bám mục tiêu, chốt kiến thức. Dữ liệu mẫu demo viết lại cụ thể hơn.
 - Kiểm thử thêm trong `tests/giu-hoat-dong.test.ts`.
+
+## Sửa KHBD: AI gợi ý mã năng lực số theo giáo án – 16/11/2026
+
+Góp ý của tác giả: ở bước 2 lối Sửa KHBD, phần năng lực số chỉ có danh sách cố định theo môn, không có AI gợi ý.
+
+- Nút "AI gợi ý mã theo giáo án" ở thẻ Năng lực số (bước 2). Dùng lại `goiYMa` của lối Soạn mới, thêm danh sách hoạt động của giáo án (`HoatDongGiaoAn`): AI giữ nguyên tiến trình, mỗi lí do nêu rõ tích hợp vào hoạt động nào của giáo án và học sinh làm gì.
+- Luật code như cũ: chỉ mã có trong thư viện, đúng loại, tối đa 3 mã NLS, 2 mã AI; giáo viên tự tích chọn, app không tích hộ. Mã AI gợi ý hiện ở thẻ Năng lực AI.
+- Dữ liệu mẫu demo có gợi ý mã cho giáo án Vật lí 10. Kiểm thử trong `tests/sua-hoat-dong-moi.test.ts`; tổng 244 đạt. Đã kiểm tra trên trình duyệt.

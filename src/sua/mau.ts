@@ -85,6 +85,15 @@ const TRA_LOI: Record<string, unknown> = {
   uuTien: { deTrienKhai: 1, sangTao: 3, aiMoPhong: 2, lyDo: 'Thả bóng không cần chuẩn bị; Thám tử động năng va chạm gắn bài học với đời sống; mô phỏng PhET giúp học sinh tự rút ra biểu thức.' },
 };
 
+/** Gợi ý mã năng lực theo giáo án mẫu (Vật lí 10), mỗi lí do gắn vào hoạt động có sẵn. */
+(TRA_LOI as Record<string, unknown>).goiYMa = {
+  nls: [
+    { ma: '5.3.5.1', lyDo: 'Hoạt động 2. Hình thành kiến thức: học sinh dùng mô phỏng trên máy tính bảng thay đổi khối lượng, độ cao để tự rút ra biểu thức thế năng, động năng.' },
+    { ma: '1.2.5.1', lyDo: 'Hoạt động 4. Vận dụng: học sinh đối chiếu số liệu tốc độ, khối lượng xe tìm trên Internet với nguồn chính thống trước khi tính động năng.' },
+  ],
+  ai: [{ ma: 'NLa', lyDo: 'Hoạt động 3. Luyện tập: học sinh tự giải trước, rồi kiểm tra lời giải do AI viết, tìm lỗi đổi đơn vị; con người giữ quyền quyết định đúng sai.' }],
+};
+
 /** Trường chất lượng của phương án mẫu: điểm đổi mới, năng lực, đối chiếu mục tiêu. */
 for (const h of ((TRA_LOI as Record<string, any>).goiY?.hoatDong ?? []) as Record<string, any>[]) {
   h.doiMoi ??= `Học sinh tự ${h.thoiDiem === 'khoi_dong' ? 'dự đoán, đặt câu hỏi' : 'làm, kiểm chứng và trình bày'} thay vì nghe giáo viên giảng.`;
