@@ -69,7 +69,7 @@ export const GoiYOut = z.object({
   }),
 });
 /** Lối "Sửa KHBD cũ": phương án đổi mới trình bày theo khung CV 5512, giữ mục tiêu cũ, bổ sung năng lực số. */
-const BuocKhung = z.object({ viec: z.string().describe('Hoạt động của GV và HS ở bước này, CỤ THỂ: GV làm gì, nói gì (câu hỏi, nhiệm vụ cụ thể); HS làm gì, theo hình thức nào, bao lâu; bước 4 nêu rõ kiến thức được chốt'), sanPham: z.string().describe('Sản phẩm cần đạt ở bước này') });
+const BuocKhung = z.object({ viec: z.string().describe('Hoạt động của GV và HS ở bước này, CỤ THỂ: GV làm gì, nói gì (câu hỏi, nhiệm vụ cụ thể); HS làm gì, theo hình thức nào, bao lâu; bước 4 nêu rõ kiến thức được chốt'), sanPham: z.string().describe('Sản phẩm cần đạt ở bước này: KẾT QUẢ CỤ THỂ học sinh phải có (nội dung câu trả lời, sản phẩm mẫu, kết luận), không ghi chung chung "HS tiếp nhận nhiệm vụ", "sản phẩm của nhóm", "đánh giá chung"; bước 4 ghi kiến thức được chốt') });
 export const Khung5512Out = z.object({
   mucDich: z.string().describe('Mục đích của hoạt động cũ được giữ nguyên (vd "đánh thức thông điệp, sáng tạo")'),
   noiDung: z.string().describe('b) Nội dung: nhiệm vụ học sinh thực hiện, giữ chủ đề/kiến thức của hoạt động cũ'),
@@ -224,7 +224,7 @@ function nhacGiu(k: Khbd, cu: HoatDongCu): string {
     'ĐƯỢC ĐỔI: cách tổ chức (hình thức, vai trò, công cụ, sản phẩm cụ thể) và BỔ SUNG năng lực số.',
     p.mucTieu ? `Các yêu cầu trong mục tiêu cần bám (bamMucTieu phải đáp ứng đủ ${yeuCauMucTieu(p.mucTieu).length} yêu cầu): ${yeuCauMucTieu(p.mucTieu).map((y, i) => `(${i + 1}) ${y}`).join(' ')}` : '',
     ma.length ? `Bổ sung năng lực số/AI: mỗi phương án gắn ít nhất 1 mã giáo viên đã chọn (${ma.join(', ')}) với biểu hiện cụ thể của học sinh; nêu cách đánh giá năng lực số (hình thức tùy chọn).` : 'Giáo viên chưa chọn mã năng lực số: không gắn mã.',
-    'Mỗi phương án điền khung5512 theo CV 5512: b) nội dung, c) sản phẩm, d) 4 bước (Chuyển giao nhiệm vụ – Thực hiện nhiệm vụ – Báo cáo, thảo luận – Kết luận, nhận định), mỗi bước có "hoạt động của GV và HS" viết cụ thể và "sản phẩm cần đạt"; bước 4 chốt kiến thức cụ thể; tiêu chí đánh giá nếu cần (linh hoạt); prompt AI mẫu nếu học sinh dùng AI (bối cảnh bài, nhiệm vụ, yêu cầu đầu ra, không xin đáp án).',
+    'Mỗi phương án điền khung5512 theo CV 5512: b) nội dung, c) sản phẩm, d) 4 bước (Chuyển giao nhiệm vụ – Thực hiện nhiệm vụ – Báo cáo, thảo luận – Kết luận, nhận định), mỗi bước có "hoạt động của GV và HS" viết cụ thể và "sản phẩm cần đạt"; "sản phẩm cần đạt" ở mỗi bước ghi KẾT QUẢ CỤ THỂ (vd lỗi AI học sinh phải phát hiện, slogan mẫu sau khi sửa), không ghi "HS tiếp nhận nhiệm vụ", "đánh giá chung"; bước 4 chốt kiến thức cụ thể (vd "Lòng tham khiến con người tự làm khổ mình…"), không ghi "GV chốt đáp án đúng"; tiêu chí đánh giá nếu cần (linh hoạt); prompt AI mẫu nếu học sinh dùng AI (bối cảnh bài, nhiệm vụ, yêu cầu đầu ra, không xin đáp án).',
   ].filter(Boolean).join('\n');
 }
 
@@ -237,6 +237,10 @@ export const laChotChung = (t: string) => soTu(t) < SO_TU_CHOT || /^\s*(gv|giáo
 /** Các yêu cầu trong mục tiêu (tách theo dấu chấm phẩy, xuống dòng). */
 export const yeuCauMucTieu = (mucTieu: string) => mucTieu.split(/;|\n/).map((x) => x.trim()).filter((x) => soTu(x) >= 3);
 
+/** Sản phẩm cần đạt chung chung, không nêu kết quả cụ thể. Hàm thuần. */
+export const laSanPhamChung = (t: string) => soTu(t) < 6 || /^\s*(hs|học sinh)?\s*(tiếp nhận|nhận) nhiệm vụ|đánh giá chung|phản hồi trực quan|^\s*(sản phẩm|kết quả|bài làm|câu trả lời|phiếu)\b[^:;]{0,40}\b(của|các) (nhóm|lớp|hs|học sinh)\.?\s*$|^\s*câu trả lời của (hs|học sinh|nhóm)\.?\s*$|^\s*kết quả (thảo luận|làm việc)( của nhóm)?\.?\s*$/i.test(t);
+export const KIEN_THUC_CHOT = 'Kiến thức chốt: ';
+
 /** Lối Sửa KHBD cũ: khung CV 5512 đủ 4 bước; năng lực số đúng mã giáo viên chọn, có tiêu chí; học sinh dùng AI thì có prompt mẫu. Hàm thuần. */
 export function kiemTraKhung(h: HoatDongGoiY, maChon: string[]): string[] {
   const loi: string[] = [];
@@ -248,6 +252,9 @@ export function kiemTraKhung(h: HoatDongGoiY, maChon: string[]): string[] {
   if (la.length) loi.push(`Không hợp: dùng mã giáo viên không chọn (${la.join(', ')}).`);
   if (maChon.length && !kh.tichHopNls.some((n) => maChon.includes(n.ma.trim()) && n.bieuHien.trim())) loi.push(`Không hợp: chưa bổ sung năng lực số giáo viên đã chọn (${maChon.join(', ')}).`);
   if (kh.tichHopNls.length && !/năng lực số|năng lực ai|\bAI\b|công nghệ số|kiểm chứng|chỉnh sửa/i.test([...kh.tieuChi.map((t) => `${t.tieuChi} ${t.yeuCau}`), h.danhGia, kh.buoc.ketLuan.viec].join(' '))) loi.push('Nên nêu cách đánh giá năng lực số (bảng kiểm, nhận xét, tiêu chí – hình thức tùy chọn).');
+  const chungChung = (['thucHien', 'baoCao'] as const).filter((b) => laSanPhamChung(kh.buoc[b].sanPham));
+  if (chungChung.length) loi.push(`Nhạt: sản phẩm cần đạt chưa cụ thể ở ${chungChung.map((b) => (b === 'thucHien' ? 'Bước 2' : 'Bước 3')).join(', ')} (ghi rõ kết quả học sinh phải có, vd nội dung câu trả lời, sản phẩm mẫu).`);
+  if (laChotChung(h.chotKienThuc)) loi.push('Thiếu chốt kiến thức cụ thể ở Bước 4 (nêu rõ nội dung kiến thức, thông điệp được chốt).');
   if (buoc.some((b) => soTu(b.viec) < SO_TU_BUOC_KHUNG)) loi.push(`Nhạt: tổ chức thực hiện chưa cụ thể (mỗi bước cần nêu rõ GV làm gì, HS làm gì; từ ${SO_TU_BUOC_KHUNG} chữ).`);
   if (coDungAi(h.nhom, h.congNghe, ...buoc.map((b) => b.viec)) && !kh.promptMau.trim()) loi.push('Thiếu prompt AI mẫu cho học sinh.');
   return loi;
@@ -256,7 +263,16 @@ export function kiemTraKhung(h: HoatDongGoiY, maChon: string[]): string[] {
 /** Áp phần GIỮ NGUYÊN do code làm: chép nguyên văn mục tiêu cũ, giữ giai đoạn trong tiến trình. Hàm thuần. */
 export function giuHoatDongCu(g: GoiY, cu: HoatDongCu): GoiY {
   const p = tachHoatDongCu(cu);
-  return { ...g, hoatDong: g.hoatDong.map((h) => ({ ...h, mucTieu: p.mucTieu ?? h.mucTieu, thoiDiem: p.thoiDiem ?? h.thoiDiem })) };
+  return { ...g, hoatDong: g.hoatDong.map((h) => ({ ...h, mucTieu: p.mucTieu ?? h.mucTieu, thoiDiem: p.thoiDiem ?? h.thoiDiem, khung5512: ganChot(h) })) };
+}
+
+/** Code đưa kiến thức chốt vào ô "Sản phẩm cần đạt" của Bước 4 (giữ thêm phần AI ghi nếu cụ thể). Hàm thuần. */
+export function ganChot(h: HoatDongGoiY): Khung5512 | undefined {
+  const kh = h.khung5512;
+  if (!kh || !h.chotKienThuc.trim()) return kh;
+  const cu = kh.buoc.ketLuan.sanPham.trim();
+  const them = cu && !cu.startsWith(KIEN_THUC_CHOT) && !laSanPhamChung(cu) && !cu.includes(h.chotKienThuc.trim()) ? `\n${cu}` : '';
+  return { ...kh, buoc: { ...kh.buoc, ketLuan: { ...kh.buoc.ketLuan, sanPham: `${KIEN_THUC_CHOT}${h.chotKienThuc.trim()}${them}` } } };
 }
 
 export interface KetQuaLuatGoiY { nghiem: string[]; nhac: string[]; theoHoatDong: string[][] }

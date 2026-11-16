@@ -352,3 +352,11 @@ Góp ý của tác giả: gợi ý hoạt động chỉ quanh Padlet, Quizizz, G
 - Giáo viên khai báo THIẾT BỊ; phần mềm trong kho chạy được trên thiết bị ấy thì được dùng (`coTrongDanhSach`), áp cho gợi ý, ngân hàng hoạt động, ý tưởng bài. Bỏ tên phần mềm khỏi danh sách thiết bị gợi ý; thêm Loa – micro, Webcam.
 - Lời nhắc mọi gợi ý (`TEN_VA_AI`) thêm khối "Công nghệ mới, dùng đúng mục đích" với công cụ hợp môn và thiết bị lớp. Luật: bộ gợi ý có ≥ 2 phương án công nghệ mà đều chỉ dùng công cụ quen thuộc → AI gợi ý lại.
 - Thẻ gợi ý hiện lưu ý của công cụ. `rules/hoat-dong.md` v4, `rules/soan.md` v6. Kiểm thử `tests/cong-cu-so.test.ts`; tổng 249 đạt.
+
+## Bước 4 có kiến thức chốt; sản phẩm cần đạt cụ thể – 16/11/2026
+
+Góp ý của tác giả (ảnh phương án "Bắt lỗi AI: giải cứu thông điệp khỏi bi kịch Đại Cát"): cột "Sản phẩm cần đạt" không thấy chốt kiến thức; Bước 4 chỉ "GV chốt đáp án đúng", sản phẩm "Đánh giá chung của lớp học".
+
+- Code đưa kiến thức chốt vào ô "Sản phẩm cần đạt" của Bước 4 (`ganChot`, dạng "Kiến thức chốt: …"); áp cả khi sinh gợi ý, khi xem trước và khi xuất Word (kể cả phương án đã chèn trước đó).
+- Luật `laSanPhamChung`: sản phẩm cần đạt Bước 2, Bước 3 chung chung ("HS tiếp nhận nhiệm vụ", "Sản phẩm … của nhóm", "Phản hồi trực quan…", "Đánh giá chung…") → nhạt; chốt kiến thức chung chung → thiếu; AI phải gợi ý lại. Lời nhắc và mô tả schema đòi ghi kết quả cụ thể ở từng bước.
+- Kiểm thử dùng đúng phương án tác giả chụp; tổng 252 đạt.

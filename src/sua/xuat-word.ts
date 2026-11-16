@@ -6,7 +6,7 @@ import { AlignmentType, BorderStyle, Document, Packer, Paragraph, ShadingType, T
 import { chuCongThuc } from '../soan/word-cong-thuc';
 import { laMaAi, moTaMa, vanBanGoc } from '../thu-vien';
 import type { Chen, HoatDongMoi, SuaKhbd } from './quy-trinh';
-import { NHOM_HINH_THUC } from '../soan/goi-y';
+import { ganChot, NHOM_HINH_THUC } from '../soan/goi-y';
 import { TEN_BUOC_KHUNG, tieuDeHoatDongMoi } from '../soan/giu-hoat-dong';
 import { tachDong } from '../soan/dinh-dang';
 
@@ -47,7 +47,7 @@ function khoiBoSung(c: Chen): Paragraph[] {
 /** Hoạt động mới đề xuất (giáo viên đã chọn): đặt ngay sau hoạt động cũ, tô nền xanh nhạt. */
 export function khoiHoatDongMoi(m: HoatDongMoi): (Paragraph | Table)[] {
   const h = m.goiY;
-  const kh = h.khung5512;
+  const kh = ganChot(h);
   if (kh) {
     const p = (nhan: string, giaTri: string) => doan([chu(`${nhan} `, { dam: true }), ...chuCT(giaTri)], { nen: NEN_BO_SUNG });
     const ra: (Paragraph | Table)[] = [
@@ -59,7 +59,7 @@ export function khoiHoatDongMoi(m: HoatDongMoi): (Paragraph | Table)[] {
       doan([chu('d) Tổ chức thực hiện:', { dam: true })], { nen: NEN_BO_SUNG }),
       bang([['Hoạt động của GV và HS', 'Sản phẩm cần đạt'], ...(Object.keys(TEN_BUOC_KHUNG) as (keyof typeof TEN_BUOC_KHUNG)[]).map((b) => [`${TEN_BUOC_KHUNG[b]}\n${kh.buoc[b].viec}`, kh.buoc[b].sanPham])], true),
     ];
-    if (h.chotKienThuc && !kh.buoc.ketLuan.viec.includes(h.chotKienThuc)) ra.push(p('Chốt kiến thức:', h.chotKienThuc));
+    if (h.chotKienThuc && !kh.buoc.ketLuan.viec.includes(h.chotKienThuc) && !kh.buoc.ketLuan.sanPham.includes(h.chotKienThuc)) ra.push(p('Chốt kiến thức:', h.chotKienThuc));
     if (h.bamMucTieu?.length) ra.push(p('Bám mục tiêu:', h.bamMucTieu.map((x) => `${x.yeuCau} → ${x.cachDat}`).join('; ')));
     if (h.nangLuc?.length) ra.push(p('Năng lực phát triển:', h.nangLuc.map((n) => `${n.ten} (${n.bieuHien})`).join('; ')));
     if (h.doiMoi) ra.push(p('Điểm đổi mới:', h.doiMoi));

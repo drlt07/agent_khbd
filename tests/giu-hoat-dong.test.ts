@@ -42,7 +42,7 @@ const k: Khbd = {
 };
 const khung = (ma: string[], prompt = 'Từ đoạn trích hài kịch Giấu của, nhóm em đã tự viết nháp thông điệp: […]. Hãy góp ý 2 điểm cần sửa, không viết lại thay.') => ({
   mucDich: 'Đánh thức thông điệp, sáng tạo', noiDung: 'Thiết kế thông điệp chủ đề lòng tham', sanPham: 'Thẻ thông điệp',
-  buoc: { chuyenGiao: { viec: 'GV nêu chủ đề “Đừng để lòng tham điều khiển cuộc sống”, chia cặp, giao nhiệm vụ và thời gian 1 phút', sanPham: '' }, thucHien: { viec: 'HS tự viết nháp thông điệp trước, sau đó hỏi chatbot AI góp ý, kiểm chứng với đoạn trích và chỉnh sửa bản của mình', sanPham: 'Bản nháp, bản sửa' }, baoCao: { viec: 'GV mời 2 cặp giới thiệu sản phẩm, HS chỉ ra chi tiết trong đoạn trích làm cơ sở thông điệp', sanPham: 'Sản phẩm' }, ketLuan: { viec: 'GV nhận xét sản phẩm, chốt thông điệp: lòng tham khiến con người tự làm khổ mình như vợ chồng Đại Cát', sanPham: '' } },
+  buoc: { chuyenGiao: { viec: 'GV nêu chủ đề “Đừng để lòng tham điều khiển cuộc sống”, chia cặp, giao nhiệm vụ và thời gian 1 phút', sanPham: '' }, thucHien: { viec: 'HS tự viết nháp thông điệp trước, sau đó hỏi chatbot AI góp ý, kiểm chứng với đoạn trích và chỉnh sửa bản của mình', sanPham: 'Bản nháp thông điệp và bản đã sửa sau góp ý của AI, ghi rõ chỗ sửa' }, baoCao: { viec: 'GV mời 2 cặp giới thiệu sản phẩm, HS chỉ ra chi tiết trong đoạn trích làm cơ sở thông điệp', sanPham: 'Thẻ thông điệp kèm một chi tiết trong đoạn trích làm cơ sở' }, ketLuan: { viec: 'GV nhận xét sản phẩm, chốt thông điệp: lòng tham khiến con người tự làm khổ mình như vợ chồng Đại Cát', sanPham: '' } },
   tieuChi: [{ tieuChi: 'Nội dung', yeuCau: 'Thông điệp đúng chủ đề' }, { tieuChi: 'Năng lực số', yeuCau: 'Biết khai thác, đánh giá, phản biện gợi ý của AI' }],
   tichHopNls: ma.map((m) => ({ ma: m, bieuHien: 'đánh giá, chỉnh sửa gợi ý của AI' })), promptMau: prompt,
 });
@@ -123,5 +123,38 @@ describe('Chất lượng phương án: chốt kiến thức cụ thể, triển
     expect(loi({ ...tot, kichBan: [{ buoc: 'Làm nhóm', phut: 5 }] }).join(' ')).toContain('Nhạt: kịch bản chưa cụ thể');
     const vang = khung(['3.1.5.1']); vang.buoc.baoCao.viec = 'Báo cáo';
     expect(loi({ ...tot, khung5512: vang }).join(' ')).toContain('Nhạt: tổ chức thực hiện chưa cụ thể');
+  });
+});
+
+import { ganChot, laSanPhamChung, KIEN_THUC_CHOT } from '../src/soan/goi-y';
+
+describe('Sản phẩm cần đạt cụ thể, Bước 4 có kiến thức chốt (phương án "Bắt lỗi AI" tác giả chụp)', () => {
+  const batLoi = (): HoatDongGoiY => ({
+    ...pa('Bắt lỗi AI: giải cứu thông điệp khỏi bi kịch Đại Cát', 'I', 'van_dung', khung(['3.1.5.1'])),
+    chotKienThuc: 'GV chốt đáp án đúng.',
+    khung5512: { ...khung(['3.1.5.1']), buoc: {
+      chuyenGiao: { viec: 'GV trình chiếu văn bản thông điệp AI bị cài lỗi, nêu quy tắc tìm lỗi và chỉnh sửa.', sanPham: 'HS tiếp nhận nhiệm vụ thám tử truyền thông.' },
+      thucHien: { viec: 'HS làm việc nhóm, soi chiếu chi tiết trong lớp kịch Giấu của để vạch lỗi AI, viết lại slogan và gõ câu lệnh tinh chỉnh.', sanPham: 'Sản phẩm sửa lỗi hoàn thiện của nhóm.' },
+      baoCao: { viec: 'Các nhóm giơ bảng/gửi câu trả lời lên màn hình. 1 nhóm đại diện giải thích lý do bắt lỗi.', sanPham: 'Phản hồi trực quan trên màn hình lớp.' },
+      ketLuan: { viec: 'GV chốt đáp án đúng, đánh giá năng lực phản biện và tư duy công nghệ của HS.', sanPham: 'Đánh giá chung của lớp học.' },
+    } },
+  });
+  it('nhận ra sản phẩm cần đạt chung chung', () => {
+    expect(laSanPhamChung('HS tiếp nhận nhiệm vụ thám tử truyền thông.')).toBe(true);
+    expect(laSanPhamChung('Đánh giá chung của lớp học.')).toBe(true);
+    expect(laSanPhamChung('Phản hồi trực quan trên màn hình lớp.')).toBe(true);
+    expect(laSanPhamChung('Slogan đã sửa nêu đúng hậu quả của lòng tham, kèm chi tiết bức ảnh cụ Đại Lợi làm cơ sở.')).toBe(false);
+  });
+  it('phương án trong ảnh bị luật bắt: sản phẩm Bước 2–3 chung chung, chốt kiến thức chung chung', () => {
+    const l = kiemTraKhung(batLoi(), ['3.1.5.1']).join(' ');
+    expect(l).toContain('Nhạt: sản phẩm cần đạt chưa cụ thể ở Bước 2, Bước 3');
+    expect(l).toContain('Thiếu chốt kiến thức cụ thể ở Bước 4');
+  });
+  it('code đưa kiến thức chốt vào ô Sản phẩm cần đạt của Bước 4, bỏ câu chung chung của AI', () => {
+    const h = { ...batLoi(), chotKienThuc: 'Lòng tham khiến vợ chồng Đại Cát tự làm khổ mình; thông điệp truyền thông cần bám chi tiết văn bản, không sáo rỗng.' };
+    const kh = ganChot(h)!;
+    expect(kh.buoc.ketLuan.sanPham).toBe(`${KIEN_THUC_CHOT}${h.chotKienThuc}`);
+    const h2 = { ...h, khung5512: { ...h.khung5512!, buoc: { ...h.khung5512!.buoc, ketLuan: { viec: 'v', sanPham: 'HS ghi vào vở hai thông điệp mẫu đã được cả lớp chọn' } } } };
+    expect(ganChot(h2)!.buoc.ketLuan.sanPham).toBe(`${KIEN_THUC_CHOT}${h.chotKienThuc}\nHS ghi vào vở hai thông điệp mẫu đã được cả lớp chọn`);
   });
 });

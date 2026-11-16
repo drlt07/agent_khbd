@@ -1,10 +1,10 @@
 import { ChuCT } from '../../thanh-phan/cong-thuc';
-import type { HoatDongGoiY } from '../../soan/goi-y';
+import { ganChot, type HoatDongGoiY } from '../../soan/goi-y';
 import { TEN_BUOC_KHUNG, tieuDeHoatDongMoi } from '../../soan/giu-hoat-dong';
 
 /** Hoạt động mới trình bày theo khung CV 5512 (a–d, bảng GV–HS / sản phẩm, tiêu chí, prompt mẫu). */
 export default function KhungHoatDongMoi({ tenCu, h }: { tenCu: string; h: HoatDongGoiY }) {
-  const kh = h.khung5512!;
+  const kh = ganChot(h) ?? h.khung5512!;
   return (
     <div className="flex flex-col gap-1">
       <div className="text-[13px] text-muted">Đề xuất thay thế “{tenCu}”</div>
@@ -26,7 +26,7 @@ export default function KhungHoatDongMoi({ tenCu, h }: { tenCu: string; h: HoatD
           </tbody>
         </table>
       </div>
-      {h.chotKienThuc && !kh.buoc.ketLuan.viec.includes(h.chotKienThuc) && <p className="text-[14px]"><b>Chốt kiến thức:</b> <ChuCT t={h.chotKienThuc} /></p>}
+      {h.chotKienThuc && !kh.buoc.ketLuan.viec.includes(h.chotKienThuc) && !kh.buoc.ketLuan.sanPham.includes(h.chotKienThuc) && <p className="text-[14px]"><b>Chốt kiến thức:</b> <ChuCT t={h.chotKienThuc} /></p>}
       {h.bamMucTieu?.length > 0 && <div className="text-[14px]"><b>Bám mục tiêu:</b><ul className="list-disc pl-5">{h.bamMucTieu.map((m, i) => <li key={i}>{m.yeuCau} → <ChuCT t={m.cachDat} /></li>)}</ul></div>}
       {h.nangLuc?.length > 0 && <p className="text-[14px]"><b>Năng lực phát triển:</b> {h.nangLuc.map((n) => `${n.ten} (${n.bieuHien})`).join('; ')}</p>}
       {h.doiMoi && <p className="text-[14px]"><b>Điểm đổi mới:</b> <ChuCT t={h.doiMoi} /></p>}

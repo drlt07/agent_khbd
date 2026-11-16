@@ -105,7 +105,7 @@ for (const h of ((TRA_LOI as Record<string, any>).goiY?.hoatDong ?? []) as Recor
 {
   type Hd = { ten: string; nhom: string; yTuong: string; cauHoiMau: string; sanPham: string; danhGia: string; chotKienThuc: string; vaiTro: string; kichBan: { buoc: string; phut: number }[]; khung5512?: unknown };
   for (const h of (TRA_LOI as { goiY: { hoatDong: Hd[] } }).goiY.hoatDong) {
-    const b = (i: number, gv: string) => ({ viec: `${gv} ${h.kichBan[i]?.buoc ?? ''}`.trim(), sanPham: i === 1 ? h.sanPham : '' });
+    const b = (i: number, gv: string) => ({ viec: `${gv} ${h.kichBan[i]?.buoc ?? ''}`.trim(), sanPham: i === 1 ? `${h.sanPham.replace(/\.$/, '')}, trả lời được: ${h.cauHoiMau}` : '' });
     h.khung5512 = {
       mucDich: 'Giữ mục tiêu của hoạt động trong giáo án cũ, đổi cách tổ chức.',
       noiDung: h.yTuong,
@@ -113,7 +113,7 @@ for (const h of ((TRA_LOI as Record<string, any>).goiY?.hoatDong ?? []) as Recor
       buoc: {
         chuyenGiao: { viec: `${h.kichBan[0]?.buoc ?? ''}. Nhiệm vụ cụ thể: ${h.cauHoiMau}`, sanPham: '' },
         thucHien: b(1, `${h.vaiTro}`),
-        baoCao: { viec: `${h.kichBan[2]?.buoc ?? 'Đại diện nhóm trình bày sản phẩm'}; các nhóm khác nhận xét, bổ sung, đặt câu hỏi.`, sanPham: h.sanPham },
+        baoCao: { viec: `${h.kichBan[2]?.buoc ?? 'Đại diện nhóm trình bày sản phẩm'}; các nhóm khác nhận xét, bổ sung, đặt câu hỏi.`, sanPham: `${h.sanPham.replace(/\.$/, '')}: ${h.danhGia}` },
         ketLuan: { viec: `GV nhận xét theo dấu hiệu: ${h.danhGia} Chốt kiến thức: ${h.chotKienThuc}`, sanPham: h.chotKienThuc },
       },
       tieuChi: [{ tieuChi: 'Nội dung', yeuCau: h.danhGia }, { tieuChi: 'Năng lực số', yeuCau: 'Dùng công cụ số đúng cách, ghi và chia sẻ kết quả, kiểm chứng thông tin.' }],
